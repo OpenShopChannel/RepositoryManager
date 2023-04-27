@@ -1,0 +1,29 @@
+{% extends "admin/base.html" %}
+{% block content %}
+    <h1 class="content-title font-size-22"> <!-- font-size-22 = font-size: 2.2rem (22px) -->
+        Repository Administration Panel
+    </h1>
+    You are logged in as <strong>{{ current_user.username }}</strong>.
+    <div class="card">
+        <h2 class="card-title">
+            {{ index()["repository"]["name"] }} (Provider: {{ index()["repository"]["provider"] }})
+        </h2>
+        <p>
+            {{ index()["repository"]["description"] }}
+        </p>
+    </div>
+    <div class="row row-eq-spacing">
+        <div class="col-6 col-xl-3">
+            <div class="card">
+                <h2 class="card-title">Applications</h2>
+                {{ index()["contents"]|length }}
+            </div>
+        </div>
+        <div class="col-6 col-xl-3">
+            <div class="card">
+                <h2 class="card-title">Downloads Today</h2>
+                0
+            </div>
+        </div>
+    </div>
+{% endblock %}

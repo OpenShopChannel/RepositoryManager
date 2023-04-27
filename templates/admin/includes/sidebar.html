@@ -1,0 +1,30 @@
+{% macro page(title, icon, endpoint) %}
+    <a href="{{ url_for(endpoint) }}"
+       class="sidebar-link sidebar-link-with-icon {% if request.endpoint == endpoint %}active{% endif %}">
+        <span class="sidebar-icon"><i class="fa {{ icon }}" aria-hidden="true"></i></span>
+        {{ title }}
+    </a>
+{% endmacro %}
+{% macro category(title) %}
+    <h5 class="sidebar-title">{{ title }}</h5>
+    <div class="sidebar-divider"></div>
+{% endmacro %}
+<div class="sidebar">
+    <div class="sidebar-menu">
+        <a href="{{ url_for('admin.home') }}" class="sidebar-brand">
+            Admin
+        </a>
+        <div class="sidebar-content">
+            <div class="mt-10 font-size-12">
+                Hello {{ current_user.username }}.
+            </div>
+        </div>
+        {{ category('General') }}
+        {{ page("Home", "fa-home", "admin.home") }}
+        {{ page("Debug", "fa-bug", "admin.debug") }}
+        {{ category('Repository') }}
+        {{ page("Applications", "fa-rectangle-list", "admin.apps") }}
+        {{ category('Configuration') }}
+        {{ page("Settings", "fa-cog", "admin.settings") }}
+    </div>
+</div>

@@ -1,0 +1,18 @@
+baseURL = "https://bulma-divider.netlify.app/"
+languageCode = "en-us"
+title = "BulmaDivider"
+theme = "creativebulma"
+[markup]
+  [markup.highlight]
+    style = "manni"
+
+[params]
+  version = "1.1"
+
+[menu]
+
+  [[menu.main]]
+    identifier = "how-to"
+    name = "How-To"
+    url = "#"
+    weight = 20

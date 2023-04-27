@@ -1,0 +1,30 @@
+{% extends "admin/base.html" %}
+{% block content %}
+    <h1 class="content-title font-size-22"> <!-- font-size-22 = font-size: 2.2rem (22px) -->
+        Applications
+    </h1>
+    <table class="table table-bordered">
+        <thead>
+        <tr>
+            <th>File</th>
+            <th>Name</th>
+            <th>Author</th>
+            <th>Category</th>
+            <th>Generated Index Entry (Debug)</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for app in index()["contents"] %}
+            <tr>
+                <th>{{ app["slug"] }}.oscmeta</th>
+                <th>{{ app["name"] }}</th>
+                <td>{{ app["author"] }}</td>
+                <td>{{ app["category"] }}</td>
+                <td class="text-right">
+                    {{ app }}
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

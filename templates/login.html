@@ -1,0 +1,71 @@
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Admin Login</title>
+    <meta name="robots" content="noindex">
+
+    <script>
+        if (document.getElementById("remember").checked) {
+            document.getElementById('rememberHidden').disabled = true;
+        }
+    </script>
+    <link rel="stylesheet" href="/static/bulma/css/bulma.min.css">
+</head>
+<body>
+<section class="section">
+    <div class="container">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="notification is-info">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        <h1 class="title">
+            Administrator Login
+        </h1>
+        <form class="form-horizontal" action="" method="post">
+            <fieldset>
+
+                <!-- Email -->
+                <div class="field">
+                    <label class="label" for="email">Email</label>
+                    <div class="control">
+                        <input id="email" name="email" type="email" class="input">
+                    </div>
+                </div>
+
+                <!-- Password -->
+                <div class="field">
+                    <label class="label" for="password">Password</label>
+                    <div class="control">
+                        <input id="password" name="password" type="password" class="input">
+                    </div>
+                </div>
+
+                <!-- Remember Me -->
+                <div class="field">
+                    <label class="checkbox">
+                        <input type="checkbox" name="remember">
+                        Remember me
+                    </label>
+                    <input id='rememberHidden' type='hidden' value='No' name='remember'>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="field">
+                    <div class="control">
+                        <button id="loginbutton" name="loginbutton" type="submit" class="button is-link">Login</button>
+                    </div>
+                </div>
+
+            </fieldset>
+        </form>
+
+    </div>
+</section>
+</body>
+</html>

@@ -1,0 +1,22 @@
+[
+    {
+        "name": "$divider-background-color",
+        "description": "",
+        "value": "$border"
+    },
+    {
+        "name": "$divider-font-size",
+        "description": "",
+        "value": "$size-7"
+    },
+    {
+        "name": "$divider-margin-inner-size",
+        "description": "",
+        "value": "10px"
+    },
+    {
+        "name": "$divider-margin-size",
+        "description": "",
+        "value": "25px"
+    }
+]

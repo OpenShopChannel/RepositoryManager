@@ -1,0 +1,11 @@
+Flask~=2.3.1
+Werkzeug~=2.3.0
+Flask-SQLAlchemy~=3.0.3
+SQLAlchemy~=2.0.10
+Flask-Login~=0.6.2
+flask_wtf~=1.1.1
+WTForms~=3.0.1
+pygit2~=1.12.0
+requests~=2.29.0
+xmltodict~=0.13.0
+py7zr~=0.20.5

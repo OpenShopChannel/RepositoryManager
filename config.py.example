@@ -1,0 +1,11 @@
+# Database URI
+SQLALCHEMY_DATABASE_URI = "sqlite:///database.db"
+
+# Set cookie secret key
+secret_key = "ChangeMe"
+
+# Enable the admin account registration page
+allow_admin_register = False
+
+# Repository path
+REPO_DIR = "repository"
