@@ -1,8 +1,10 @@
 import json
 import os
 import shutil
+import time
 import zipfile
 import tempfile
+from datetime import datetime
 
 import py7zr
 import requests
@@ -135,9 +137,87 @@ def update_application(oscmeta):
         # copy the files to app directory in the index
         shutil.copytree(temp_dir, app_directory, dirs_exist_ok=True)
 
+    # we will create a zip for homebrew browser and the API to use
+    # create the zip file
+    with zipfile.ZipFile(os.path.join("data", "contents", oscmeta["slug"] + ".zip"), 'w') as zip_ref:
+        # iterate through the files starting at the app directory
+        for root, dirs, files in os.walk(app_directory):
+            # iterate through the files
+            for file in files:
+                # get the full path of the file
+                file_path = os.path.join(root, file)
+
+                # get the relative path of the file
+                relative_path = os.path.relpath(file_path, app_directory)
+
+                # add the file to the zip
+                zip_ref.write(file_path, relative_path)
+
     # open the metadata file
     with open(os.path.join(app_directory, 'apps', oscmeta["slug"], "meta.xml")) as f:
         # convert the metadata to JSON
         metadata = json.loads(json.dumps(xmltodict.parse(f.read())))
+
+    # time for determining some extra information needed by API and Homebrew Browser, and adding to index
+    oscmeta["index_extra_info"] = {}
+
+    # Check type (dol/elf)
+    if os.path.exists(os.path.join(app_directory, 'apps', oscmeta["slug"], "boot.dol")):
+        oscmeta["index_extra_info"]["package_type"] = "dol"
+    elif os.path.exists(os.path.join(app_directory, 'apps', oscmeta["slug"], "boot.elf")):
+        oscmeta["index_extra_info"]["package_type"] = "elf"
+
+    # determine release date timestamp and add it to the oscmeta file
+    if "release_date" in metadata["app"]:
+        timestamp = metadata["app"]["release_date"]
+        if len(timestamp) == 14:
+            timestamp = datetime.strptime(timestamp, "%Y%m%d%H%M%S")
+        elif len(timestamp) == 12:
+            timestamp = datetime.strptime(timestamp, "%Y%m%d%H%M")
+        elif len(timestamp) == 8:
+            timestamp = datetime.strptime(timestamp, "%Y%m%d")
+    else:
+        # we will obtain the timestamp from the boot.dol creation date, because the meta.xml lacks a release date
+        timestamp = os.path.getmtime(os.path.join(app_directory, 'apps', oscmeta["slug"],
+                                                  "boot." + oscmeta["index_extra_info"]["package_type"]))
+        timestamp = datetime.fromtimestamp(timestamp)
+
+    timestamp = int(time.mktime(timestamp.timetuple()))
+
+    oscmeta["index_extra_info"]["release_date"] = timestamp
+
+    # File size of icon.png
+    oscmeta["index_extra_info"]["icon_size"] = os.path.getsize(os.path.join(app_directory, 'apps', oscmeta["slug"], "icon.png"))
+
+    # File size of zip
+    oscmeta["index_extra_info"]["compressed_size"] = os.path.getsize(os.path.join("data", "contents", oscmeta["slug"] + ".zip"))
+
+    # File size of dol/elf
+    oscmeta["index_extra_info"]["binary_size"] = os.path.getsize(os.path.join(app_directory, 'apps', oscmeta["slug"], "boot." + oscmeta["index_extra_info"]["package_type"]))
+
+    # Uncompressed size of zip
+    oscmeta["index_extra_info"]["uncompressed_size"] = 0
+    with zipfile.ZipFile(os.path.join("data", "contents", oscmeta["slug"] + ".zip"), 'r') as zip_ref:
+        for file in zip_ref.infolist():
+            oscmeta["index_extra_info"]["uncompressed_size"] += file.file_size
+
+    # Build peripherals string
+    oscmeta["index_extra_info"]["peripherals"] = ""
+    for peripheral in oscmeta["peripherals"]:
+        match peripheral:
+            case "Wii Remote":
+                oscmeta["index_extra_info"]["peripherals"] += "w"
+            case "GameCube Controller":
+                oscmeta["index_extra_info"]["peripherals"] += "g"
+            case "Nunchuk":
+                oscmeta["index_extra_info"]["peripherals"] += "n"
+            case "Classic Controller":
+                oscmeta["index_extra_info"]["peripherals"] += "c"
+            case "SDHC":
+                oscmeta["index_extra_info"]["peripherals"] += "s"
+            case "USB Keyboard":
+                oscmeta["index_extra_info"]["peripherals"] += "k"
+            case "Wii Zapper":
+                oscmeta["index_extra_info"]["peripherals"] += "z"
 
     return metadata
