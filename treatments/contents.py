@@ -16,4 +16,4 @@ def move(temp_dir, parameters):
 
     os.rename(from_path, to_path)
 
-    helpers.log_status(f'-- Moved {parameters[0]} to {parameters[1]}', 'success')
+    helpers.log_status(f'  - Moved {parameters[0]} to {parameters[1]}', 'success')
