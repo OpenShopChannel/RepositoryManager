@@ -36,6 +36,7 @@ def initialize():
 
 
 def update():
+    helpers.log_status(f'Updating repository index')
     repo_index = {}
 
     # index the repository.json file
@@ -53,6 +54,8 @@ def update():
             with open(os.path.join(config.REPO_DIR, 'contents', file)) as f:
                 oscmeta = json.load(f)
 
+                helpers.log_status(f'Loaded {file}')
+
                 # add the slug to the oscmeta
                 oscmeta["slug"] = file.replace('.oscmeta', '')
 
@@ -66,6 +69,8 @@ def update():
     with open(os.path.join('data', 'index.json'), 'w') as f:
         json.dump(repo_index, f)
 
+    helpers.log_status(f'Finished updating repository index', 'success')
+
     return repo_index
 
 
@@ -77,7 +82,7 @@ def get():
 
 def update_application(oscmeta):
     # update the application contents in the index
-    print(f'Updating application {oscmeta["slug"]}')
+    helpers.log_status(f'Updating application {oscmeta["slug"]}')
 
     metadata = None
     app_directory = helpers.app_index_directory_location(oscmeta["slug"])
@@ -89,6 +94,7 @@ def update_application(oscmeta):
     # create temporary directory where we will download the application files and run the treatments
     with tempfile.TemporaryDirectory() as temp_dir:
         # download the application files
+        helpers.log_status(f'- Starting Downloads')
         match oscmeta["source"]["type"]:
             case "url":
                 url = oscmeta["source"]["location"]
@@ -124,6 +130,8 @@ def update_application(oscmeta):
             case _:
                 Exception("Unsupported source type")
 
+        helpers.log_status(f'- Applying Treatments:')
+
         # process treatments, eventually will be moved to a separate function
         if "treatments" in oscmeta:
             for key, value in oscmeta["treatments"].items():
@@ -136,6 +144,8 @@ def update_application(oscmeta):
 
         # copy the files to app directory in the index
         shutil.copytree(temp_dir, app_directory, dirs_exist_ok=True)
+
+    helpers.log_status(f'- Creating ZIP file')
 
     # we will create a zip for homebrew browser and the API to use
     # create the zip file
@@ -159,6 +169,7 @@ def update_application(oscmeta):
         metadata = json.loads(json.dumps(xmltodict.parse(f.read())))
 
     # time for determining some extra information needed by API and Homebrew Browser, and adding to index
+    helpers.log_status(f'- Retrieving Extra Information')
     oscmeta["index_extra_info"] = {}
 
     # Check type (dol/elf)
@@ -219,5 +230,7 @@ def update_application(oscmeta):
                 oscmeta["index_extra_info"]["peripherals"] += "k"
             case "Wii Zapper":
                 oscmeta["index_extra_info"]["peripherals"] += "z"
+
+    helpers.log_status(f'- Adding to Index')
 
     return metadata

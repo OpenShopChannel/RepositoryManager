@@ -3,7 +3,7 @@ import stat
 
 import pygit2
 
-from models import SettingsModel, db
+from models import SettingsModel, db, StatusLogsModel
 
 
 def get_settings():
@@ -84,3 +84,11 @@ def pull(repo, remote_name='origin', branch='master'):
 
 def app_index_directory_location(slug):
     return os.path.join('data', 'contents', slug)
+
+
+def log_status(message, status='info'):
+    print(f"[{status}] {message}")
+
+    log = StatusLogsModel(message=message, status=status)
+    db.session.add(log)
+    db.session.commit()

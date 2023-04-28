@@ -1,15 +1,13 @@
-import pygit2
-from flask import Blueprint, redirect, url_for, request, render_template, flash
+from flask import Blueprint, redirect, url_for, request, render_template, flash, jsonify, copy_current_request_context
 from flask_login import current_user, login_user, login_required
 
 import config
 import helpers
 import index
 import repository
-from models import UserModel, db, SettingsModel
+from models import UserModel, db, SettingsModel, StatusLogsModel
 
 admin = Blueprint('admin', __name__, template_folder='templates', url_prefix='/admin')
-
 
 @admin.route('/')
 @login_required
@@ -26,12 +24,27 @@ def apps():
 @admin.route('/debug')
 @login_required
 def debug():
-    repo = pygit2.Repository(config.REPO_DIR)
-    # get info about the repository
-    repo_info = {
+    return render_template('admin/debug.html')
 
-    }
-    return render_template('admin/debug.html', repo_info=repo_info)
+
+@admin.route('/log')
+@login_required
+def log():
+    return render_template('admin/log.html')
+
+
+@admin.route('/log/json')
+@login_required
+def log_json():
+    logs = []
+    for log in StatusLogsModel.query.all():
+        logs.append({
+            'id': log.id,
+            'status': log.status,
+            'message': log.message,
+            'timestamp': log.timestamp
+        })
+    return jsonify(logs)
 
 
 @admin.route('/debug/<action>')
@@ -44,8 +57,17 @@ def debug_action(action):
         repository.pull()
         flash('Successfully pulled repository', 'success')
     elif action == 'update_index':
-        index.update()
-        flash('Successfully updated index', 'success')
+        response = redirect(url_for('admin.log'))
+
+        @response.call_on_close
+        @copy_current_request_context
+        def on_close():
+            index.update()
+
+        flash('Started index update', 'info')
+        return response
+    elif action == 'test_log':
+        helpers.log_status("This is a test log")
     return redirect(url_for('admin.debug'))
 
 

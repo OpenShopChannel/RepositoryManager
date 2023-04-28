@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin, LoginManager
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -32,3 +34,12 @@ class SettingsModel(UserMixin, db.Model):
 
     key = db.Column(db.String, primary_key=True)
     value = db.Column(db.String)
+
+
+class StatusLogsModel(UserMixin, db.Model):
+    __tablename__ = 'status_logs'
+
+    id = db.Column(db.Integer, primary_key=True)
+    status = db.Column(db.String)
+    message = db.Column(db.String)
+    timestamp = db.Column(db.DateTime, default=datetime.now)

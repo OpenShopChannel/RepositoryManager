@@ -1,0 +1,31 @@
+{% extends "admin/base.html" %}
+{% block content %}
+    <h1 class="content-title font-size-22"> <!-- font-size-22 = font-size: 2.2rem (22px) -->
+        Status Log
+    </h1>
+    <div class="row row-eq-spacing">
+        <textarea class="form-control" id="description" style="height: 600px; font-size: 20px;" readonly placeholder="Loading.."></textarea>
+    </div>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-1.7.1.min.js"></script>
+    <script>
+        // refresh logs every second
+        setInterval(function() {
+            $.ajax({
+                url: '{{ url_for("admin.log_json") }}',
+                type: 'GET',
+                success: function (data) {
+                    var logs = data;
+                    var logText = "";
+                    for (var i = 0; i < logs.length; i++) {
+                        var log = logs[i];
+                        logText += "[" + log.timestamp + "]: " + log.message + "\n";
+                    }
+                    $("#description").text(logText);
+
+                    // scroll to bottom
+                    $("#description").scrollTop($("#description")[0].scrollHeight);
+                }
+            });
+        }, 1000);
+    </script>
+{% endblock %}
