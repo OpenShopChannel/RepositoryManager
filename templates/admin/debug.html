@@ -1,12 +1,14 @@
 {% extends "admin/base.html" %}
 {% block content %}
-    <h1 class="content-title font-size-22"> <!-- font-size-22 = font-size: 2.2rem (22px) -->
-        Debug
-    </h1>
-    <div class="row row-eq-spacing">
-        <a href="{{ url_for("admin.debug_action", action="init_repo") }}" class="btn btn-danger" role="button">Initialize Repository</a>
-        <a href="{{ url_for("admin.debug_action", action="pull_repo") }}" class="btn" role="button">Pull Remote</a>
-        <a href="{{ url_for("admin.debug_action", action="update_index") }}" class="btn" role="button">Update Index</a>
-        <a href="{{ url_for("admin.debug_action", action="test_log") }}" class="btn" role="button">Log Test</a>
+    <div class="content">
+        <h1 class="content-title font-size-22"> <!-- font-size-22 = font-size: 2.2rem (22px) -->
+            Debug
+        </h1>
+        <div class="row">
+            <a href="{{ url_for("admin.debug_action", action="init_repo") }}" class="btn btn-danger" role="button">Initialize Repository</a>
+            <a href="{{ url_for("admin.debug_action", action="pull_repo") }}" class="btn" role="button">Pull Remote</a>
+            <a href="{{ url_for("admin.debug_action", action="update_index") }}" class="btn" role="button">Update Index</a>
+            <a href="{{ url_for("admin.debug_action", action="test_log") }}" class="btn" role="button">Log Test</a>
+        </div>
     </div>
 {% endblock %}

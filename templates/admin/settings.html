@@ -7,13 +7,15 @@
     </div>
 {% endmacro %}
 {% block content %}
-    <h1 class="content-title font-size-22">
-        Settings
-    </h1>
-    <div class="content-body">
-        <form action="{{ url_for('admin.settings') }}" method="post" enctype="multipart/form-data">
-            {{ text_setting("Repository URL", "git_url") }}
-            <button type="submit" class="btn btn-primary">Save</button>
-        </form>
+    <div class="content">
+        <h1 class="content-title font-size-22">
+            Settings
+        </h1>
+        <div class="content-body">
+            <form action="{{ url_for('admin.settings') }}" method="post" enctype="multipart/form-data">
+                {{ text_setting("Repository URL", "git_url") }}
+                <button type="submit" class="btn btn-primary">Save</button>
+            </form>
+        </div>
     </div>
 {% endblock %}
