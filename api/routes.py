@@ -1,5 +1,8 @@
-from flask import Blueprint, jsonify
+import os
 
+from flask import Blueprint, jsonify, send_file, url_for
+
+import helpers
 import index
 
 api = Blueprint('api', __name__, template_folder='templates', url_prefix='/api')
@@ -32,10 +35,26 @@ def get_contents():
             "peripherals": content["peripherals"],
             "release_date": content["index_extra_info"]["release_date"],
             "slug": content["slug"],
+            "url": {
+                "icon": url_for('api.get_content_icon', slug=content["slug"], _external=True),
+                "zip": url_for('api.get_content_zip', slug=content["slug"], _external=True),
+            },
             "version": content["metaxml"]["app"]["version"]
         })
 
     return jsonify(contents)
+
+
+@api.get("/v3/content/<slug>/icon.png")
+def get_content_icon(slug):
+    icon_path = os.path.join(helpers.app_index_directory_location(slug), "apps", slug, "icon.png")
+    return send_file(icon_path, download_name="icon.png")
+
+
+@api.get("/v3/content/<slug>/content.zip")
+def get_content_zip(slug):
+    zip_path = os.path.join("data", "contents", slug + ".zip")
+    return send_file(zip_path, download_name=slug + ".zip")
 
 
 @api.after_request
