@@ -40,22 +40,22 @@ def apps_list():
         # Internal name
         content.add(app["slug"])
         # Date added to repo
-        content.add(app["index_extra_info"]["release_date"])
+        content.add(app["index_computed_info"]["release_date"])
         # Size of icon.png
-        content.add(app["index_extra_info"]["icon_size"])
+        content.add(app["index_computed_info"]["icon_size"])
         # Size of package
-        content.add(app["index_extra_info"]["binary_size"])
+        content.add(app["index_computed_info"]["binary_size"])
         # Type of package (dol/elf/etc)
-        content.add(app["index_extra_info"]["package_type"])
+        content.add(app["index_computed_info"]["package_type"])
         # Size of total zip
-        content.add(app["index_extra_info"]["compressed_size"])
+        content.add(app["index_computed_info"]["compressed_size"])
         # Download count
         # TODO: support download count
         content.add(0)
         # Ratings count
         content.add(0)
         # Peripherals
-        content.add(app["index_extra_info"]["peripherals"])
+        content.add(app["index_computed_info"]["peripherals"])
         # Folders to create
         content.add("")
         # Folders to not delete
@@ -71,7 +71,7 @@ def apps_list():
         # Version
         content.add_line(app["metaxml"]["app"]["version"])
         # Extracted Size
-        content.add_line(str(app["index_extra_info"]["uncompressed_size"]))
+        content.add_line(str(app["index_computed_info"]["uncompressed_size"]))
         # Short Description
         content.add_line(app["metaxml"]["app"]["short_description"])
         # Long Description

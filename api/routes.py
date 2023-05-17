@@ -25,15 +25,15 @@ def get_contents():
                 "short": content["metaxml"]["app"]["short_description"]
             },
             "file_size": {
-                "binary": content["index_extra_info"]["binary_size"],
-                "icon": content["index_extra_info"]["icon_size"],
-                "zip_compressed": content["index_extra_info"]["compressed_size"],
-                "zip_uncompressed": content["index_extra_info"]["uncompressed_size"]
+                "binary": content["index_computed_info"]["binary_size"],
+                "icon": content["index_computed_info"]["icon_size"],
+                "zip_compressed": content["index_computed_info"]["compressed_size"],
+                "zip_uncompressed": content["index_computed_info"]["uncompressed_size"]
             },
             "name": content["name"],
-            "package_type": content["index_extra_info"]["package_type"],
+            "package_type": content["index_computed_info"]["package_type"],
             "peripherals": content["peripherals"],
-            "release_date": content["index_extra_info"]["release_date"],
+            "release_date": content["index_computed_info"]["release_date"],
             "slug": content["slug"],
             "url": {
                 "icon": url_for('api.get_content_icon', slug=content["slug"], _external=True),
