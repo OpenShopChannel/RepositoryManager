@@ -11,7 +11,10 @@ from setup.routes import setup
 
 app = Flask(__name__)
 
+# Configuration
+app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
 
+# Register blueprints
 app.register_blueprint(admin)
 app.register_blueprint(api)
 app.register_blueprint(hbb)
