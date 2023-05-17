@@ -45,13 +45,13 @@ def get_contents():
     return jsonify(contents)
 
 
-@api.get("/v3/content/<slug>/icon.png")
+@api.get("/v3/contents/<slug>/icon.png")
 def get_content_icon(slug):
     icon_path = os.path.join(helpers.app_index_directory_location(slug), "apps", slug, "icon.png")
     return send_file(icon_path, download_name="icon.png")
 
 
-@api.get("/v3/content/<slug>/content.zip")
+@api.get("/v3/contents/<slug>/content.zip")
 def get_content_zip(slug):
     zip_path = os.path.join("data", "contents", slug + ".zip")
     return send_file(zip_path, download_name=slug + ".zip")
