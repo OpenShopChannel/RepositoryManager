@@ -1,8 +1,8 @@
-import zipfile
-from io import BytesIO
+import os
 
 from flask import Blueprint, request, abort, send_file
 
+import helpers
 import index
 from hbb.normalize import Normalize
 
@@ -110,6 +110,18 @@ def update_rating():
     esid = request.args.get("esid")
     rating = request.args.get("rating")
     return "5"
+
+
+@hbb.get("/<slug>.png")
+def get_content_icon(slug):
+    icon_path = os.path.join(helpers.app_index_directory_location(slug), "apps", slug, "icon.png")
+    return send_file(icon_path, download_name="icon.png")
+
+
+@hbb.get("/<slug>/<_slug>.zip")
+def get_content_zip(slug):
+    zip_path = os.path.join("data", "contents", slug + ".zip")
+    return send_file(zip_path, download_name=slug + ".zip")
 
 
 # Stub
