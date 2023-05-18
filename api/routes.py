@@ -52,8 +52,8 @@ def get_content_icon(slug):
     return send_file(icon_path, download_name="icon.png")
 
 
-@api.get("/v3/contents/<slug>/content.zip")
-def get_content_zip(slug):
+@api.get("/v3/contents/<slug>/<_slug>.zip")
+def get_content_zip(slug, _slug):
     zip_path = os.path.join("data", "contents", slug + ".zip")
     return send_file(zip_path, download_name=slug + ".zip")
 
