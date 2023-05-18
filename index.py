@@ -45,8 +45,9 @@ def update():
 
         repo_index['repository'] = repo_info
 
-    # create icons directory
-    os.makedirs(os.path.join("data", "icons"))
+    # create icons directory if it doesn't exist
+    if not os.path.exists(os.path.join("data", "icons")):
+        os.makedirs(os.path.join("data", "icons"))
 
     # index the application manifests
     repo_index['contents'] = []
