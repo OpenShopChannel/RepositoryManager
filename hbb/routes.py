@@ -119,9 +119,15 @@ def get_content_icon(slug):
 
 
 @hbb.get("/hbb/<slug>/<_slug>.zip")
-def get_content_zip(slug):
+def get_content_zip(slug, _slug):
     zip_path = os.path.join("data", "contents", slug + ".zip")
     return send_file(zip_path, download_name=slug + ".zip")
+
+
+@hbb.get("/unzipped_apps/<slug>/apps/<_slug>/meta.xml")
+def get_content_xml(slug, _slug):
+    xml_path = os.path.join(helpers.app_index_directory_location(slug), "apps", slug, "meta.xml")
+    return send_file(xml_path, download_name="meta.xml")
 
 
 # Stub
