@@ -187,6 +187,11 @@ def update_application(oscmeta):
             timestamp = datetime.strptime(timestamp, "%Y%m%d%H%M")
         elif len(timestamp) == 8:
             timestamp = datetime.strptime(timestamp, "%Y%m%d")
+        else:
+            # we will obtain the timestamp from the boot.dol creation date, because the meta.xml lacks a release date
+            timestamp = os.path.getmtime(os.path.join(app_directory, 'apps', oscmeta["slug"],
+                                                      "boot." + oscmeta["index_computed_info"]["package_type"]))
+            timestamp = datetime.fromtimestamp(timestamp)
     else:
         # we will obtain the timestamp from the boot.dol creation date, because the meta.xml lacks a release date
         timestamp = os.path.getmtime(os.path.join(app_directory, 'apps', oscmeta["slug"],
