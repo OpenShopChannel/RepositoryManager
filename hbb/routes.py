@@ -130,6 +130,11 @@ def get_content_xml(slug, _slug):
     return send_file(xml_path, download_name="meta.xml")
 
 
+@hbb.get("/hbb/homebrew_browser/temp_files.zip")
+def get_icons_zip():
+    return send_file(os.path.join("data", "icons.zip"), download_name="icons.zip")
+
+
 # Stub
 @hbb.route('/hbb/hbb_download.php')
 def register_download():

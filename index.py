@@ -45,6 +45,9 @@ def update():
 
         repo_index['repository'] = repo_info
 
+    # create icons directory
+    os.makedirs(os.path.join("data", "icons"))
+
     # index the application manifests
     repo_index['contents'] = []
     for file in os.listdir(os.path.join(config.REPO_DIR, 'contents')):
@@ -69,8 +72,19 @@ def update():
     with open(os.path.join('data', 'index.json'), 'w') as f:
         json.dump(repo_index, f)
 
-    helpers.log_status(f'Finished updating repository index', 'success')
+    # remove the icons zip if it exists
+    if os.path.exists(os.path.join("data", "icons.zip")):
+        os.remove(os.path.join("data", "icons.zip"))
 
+    # put all contents of data/icons into a zip file called icons.zip
+    # this will be used for the icon cache that the HBB downloads
+    with zipfile.ZipFile(os.path.join("data", "icons.zip"), "w") as zipf:
+        for file in os.listdir(os.path.join("data", "icons")):
+            zipf.write(os.path.join("data", "icons", file), file)
+
+    shutil.rmtree(os.path.join("data", "icons"))
+
+    helpers.log_status(f'Finished updating repository index', 'success')
     return repo_index
 
 
@@ -244,6 +258,9 @@ def update_application(oscmeta):
             # example format: /apps/slug/subdirectory1/subdirectory2
             oscmeta["index_computed_info"]["subdirectories"].append(os.path.relpath(os.path.join(root, dir), os.path.join(app_directory, 'apps', oscmeta["slug"])))
             oscmeta["index_computed_info"]["subdirectories"][-1] = "/apps/" + oscmeta["slug"] + "/" + oscmeta["index_computed_info"]["subdirectories"][-1].replace("\\", "/")
+
+    # Copy the icon to a directory named icons in the index (create if it doesn't exist)
+    shutil.copy(os.path.join(app_directory, 'apps', oscmeta["slug"], "icon.png"), os.path.join("data", "icons", oscmeta["slug"] + ".png"))
 
     helpers.log_status(f'- Adding to Index')
 
