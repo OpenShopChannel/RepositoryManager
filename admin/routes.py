@@ -57,15 +57,9 @@ def debug_action(action):
         repository.pull()
         flash('Successfully pulled repository', 'success')
     elif action == 'update_index':
-        response = redirect(url_for('admin.log'))
-
-        @response.call_on_close
-        @copy_current_request_context
-        def on_close():
-            index.update()
-
-        flash('Started index update', 'info')
-        return response
+        index.update()
+        flash('Finished index update', 'info')
+        return redirect(url_for('admin.log'))
     elif action == 'test_log':
         helpers.log_status("This is a test log")
     return redirect(url_for('admin.debug'))
