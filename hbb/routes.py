@@ -112,6 +112,7 @@ def update_rating():
     return "5"
 
 
+@hbb.get("/hbb/<slug>/icon.png")
 @hbb.get("/hbb/<slug>.png")
 def get_content_icon(slug):
     icon_path = os.path.join(helpers.app_index_directory_location(slug), "apps", slug, "icon.png")
@@ -169,51 +170,3 @@ def register_download():
 #    return content.response
 #
 #
-#def get_repo_id() -> str:
-#    """Returns the repository ID for the given hostname, Aborts with a 404 if not found."""
-#    hostname = request.host
-#    repo = ReposModel.query.where(ReposModel.host == hostname).limit(1).all()
-#    if not repo:
-#        abort(404)
-#
-#    return repo[0].id
-#
-#
-#@hbb.route('/hbb/<slug>/<_slug>.zip')
-#def hbb_zip(slug):
-#    return serve_slug_file(slug, FileTypes.ZIP)
-#
-#
-#@hbb.route('/hbb/<slug>/icon.png')
-#@hbb.route('/hbb/<slug>.png')
-#def hbb_icon(slug):
-#    return serve_slug_icon(slug)
-#
-#
-#@hbb.route('/hbb/<slug>/meta.xml')
-#def hbb_meta(slug):
-#    return serve_slug_file(slug, FileTypes.META)
-#
-#
-#@hbb.route('/hbb/homebrew_browser/temp_files.zip')
-#def hbb_icon_zip():
-#    # TODO: This should be done upon catalogue update,
-#    # instead of dynamically, to avoid server strain.
-#    # For development purposes, we do not.
-#
-#    # Create a zip file within memory.
-#    memory_buffer = BytesIO()
-#    zip_file = zipfile.ZipFile(memory_buffer, 'w')
-#
-#    # Zip all icons within our icon directory.
-#    repo: [AppsModel] = AppsModel.query.all()
-#    for app in repo:
-#        icon_path = file_path(app.meta_data.file_uuid, FileTypes.ICON)
-#        file_name = f"{app.slug}.png"
-#        zip_file.write(icon_path, arcname=file_name)
-#
-#    # Rewind to the start of the buffer so that it can be read in full.
-#    zip_file.close()
-#    memory_buffer.seek(0)
-#
-#    return send_file(memory_buffer, mimetype='application/zip')
