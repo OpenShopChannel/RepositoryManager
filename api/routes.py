@@ -35,6 +35,7 @@ def get_contents():
             "peripherals": content["peripherals"],
             "release_date": content["index_computed_info"]["release_date"],
             "slug": content["slug"],
+            "subdirectories": content["index_computed_info"]["subdirectories"],
             "url": {
                 "icon": url_for('api.get_content_icon', slug=content["slug"], _external=True),
                 "zip": url_for('api.get_content_zip', slug=content["slug"], _external=True),

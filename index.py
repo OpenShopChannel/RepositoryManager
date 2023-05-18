@@ -231,6 +231,15 @@ def update_application(oscmeta):
             case "Wii Zapper":
                 oscmeta["index_computed_info"]["peripherals"] += "z"
 
+    # Create subdirectories list
+    oscmeta["index_computed_info"]["subdirectories"] = []
+    for root, dirs, files in os.walk(os.path.join(app_directory, 'apps', oscmeta["slug"])):
+        for dir in dirs:
+            # we need to make sure that these strings are in the right format for the HBB.
+            # example format: /apps/slug/subdirectory1/subdirectory2
+            oscmeta["index_computed_info"]["subdirectories"].append(os.path.relpath(os.path.join(root, dir), os.path.join(app_directory, 'apps', oscmeta["slug"])))
+            oscmeta["index_computed_info"]["subdirectories"][-1] = "/apps/" + oscmeta["slug"] + "/" + oscmeta["index_computed_info"]["subdirectories"][-1].replace("\\", "/")
+
     helpers.log_status(f'- Adding to Index')
 
     return metadata

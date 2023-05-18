@@ -56,8 +56,13 @@ def apps_list():
         content.add(0)
         # Peripherals
         content.add(app["index_computed_info"]["peripherals"])
+
         # Folders to create
-        content.add("")
+        subdirectories = ""
+        for directory in app["index_computed_info"]["subdirectories"]:
+            subdirectories += f"{directory};"
+        content.add(subdirectories[:-1])
+
         # Folders to not delete
         content.add(".")
         # Files to not extract
