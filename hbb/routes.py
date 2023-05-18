@@ -83,7 +83,7 @@ def apps_list():
         try:
             content.add_line(app["metaxml"]["app"]["long_description"].replace('\n', ' '))
         except KeyError:
-            content.add_line("")
+            content.add_line(app["metaxml"]["app"]["short_description"])
     content.add_line(f"={current_category.capitalize()}=")
 
     return content.response
