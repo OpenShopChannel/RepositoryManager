@@ -38,7 +38,7 @@ def get_contents():
             "subdirectories": content["index_computed_info"]["subdirectories"],
             "url": {
                 "icon": url_for('api.get_content_icon', slug=content["slug"], _external=True),
-                "zip": url_for('api.get_content_zip', slug=content["slug"], _external=True),
+                "zip": url_for('api.get_content_zip', slug=content["slug"], _slug=content["slug"], _external=True),
             },
             "version": content["metaxml"]["app"]["version"]
         })
