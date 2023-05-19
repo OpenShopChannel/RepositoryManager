@@ -149,9 +149,10 @@ def update_application(oscmeta):
 
         # process treatments, eventually will be moved to a separate function
         if "treatments" in oscmeta:
-            for key, value in oscmeta["treatments"].items():
-                if key == "contents.move":
-                    treatments.contents.move(temp_dir, value)
+            for treatment in oscmeta["treatments"]:
+                match treatment["treatment"]:
+                    case "contents.move":
+                        treatments.contents.move(temp_dir, treatment["arguments"])
 
         # remove the app directory if it exists (to ensure we don't have any old files)
         if os.path.exists(os.path.join(app_directory)):
