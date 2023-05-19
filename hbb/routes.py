@@ -21,24 +21,24 @@ def apps_list():
     apps = []
     for category in ["demos", "emulators", "games", "media", "utilities"]:
         for app in index.get()["contents"]:
-            if app["category"] == category:
+            if app["information"]["category"] == category:
                 apps.append(app)
 
     # Formulate our response.
     content = Normalize()
     content.add_line("Homebrew 2092896 v0.3.9e | - Updated with latest libogc which should correct network issues some users are experiencing")
 
-    current_category = apps[0]["category"]
+    current_category = apps[0]["information"]["category"]
     for app in apps:
         # append "=Category=" if reached last item in category
-        if current_category != app["category"]:
+        if current_category != app["information"]["category"]:
             content.add_line(f"={current_category.capitalize()}=")
-            current_category = app["category"]
+            current_category = app["information"]["category"]
 
         # The following app metadata should all be on one line.
         # -----
         # Internal name
-        content.add(app["slug"])
+        content.add(app["information"]["slug"])
         # Date added to repo
         content.add(app["index_computed_info"]["release_date"])
         # Size of icon.png

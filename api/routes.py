@@ -18,8 +18,8 @@ def get_contents():
 
         # Append to contents
         contents.append({
-            "author": content["author"],
-            "category": content["category"],
+            "author": content["information"]["author"],
+            "category": content["information"]["category"],
             "description": {
                 "long": content["metaxml"]["app"]["long_description"],
                 "short": content["metaxml"]["app"]["short_description"]
@@ -30,15 +30,15 @@ def get_contents():
                 "zip_compressed": content["index_computed_info"]["compressed_size"],
                 "zip_uncompressed": content["index_computed_info"]["uncompressed_size"]
             },
-            "name": content["name"],
+            "name": content["information"]["name"],
             "package_type": content["index_computed_info"]["package_type"],
-            "peripherals": content["peripherals"],
+            "peripherals": content["information"]["peripherals"],
             "release_date": content["index_computed_info"]["release_date"],
-            "slug": content["slug"],
+            "slug": content["information"]["slug"],
             "subdirectories": content["index_computed_info"]["subdirectories"],
             "url": {
-                "icon": url_for('api.get_content_icon', slug=content["slug"], _external=True),
-                "zip": url_for('api.get_content_zip', slug=content["slug"], _slug=content["slug"], _external=True),
+                "icon": url_for('api.get_content_icon', slug=content["information"]["slug"], _external=True),
+                "zip": url_for('api.get_content_zip', slug=content["information"]["slug"], _slug=content["information"]["slug"], _external=True),
             },
             "version": content["metaxml"]["app"]["version"]
         })

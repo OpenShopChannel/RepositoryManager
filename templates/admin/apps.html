@@ -17,10 +17,10 @@
             <tbody>
             {% for app in index()["contents"] %}
                 <tr>
-                    <th>{{ app["slug"] }}.oscmeta</th>
-                    <th>{{ app["name"] }}</th>
-                    <td>{{ app["author"] }}</td>
-                    <td>{{ app["category"] }}</td>
+                    <th>{{ app["information"]["slug"] }}.oscmeta</th>
+                    <th>{{ app["information"]["name"] }}</th>
+                    <td>{{ app["information"]["author"] }}</td>
+                    <td>{{ app["information"]["category"] }}</td>
                     <td class="text-right">
                         {{ app }}
                     </td>

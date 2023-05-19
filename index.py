@@ -61,7 +61,7 @@ def update():
                 helpers.log_status(f'Loaded {file}')
 
                 # add the slug to the oscmeta
-                oscmeta["slug"] = file.replace('.oscmeta', '')
+                oscmeta["information"]["slug"] = file.replace('.oscmeta', '')
 
                 # add the oscmeta to the index
                 repo_index['contents'].append(oscmeta)
@@ -97,10 +97,10 @@ def get():
 
 def update_application(oscmeta):
     # update the application contents in the index
-    helpers.log_status(f'Updating application {oscmeta["slug"]}')
+    helpers.log_status(f'Updating application {oscmeta["information"]["slug"]}')
 
     metadata = None
-    app_directory = helpers.app_index_directory_location(oscmeta["slug"])
+    app_directory = helpers.app_index_directory_location(oscmeta["information"]["slug"])
 
     # create contents directory if it doesn't exist
     if not os.path.exists(os.path.join('data', 'contents')):
@@ -118,7 +118,7 @@ def update_application(oscmeta):
                     case "zip":
                         # why do we bother to add the file extension to the filename?
                         # because windows complains otherwise
-                        filename = os.path.join(temp_dir, oscmeta["slug"] + ".zip")
+                        filename = os.path.join(temp_dir, oscmeta["information"]["slug"] + ".zip")
 
                         with open(filename, "wb") as f:
                             f.write(requests.get(url).content)
@@ -130,7 +130,7 @@ def update_application(oscmeta):
                         # remove the zip file
                         os.remove(filename)
                     case "7z":
-                        filename = os.path.join(temp_dir, oscmeta["slug"] + ".7z")
+                        filename = os.path.join(temp_dir, oscmeta["information"]["slug"] + ".7z")
 
                         with open(filename, "wb") as f:
                             f.write(requests.get(url).content)
@@ -164,7 +164,7 @@ def update_application(oscmeta):
 
     # we will create a zip for homebrew browser and the API to use
     # create the zip file
-    with zipfile.ZipFile(os.path.join("data", "contents", oscmeta["slug"] + ".zip"), 'w') as zip_ref:
+    with zipfile.ZipFile(os.path.join("data", "contents", oscmeta["information"]["slug"] + ".zip"), 'w') as zip_ref:
         # iterate through the files starting at the app directory
         for root, dirs, files in os.walk(app_directory):
             # iterate through the files
@@ -179,7 +179,7 @@ def update_application(oscmeta):
                 zip_ref.write(file_path, relative_path)
 
     # open the metadata file
-    with open(os.path.join(app_directory, 'apps', oscmeta["slug"], "meta.xml")) as f:
+    with open(os.path.join(app_directory, 'apps', oscmeta["information"]["slug"], "meta.xml")) as f:
         # convert the metadata to JSON
         metadata = json.loads(json.dumps(xmltodict.parse(f.read())))
 
@@ -188,9 +188,9 @@ def update_application(oscmeta):
     oscmeta["index_computed_info"] = {}
 
     # Check type (dol/elf)
-    if os.path.exists(os.path.join(app_directory, 'apps', oscmeta["slug"], "boot.dol")):
+    if os.path.exists(os.path.join(app_directory, 'apps', oscmeta["information"]["slug"], "boot.dol")):
         oscmeta["index_computed_info"]["package_type"] = "dol"
-    elif os.path.exists(os.path.join(app_directory, 'apps', oscmeta["slug"], "boot.elf")):
+    elif os.path.exists(os.path.join(app_directory, 'apps', oscmeta["information"]["slug"], "boot.elf")):
         oscmeta["index_computed_info"]["package_type"] = "elf"
 
     # determine release date timestamp and add it to the oscmeta file
@@ -204,12 +204,12 @@ def update_application(oscmeta):
             timestamp = datetime.strptime(timestamp, "%Y%m%d")
         else:
             # we will obtain the timestamp from the boot.dol creation date, because the meta.xml lacks a release date
-            timestamp = os.path.getmtime(os.path.join(app_directory, 'apps', oscmeta["slug"],
+            timestamp = os.path.getmtime(os.path.join(app_directory, 'apps', oscmeta["information"]["slug"],
                                                       "boot." + oscmeta["index_computed_info"]["package_type"]))
             timestamp = datetime.fromtimestamp(timestamp)
     else:
         # we will obtain the timestamp from the boot.dol creation date, because the meta.xml lacks a release date
-        timestamp = os.path.getmtime(os.path.join(app_directory, 'apps', oscmeta["slug"],
+        timestamp = os.path.getmtime(os.path.join(app_directory, 'apps', oscmeta["information"]["slug"],
                                                   "boot." + oscmeta["index_computed_info"]["package_type"]))
         timestamp = datetime.fromtimestamp(timestamp)
 
@@ -218,23 +218,23 @@ def update_application(oscmeta):
     oscmeta["index_computed_info"]["release_date"] = timestamp
 
     # File size of icon.png
-    oscmeta["index_computed_info"]["icon_size"] = os.path.getsize(os.path.join(app_directory, 'apps', oscmeta["slug"], "icon.png"))
+    oscmeta["index_computed_info"]["icon_size"] = os.path.getsize(os.path.join(app_directory, 'apps', oscmeta["information"]["slug"], "icon.png"))
 
     # File size of zip
-    oscmeta["index_computed_info"]["compressed_size"] = os.path.getsize(os.path.join("data", "contents", oscmeta["slug"] + ".zip"))
+    oscmeta["index_computed_info"]["compressed_size"] = os.path.getsize(os.path.join("data", "contents", oscmeta["information"]["slug"] + ".zip"))
 
     # File size of dol/elf
-    oscmeta["index_computed_info"]["binary_size"] = os.path.getsize(os.path.join(app_directory, 'apps', oscmeta["slug"], "boot." + oscmeta["index_computed_info"]["package_type"]))
+    oscmeta["index_computed_info"]["binary_size"] = os.path.getsize(os.path.join(app_directory, 'apps', oscmeta["information"]["slug"], "boot." + oscmeta["index_computed_info"]["package_type"]))
 
     # Uncompressed size of zip
     oscmeta["index_computed_info"]["uncompressed_size"] = 0
-    with zipfile.ZipFile(os.path.join("data", "contents", oscmeta["slug"] + ".zip"), 'r') as zip_ref:
+    with zipfile.ZipFile(os.path.join("data", "contents", oscmeta["information"]["slug"] + ".zip"), 'r') as zip_ref:
         for file in zip_ref.infolist():
             oscmeta["index_computed_info"]["uncompressed_size"] += file.file_size
 
     # Build peripherals string
     oscmeta["index_computed_info"]["peripherals"] = ""
-    for peripheral in oscmeta["peripherals"]:
+    for peripheral in oscmeta["information"]["peripherals"]:
         match peripheral:
             case "Wii Remote":
                 oscmeta["index_computed_info"]["peripherals"] += "w"
@@ -253,15 +253,15 @@ def update_application(oscmeta):
 
     # Create subdirectories list
     oscmeta["index_computed_info"]["subdirectories"] = []
-    for root, dirs, files in os.walk(os.path.join(app_directory, 'apps', oscmeta["slug"])):
+    for root, dirs, files in os.walk(os.path.join(app_directory, 'apps', oscmeta["information"]["slug"])):
         for dir in dirs:
             # we need to make sure that these strings are in the right format for the HBB.
             # example format: /apps/slug/subdirectory1/subdirectory2
-            oscmeta["index_computed_info"]["subdirectories"].append(os.path.relpath(os.path.join(root, dir), os.path.join(app_directory, 'apps', oscmeta["slug"])))
-            oscmeta["index_computed_info"]["subdirectories"][-1] = "/apps/" + oscmeta["slug"] + "/" + oscmeta["index_computed_info"]["subdirectories"][-1].replace("\\", "/")
+            oscmeta["index_computed_info"]["subdirectories"].append(os.path.relpath(os.path.join(root, dir), os.path.join(app_directory, 'apps', oscmeta["information"]["slug"])))
+            oscmeta["index_computed_info"]["subdirectories"][-1] = "/apps/" + oscmeta["information"]["slug"] + "/" + oscmeta["index_computed_info"]["subdirectories"][-1].replace("\\", "/")
 
     # Copy the icon to a directory named icons in the index (create if it doesn't exist)
-    shutil.copy(os.path.join(app_directory, 'apps', oscmeta["slug"], "icon.png"), os.path.join("data", "icons", oscmeta["slug"] + ".png"))
+    shutil.copy(os.path.join(app_directory, 'apps', oscmeta["information"]["slug"], "icon.png"), os.path.join("data", "icons", oscmeta["information"]["slug"] + ".png"))
 
     helpers.log_status(f'- Adding to Index')
 
