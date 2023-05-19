@@ -153,6 +153,8 @@ def update_application(oscmeta):
                 match treatment["treatment"]:
                     case "contents.move":
                         treatments.contents.move(temp_dir, treatment["arguments"])
+                    case "contents.delete":
+                        treatments.contents.delete(temp_dir, treatment["arguments"])
 
         # remove the app directory if it exists (to ensure we don't have any old files)
         if os.path.exists(os.path.join(app_directory)):

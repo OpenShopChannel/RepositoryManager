@@ -12,6 +12,7 @@
                 <th>Author</th>
                 <th>Category</th>
                 <th>Generated Index Entry (Debug)</th>
+                <th>Links</th>
             </tr>
             </thead>
             <tbody>
@@ -24,6 +25,7 @@
                     <td class="text-right">
                         {{ app }}
                     </td>
+                    <td><a href="{{ url_for('api.get_content_zip', slug=app["information"]["slug"], _slug=app["information"]["slug"]) }}" class="btn" type="button">Download</a></td>
                 </tr>
             {% endfor %}
             </tbody>
