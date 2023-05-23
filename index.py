@@ -12,7 +12,7 @@ import xmltodict
 
 import config
 import helpers
-import treatments.contents
+import treatments
 
 # why do we use IO instead of the database we already have set up?
 # because it's easier to manage. we don't need to worry about migrations, etc.
@@ -150,11 +150,21 @@ def update_application(oscmeta):
         # process treatments, eventually will be moved to a separate function
         if "treatments" in oscmeta:
             for treatment in oscmeta["treatments"]:
-                match treatment["treatment"]:
-                    case "contents.move":
-                        treatments.contents.move(temp_dir, treatment["arguments"])
-                    case "contents.delete":
-                        treatments.contents.delete(temp_dir, treatment["arguments"])
+                # math the treatment group (e.g. contents)
+                match treatment["treatment"][:treatment["treatment"].index(".")]:
+                    case "contents":
+                        contents = treatments.Contents(temp_dir, oscmeta, oscmeta["information"]["slug"])
+                        # match the treatment (e.g. move)
+                        match treatment["treatment"][treatment["treatment"].index(".") + 1:]:
+                            case "move":
+                                contents.move(treatment["arguments"])
+                            case "delete":
+                                contents.delete(treatment["arguments"])
+                    case "meta":
+                        meta = treatments.Meta(temp_dir, oscmeta, oscmeta["information"]["slug"])
+                        match treatment["treatment"][treatment["treatment"].index(".") + 1:]:
+                            case "set":
+                                meta.set(treatment["arguments"])
 
         # remove the app directory if it exists (to ensure we don't have any old files)
         if os.path.exists(os.path.join(app_directory)):
