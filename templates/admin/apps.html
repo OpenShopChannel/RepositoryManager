@@ -19,8 +19,8 @@
             {% for app in index()["contents"] %}
                 <tr>
                     <th>{{ app["information"]["slug"] }}.oscmeta</th>
-                    <th>{{ app["information"]["name"] }}</th>
-                    <td>{{ app["information"]["author"] }}</td>
+                    <th>{{ app["metaxml"]["app"]["name"] }}</th>
+                    <td>{{ app["metaxml"]["app"]["coder"] }}</td>
                     <td>{{ app["information"]["category"] }}</td>
                     <td class="text-right">
                         {{ app }}

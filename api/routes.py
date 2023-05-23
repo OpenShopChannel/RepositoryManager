@@ -18,7 +18,7 @@ def get_contents():
 
         # Append to contents
         contents.append({
-            "author": content["information"]["author"],
+            "author": content["metaxml"]["app"]["coder"],
             "category": content["information"]["category"],
             "description": {
                 "long": content["metaxml"]["app"]["long_description"],
@@ -30,7 +30,7 @@ def get_contents():
                 "zip_compressed": content["index_computed_info"]["compressed_size"],
                 "zip_uncompressed": content["index_computed_info"]["uncompressed_size"]
             },
-            "name": content["information"]["name"],
+            "name": content["metaxml"]["app"]["name"],
             "package_type": content["index_computed_info"]["package_type"],
             "peripherals": content["information"]["peripherals"],
             "release_date": content["index_computed_info"]["release_date"],
