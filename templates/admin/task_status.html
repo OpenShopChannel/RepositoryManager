@@ -1,0 +1,23 @@
+{% extends "admin/base.html" %}
+{% block content %}
+    <div class="content">
+        <h1 class="content-title font-size-22"> <!-- font-size-22 = font-size: 2.2rem (22px) -->
+            Task Status
+        </h1>
+        <div class="row">
+            <textarea class="form-control" id="log" style="height: 600px; font-size: 16px; font-family: JetBrainsMono; resize: none;" readonly placeholder="Loading.."></textarea>
+        </div>
+    </div>
+    <script src="/static/socketio/socket.io.js"></script>
+    <script type="text/javascript" charset="utf-8">
+        var socket = io();
+        socket.on('logUpdate', function(msg) {
+            let log = document.getElementById('log');
+            let now = new Date();
+            let timestamp = '[' + now.toUTCString() + '] ';
+            msg = timestamp + msg;
+            log.value += msg + '\n';
+            log.scrollTop = log.scrollHeight;
+        });
+    </script>
+{% endblock %}

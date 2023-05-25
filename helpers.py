@@ -4,6 +4,7 @@ import stat
 import pygit2
 
 from models import SettingsModel, db, StatusLogsModel
+from scheduler import log_signal
 
 
 def get_settings():
@@ -86,9 +87,15 @@ def app_index_directory_location(slug):
     return os.path.join('data', 'contents', slug)
 
 
-def log_status(message, status='info'):
+def log(message, status='info'):
     print(f"[{status}] {message}")
 
     log = StatusLogsModel(message=message, status=status)
     db.session.add(log)
     db.session.commit()
+
+
+def log_status(message, status='info'):
+    print(f"[{status}] {message}")
+
+    log_signal.send(message)

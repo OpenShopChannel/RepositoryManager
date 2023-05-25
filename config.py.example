@@ -1,5 +1,6 @@
 # Database URI
 SQLALCHEMY_DATABASE_URI = "sqlite:///database.db"
+SCHEDULER_DATABASE_URI = "sqlite:///scheduler.db"
 
 # Set cookie secret key
 secret_key = "ChangeMe"

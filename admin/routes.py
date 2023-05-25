@@ -1,11 +1,13 @@
+import datetime
+
 from flask import Blueprint, redirect, url_for, request, render_template, flash, jsonify, copy_current_request_context
 from flask_login import current_user, login_user, login_required
 
 import config
 import helpers
-import index
 import repository
 from models import UserModel, db, SettingsModel, StatusLogsModel
+from scheduler import scheduler
 
 admin = Blueprint('admin', __name__, template_folder='templates', url_prefix='/admin')
 
@@ -33,6 +35,12 @@ def log():
     return render_template('admin/log.html')
 
 
+@admin.route('/status')
+@login_required
+def status():
+    return render_template('admin/task_status.html')
+
+
 @admin.route('/log/json')
 @login_required
 def log_json():
@@ -57,9 +65,9 @@ def debug_action(action):
         repository.pull()
         flash('Successfully pulled repository', 'success')
     elif action == 'update_index':
-        index.update()
-        flash('Finished index update', 'info')
-        return redirect(url_for('admin.log'))
+        scheduler.get_job(job_id="index_update").modify(next_run_time=datetime.datetime.now())
+        flash('Scheduled immediate index update.', 'info')
+        return redirect(url_for('admin.status'))
     elif action == 'test_log':
         helpers.log_status("This is a test log")
     return redirect(url_for('admin.debug'))
