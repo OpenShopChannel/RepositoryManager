@@ -3,6 +3,8 @@ import stat
 
 import pygit2
 
+import index
+import repository
 from models import SettingsModel, db, StatusLogsModel
 from scheduler import log_signal
 
@@ -99,3 +101,8 @@ def log_status(message, status='info'):
     print(f"[{status}] {message}")
 
     log_signal.send(message)
+
+
+def pull_repo_and_update_index():
+    repository.pull()
+    index.update()

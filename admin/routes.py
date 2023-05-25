@@ -5,6 +5,7 @@ from flask_login import current_user, login_user, login_required
 
 import config
 import helpers
+import index
 import repository
 from models import UserModel, db, SettingsModel, StatusLogsModel
 from scheduler import scheduler
@@ -65,12 +66,22 @@ def debug_action(action):
         repository.pull()
         flash('Successfully pulled repository', 'success')
     elif action == 'update_index':
-        scheduler.get_job(job_id="index_update").modify(next_run_time=datetime.datetime.now())
-        flash('Scheduled immediate index update.', 'info')
-        return redirect(url_for('admin.status'))
+        index.update()
+        flash('Successfully updated index', 'success')
     elif action == 'test_log':
         helpers.log_status("This is a test log")
     return redirect(url_for('admin.debug'))
+
+
+@admin.route('/action/<action>')
+@login_required
+def action(action):
+    match action:
+        case 'update':
+            scheduler.get_job(job_id="update").modify(next_run_time=datetime.datetime.now())
+            flash('Scheduled immediate index update.', 'info')
+            return redirect(url_for('admin.status'))
+    return redirect(url_for('admin.home'))
 
 
 @admin.route('/settings', methods=['GET', 'POST'])

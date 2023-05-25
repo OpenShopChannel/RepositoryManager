@@ -18,3 +18,4 @@ def initialize(git_repo_url):
 def pull():
     # pull the repository
     helpers.pull(pygit2.Repository(config.REPO_DIR))
+    helpers.log_status('Successfully pulled repository', 'success')

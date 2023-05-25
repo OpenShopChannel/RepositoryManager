@@ -33,8 +33,7 @@ login.login_view = 'admin.login'
 
 
 # Register scheduler jobs
-scheduler.add_job(index.update, 'interval', hours=24, replace_existing=True, id='index_update',
-                  args=[])
+scheduler.add_job(helpers.pull_repo_and_update_index, 'interval', hours=24, replace_existing=True, id='update', args=[])
 scheduler.start()
 
 
