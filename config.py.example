@@ -2,6 +2,8 @@
 SQLALCHEMY_DATABASE_URI = "sqlite:///database.db"
 SCHEDULER_DATABASE_URI = "sqlite:///scheduler.db"
 
+SOCKETIO_CORS_ALLOWED_ORIGINS = "*"
+
 # Set cookie secret key
 secret_key = "ChangeMe"
 

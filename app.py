@@ -11,7 +11,7 @@ from scheduler import scheduler, socketio
 from setup.routes import setup
 
 app = Flask(__name__)
-socketio.init_app(app)
+socketio.init_app(app, cors_allowed_origins=config.SOCKETIO_CORS_ALLOWED_ORIGINS)
 
 
 # Configuration
