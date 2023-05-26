@@ -7,6 +7,7 @@ import tempfile
 import fnmatch
 from datetime import datetime
 
+import eventlet
 import py7zr
 import requests
 import xmltodict
@@ -64,14 +65,11 @@ def update():
                 # add the slug to the oscmeta
                 oscmeta["information"]["slug"] = file.replace('.oscmeta', '')
 
-                # add the oscmeta to the index
-                repo_index['contents'].append(oscmeta)
-
                 # download application files to add to the index, and update the oscmeta with the obtained meta.xml
                 try:
                     oscmeta["metaxml"] = update_application(oscmeta)
-                except:
-                    helpers.log_status(f'Failed to process {file}, moving on.', 'error')
+                except Exception as e:
+                    helpers.log_status(f'Failed to process {file}, moving on. ({e})', 'error')
 
                     # load the previous index file and set it to the current index for this app, to avoid losing it
                     with open(os.path.join('data', 'index.json')) as f:
@@ -79,6 +77,9 @@ def update():
                         for app in old_repo_index['contents']:
                             if app["information"]["slug"] == oscmeta["information"]["slug"]:
                                 oscmeta = app
+
+                # add the oscmeta to the index
+                repo_index['contents'].append(oscmeta)
 
     # write the index to the index file
     with open(os.path.join('data', 'index.json'), 'w') as f:
@@ -128,7 +129,8 @@ def update_application(oscmeta):
                 filename = os.path.join(temp_dir, oscmeta["information"]["slug"] + ".package")
                 # download the file
                 with open(filename, "wb") as f:
-                    f.write(requests.get(url, timeout=60).content)
+                    with eventlet.Timeout(60):
+                        f.write(requests.get(url).content)
             case "github_release":
                 if config.GITHUB_TOKEN != "":
                     # we have a token, let's use it
