@@ -68,7 +68,17 @@ def update():
                 repo_index['contents'].append(oscmeta)
 
                 # download application files to add to the index, and update the oscmeta with the obtained meta.xml
-                oscmeta["metaxml"] = update_application(oscmeta)
+                try:
+                    oscmeta["metaxml"] = update_application(oscmeta)
+                except:
+                    helpers.log_status(f'Failed to process {file}, moving on.', 'error')
+
+                    # load the previous index file and set it to the current index for this app, to avoid losing it
+                    with open(os.path.join('data', 'index.json')) as f:
+                        old_repo_index = json.load(f)
+                        for app in old_repo_index['contents']:
+                            if app["information"]["slug"] == oscmeta["information"]["slug"]:
+                                oscmeta = app
 
     # write the index to the index file
     with open(os.path.join('data', 'index.json'), 'w') as f:
