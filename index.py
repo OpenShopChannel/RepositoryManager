@@ -90,8 +90,17 @@ def update():
     if os.path.exists(os.path.join("data", "icons.zip")):
         os.remove(os.path.join("data", "icons.zip"))
 
-    # put all contents of data/icons into a zip file called icons.zip
+    # put all icons into a zip file called icons.zip
     # this will be used for the icon cache that the HBB downloads
+    helpers.log_status(f'Creating HBB icon cache')
+    if not os.path.exists(os.path.join("data", "icons")):
+        os.makedirs(os.path.join("data", "icons"))
+
+    for oscmeta in repo_index["contents"]:
+        shutil.copy(os.path.join(helpers.app_index_directory_location(oscmeta["information"]["slug"]), 'apps',
+                                 oscmeta["information"]["slug"], "icon.png"),
+                    os.path.join("data", "icons", oscmeta["information"]["slug"] + ".png"))
+
     with zipfile.ZipFile(os.path.join("data", "icons.zip"), "w") as zipf:
         for file in os.listdir(os.path.join("data", "icons")):
             zipf.write(os.path.join("data", "icons", file), file)
@@ -318,9 +327,6 @@ def update_application(oscmeta):
             # example format: /apps/slug/subdirectory1/subdirectory2
             oscmeta["index_computed_info"]["subdirectories"].append(os.path.relpath(os.path.join(root, dir), os.path.join(app_directory, 'apps', oscmeta["information"]["slug"])))
             oscmeta["index_computed_info"]["subdirectories"][-1] = "/apps/" + oscmeta["information"]["slug"] + "/" + oscmeta["index_computed_info"]["subdirectories"][-1].replace("\\", "/")
-
-    # Copy the icon to a directory named icons in the index (create if it doesn't exist)
-    shutil.copy(os.path.join(app_directory, 'apps', oscmeta["information"]["slug"], "icon.png"), os.path.join("data", "icons", oscmeta["information"]["slug"] + ".png"))
 
     helpers.log_status(f'- Adding to Index')
 
