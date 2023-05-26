@@ -128,7 +128,7 @@ def update_application(oscmeta):
                 filename = os.path.join(temp_dir, oscmeta["information"]["slug"] + ".package")
                 # download the file
                 with open(filename, "wb") as f:
-                    f.write(requests.get(url).content)
+                    f.write(requests.get(url, timeout=60).content)
             case "github_release":
                 if config.GITHUB_TOKEN != "":
                     # we have a token, let's use it
