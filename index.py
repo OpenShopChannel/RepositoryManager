@@ -130,7 +130,7 @@ def update_application(oscmeta):
                 filename = os.path.join(temp_dir, oscmeta["information"]["slug"] + ".package")
                 # download the file
                 with open(filename, "wb") as f:
-                    with eventlet.Timeout(60):
+                    with eventlet.Timeout(config.URL_DOWNLOAD_TIMEOUT):
                         f.write(requests.get(url).content)
             case "github_release":
                 if config.GITHUB_TOKEN != "":
