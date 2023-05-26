@@ -1,3 +1,4 @@
+import glob
 import os
 import shutil
 from xml.etree import ElementTree as et
@@ -25,7 +26,9 @@ class Contents(Treatment):
         if not os.path.exists(os.path.dirname(to_path)):
             os.makedirs(os.path.dirname(to_path))
 
-        os.rename(from_path, to_path)
+        files = glob.glob(from_path)  # Get a list of files matching the pattern
+        for file in files:
+            shutil.move(file, to_path)  # Move each file to the target directory
 
         helpers.log_status(f'  - Moved {parameters[0]} to {parameters[1]}', 'success')
 
