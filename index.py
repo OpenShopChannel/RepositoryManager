@@ -4,6 +4,7 @@ import shutil
 import time
 import zipfile
 import tempfile
+import fnmatch
 from datetime import datetime
 
 import py7zr
@@ -109,41 +110,71 @@ def update_application(oscmeta):
     # create temporary directory where we will download the application files and run the treatments
     with tempfile.TemporaryDirectory() as temp_dir:
         # download the application files
-        helpers.log_status(f'- Starting Downloads')
+        helpers.log_status(f'- Downloading application files')
         match oscmeta["source"]["type"]:
             case "url":
                 url = oscmeta["source"]["location"]
 
-                match oscmeta["source"]["format"]:
-                    case "zip":
-                        # why do we bother to add the file extension to the filename?
-                        # because windows complains otherwise
-                        filename = os.path.join(temp_dir, oscmeta["information"]["slug"] + ".zip")
+                filename = os.path.join(temp_dir, oscmeta["information"]["slug"] + ".package")
+                # download the file
+                with open(filename, "wb") as f:
+                    f.write(requests.get(url).content)
+            case "github_release":
+                if config.GITHUB_TOKEN != "":
+                    # we have a token, let's use it
+                    helpers.log_status(f'  - Authenticating with GitHub')
+                    headers = {"Authorization": f"token {config.GITHUB_TOKEN}"}
+                else:
+                    helpers.log_status(f'  - No valid GitHub token found, using unauthenticated requests. '
+                                       f'Please configure a token in config.py')
+                    headers = {}
 
-                        with open(filename, "wb") as f:
-                            f.write(requests.get(url).content)
+                # fetch the latest release
+                url = f'https://api.github.com/repos/{oscmeta["source"]["repository"]}/releases/latest'
+                response = requests.get(url, headers=headers)
 
-                        # extract the zip file
-                        with zipfile.ZipFile(filename, 'r') as zip_ref:
-                            zip_ref.extractall(temp_dir)
+                if response.status_code == 200:
+                    helpers.log_status(f'  - Successfully fetched latest release')
+                    assets = response.json()["assets"]
+                    for asset in assets:
+                        # check if asset name matches pattern
+                        if fnmatch.fnmatch(asset["name"], oscmeta["source"]["file"]):
+                            helpers.log_status(f'  - Found asset {asset["name"]}')
+                            # download the asset
+                            url = asset["browser_download_url"]
 
-                        # remove the zip file
-                        os.remove(filename)
-                    case "7z":
-                        filename = os.path.join(temp_dir, oscmeta["information"]["slug"] + ".7z")
+                            filename = os.path.join(temp_dir, oscmeta["information"]["slug"] + ".package")
+                            # download the file
+                            with open(filename, "wb") as f:
+                                f.write(requests.get(url).content)
 
-                        with open(filename, "wb") as f:
-                            f.write(requests.get(url).content)
-
-                        with py7zr.SevenZipFile(filename, 'r') as archive:
-                            archive.extractall(temp_dir)
-
-                        # remove the 7z file
-                        os.remove(filename)
-                    case _:
-                        Exception("Unsupported source format")
+                            helpers.log_status(f'  - Downloaded asset {asset["name"]}')
+                            break
             case _:
                 Exception("Unsupported source type")
+
+        # extract the application files
+        helpers.log_status(f'- Extracting application files')
+        match oscmeta["source"]["format"]:
+            case "zip":
+                # why do we bother to add ".package" to the filename?
+                # because windows complains otherwise, as it looks like a directory, and I'm testing on windows.
+
+                # extract the zip file
+                with zipfile.ZipFile(filename, 'r') as zip_ref:
+                    zip_ref.extractall(temp_dir)
+
+                # remove the zip file
+                os.remove(filename)
+            case "7z":
+                # extract the 7z file
+                with py7zr.SevenZipFile(filename, 'r') as archive:
+                    archive.extractall(temp_dir)
+
+                # remove the 7z file
+                os.remove(filename)
+            case _:
+                Exception("Unsupported source format")
 
         helpers.log_status(f'- Applying Treatments:')
 

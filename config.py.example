@@ -12,3 +12,6 @@ allow_admin_register = False
 
 # Repository path
 REPO_DIR = "repository"
+
+# API access tokens
+GITHUB_TOKEN = ""
