@@ -165,6 +165,8 @@ def update_application(oscmeta):
                         match treatment["treatment"][treatment["treatment"].index(".") + 1:]:
                             case "set":
                                 meta.set(treatment["arguments"])
+                            case "remove_declaration":
+                                meta.remove_declaration()
 
         # remove the app directory if it exists (to ensure we don't have any old files)
         if os.path.exists(os.path.join(app_directory)):

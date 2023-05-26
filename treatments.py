@@ -71,3 +71,21 @@ class Meta(Treatment):
         meta_xml.write(meta_xml_path)
 
         helpers.log_status(f'  - Set {key} to {value} in meta.xml', 'success')
+
+    def remove_declaration(self):
+        # Remove the unicode declaration from meta.xml, can help with some broken meta.xml files
+
+        meta_xml_path = os.path.join(self.directory, "apps", self.slug, "meta.xml")
+
+        # read meta.xml as file
+        with open(meta_xml_path, "r") as f:
+            xml = f.read()
+
+            # Remove unicode declaration
+            xml = xml.split("\n", 1)[1]
+
+        # write meta.xml
+        with open(meta_xml_path, "w") as f:
+            f.write(xml)
+
+        helpers.log_status(f'  - Removed unicode declaration from meta.xml', 'success')
