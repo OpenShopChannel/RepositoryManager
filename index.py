@@ -136,11 +136,25 @@ def update_application(oscmeta):
             case "url":
                 url = oscmeta["source"]["location"]
 
+                headers = {"User-Agent": config.USER_AGENT}
+
+                # check if user-agent is set
+                if "user-agent" in oscmeta["source"]:
+                    # check if this user-agent string is included in the config.SECRET_USER_AGENTS dictionary
+                    if oscmeta["source"]["user-agent"] in config.SECRET_USER_AGENTS:
+                        # if it is, use the actual user-agent string
+                        headers = {"User-Agent": config.SECRET_USER_AGENTS[oscmeta["source"]["user-agent"]]}
+                    else:
+                        headers = {"User-Agent": oscmeta["source"]["user-agent"]}
+
                 filename = os.path.join(temp_dir, oscmeta["information"]["slug"] + ".package")
                 # download the file
                 with open(filename, "wb") as f:
                     with eventlet.Timeout(config.URL_DOWNLOAD_TIMEOUT):
-                        f.write(requests.get(url).content)
+                        if "user-agent" in oscmeta["source"]:
+                            helpers.log_status(f'  - Using custom user-agent: {oscmeta["source"]["user-agent"]}')
+                        f.write(requests.get(url, headers=headers).content)
+
             case "github_release":
                 if config.GITHUB_TOKEN != "":
                     # we have a token, let's use it
