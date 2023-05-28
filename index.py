@@ -128,6 +128,18 @@ def update_application(oscmeta):
     if not os.path.exists(os.path.join('data', 'contents')):
         os.mkdir(os.path.join('data', 'contents'))
 
+    # determine user-agent
+    # check if user-agent is set
+    if "user-agent" in oscmeta["source"]:
+        # check if this user-agent string is included in the config.SECRET_USER_AGENTS dictionary
+        if oscmeta["source"]["user-agent"] in config.SECRET_USER_AGENTS:
+            # if it is, use the actual user-agent string
+            user_agent = config.SECRET_USER_AGENTS[oscmeta["source"]["user-agent"]]
+        else:
+            user_agent = oscmeta["source"]["user-agent"]
+    else:
+        user_agent = config.USER_AGENT
+
     # create temporary directory where we will download the application files and run the treatments
     with tempfile.TemporaryDirectory() as temp_dir:
         # download the application files
@@ -136,16 +148,7 @@ def update_application(oscmeta):
             case "url":
                 url = oscmeta["source"]["location"]
 
-                headers = {"User-Agent": config.USER_AGENT}
-
-                # check if user-agent is set
-                if "user-agent" in oscmeta["source"]:
-                    # check if this user-agent string is included in the config.SECRET_USER_AGENTS dictionary
-                    if oscmeta["source"]["user-agent"] in config.SECRET_USER_AGENTS:
-                        # if it is, use the actual user-agent string
-                        headers = {"User-Agent": config.SECRET_USER_AGENTS[oscmeta["source"]["user-agent"]]}
-                    else:
-                        headers = {"User-Agent": oscmeta["source"]["user-agent"]}
+                headers = {"User-Agent": user_agent}
 
                 filename = os.path.join(temp_dir, oscmeta["information"]["slug"] + ".package")
                 # download the file
@@ -186,31 +189,34 @@ def update_application(oscmeta):
 
                             helpers.log_status(f'  - Downloaded asset {asset["name"]}')
                             break
+            case "manual":
+                helpers.log_status(f'  - Manual source type, downloads will be handled by treatments')
             case _:
                 Exception("Unsupported source type")
 
         # extract the application files
-        helpers.log_status(f'- Extracting application files')
-        match oscmeta["source"]["format"]:
-            case "zip":
-                # why do we bother to add ".package" to the filename?
-                # because windows complains otherwise, as it looks like a directory, and I'm testing on windows.
+        if oscmeta["source"]["type"] != "manual":
+            helpers.log_status(f'- Extracting application files')
+            match oscmeta["source"]["format"]:
+                case "zip":
+                    # why do we bother to add ".package" to the filename?
+                    # because windows complains otherwise, as it looks like a directory, and I'm testing on windows.
 
-                # extract the zip file
-                with zipfile.ZipFile(filename, 'r') as zip_ref:
-                    zip_ref.extractall(temp_dir)
+                    # extract the zip file
+                    with zipfile.ZipFile(filename, 'r') as zip_ref:
+                        zip_ref.extractall(temp_dir)
 
-                # remove the zip file
-                os.remove(filename)
-            case "7z":
-                # extract the 7z file
-                with py7zr.SevenZipFile(filename, 'r') as archive:
-                    archive.extractall(temp_dir)
+                    # remove the zip file
+                    os.remove(filename)
+                case "7z":
+                    # extract the 7z file
+                    with py7zr.SevenZipFile(filename, 'r') as archive:
+                        archive.extractall(temp_dir)
 
-                # remove the 7z file
-                os.remove(filename)
-            case _:
-                Exception("Unsupported source format")
+                    # remove the 7z file
+                    os.remove(filename)
+                case _:
+                    Exception("Unsupported source format")
 
         helpers.log_status(f'- Applying Treatments:')
 
@@ -234,6 +240,11 @@ def update_application(oscmeta):
                                 meta.set(treatment["arguments"])
                             case "remove_declaration":
                                 meta.remove_declaration()
+                    case "web":
+                        web = treatments.Web(user_agent, temp_dir, oscmeta, oscmeta["information"]["slug"])
+                        match treatment["treatment"][treatment["treatment"].index(".") + 1:]:
+                            case "download":
+                                web.download(treatment["arguments"])
 
         # remove the app directory if it exists (to ensure we don't have any old files)
         if os.path.exists(os.path.join(app_directory)):

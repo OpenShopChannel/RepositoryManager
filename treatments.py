@@ -3,6 +3,10 @@ import os
 import shutil
 from xml.etree import ElementTree as et
 
+import eventlet
+import requests
+
+import config
 import helpers
 
 
@@ -92,3 +96,28 @@ class Meta(Treatment):
             f.write(xml)
 
         helpers.log_status(f'  - Removed unicode declaration from meta.xml', 'success')
+
+
+class Web(Treatment):
+    def __init__(self, user_agent, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.user_agent = user_agent
+
+    def download(self, parameters):
+        # download a file from a url
+        # parameters: ["url", "path"]
+
+        url = parameters[0]
+        path = os.path.normpath(os.path.join(self.directory, parameters[1]))
+
+        # create directories in the path if they don't exist
+        if not os.path.exists(os.path.dirname(path)):
+            os.makedirs(os.path.dirname(path))
+
+        # download the file
+        with eventlet.Timeout(config.URL_DOWNLOAD_TIMEOUT):
+            r = requests.get(url, headers={"User-Agent": self.user_agent})
+            with open(path, "wb") as f:
+                f.write(r.content)
+
+        helpers.log_status(f'  - Downloaded {parameters[0]} to {parameters[1]}', 'success')
