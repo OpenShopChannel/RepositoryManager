@@ -69,7 +69,7 @@ def update():
                 try:
                     oscmeta["metaxml"] = update_application(oscmeta)
                 except (Exception, eventlet.timeout.Timeout) as e:
-                    helpers.log_status(f'Failed to process {file}, moving on. ({e})', 'error')
+                    helpers.log_status(f'Failed to process {file}, moving on. ({type(e).__name__}: {e})', 'error')
 
                     # load the previous index file and set it to the current index for this app, to avoid losing it
                     with open(os.path.join('data', 'index.json')) as f:
