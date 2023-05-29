@@ -140,3 +140,23 @@ class Web(Treatment):
                 f.write(r.content)
 
         helpers.log_status(f'  - Downloaded {parameters[0]} to {parameters[1]}', 'success')
+
+
+class Archive(Treatment):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def extract(self, parameters):
+        # extract an archive
+        # parameters: ["path", "to_path"]
+
+        path = os.path.normpath(os.path.join(self.directory, parameters[0]))
+        to_path = os.path.normpath(os.path.join(self.directory, parameters[1]))
+
+        # create directories in the to_path if they don't exist
+        if not os.path.exists(os.path.dirname(to_path)):
+            os.makedirs(os.path.dirname(to_path))
+
+        shutil.unpack_archive(path, to_path)
+
+        helpers.log_status(f'  - Extracted {parameters[0]} to {parameters[1]}', 'success')

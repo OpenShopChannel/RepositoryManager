@@ -247,6 +247,11 @@ def update_application(oscmeta):
                         match treatment["treatment"][treatment["treatment"].index(".") + 1:]:
                             case "download":
                                 web.download(treatment["arguments"])
+                    case "archive":
+                        archive = treatments.Archive(temp_dir, oscmeta, oscmeta["information"]["slug"])
+                        match treatment["treatment"][treatment["treatment"].index(".") + 1:]:
+                            case "extract":
+                                archive.extract(treatment["arguments"])
 
         # remove the app directory if it exists (to ensure we don't have any old files)
         if os.path.exists(os.path.join(app_directory)):

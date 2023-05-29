@@ -1,3 +1,6 @@
+import shutil
+
+import py7zr
 from flask import Flask
 
 import config
@@ -35,6 +38,10 @@ login.login_view = 'admin.login'
 # Register scheduler jobs
 scheduler.add_job(helpers.pull_repo_and_update_index, 'interval', hours=24, replace_existing=True, id='update', args=[])
 scheduler.start()
+
+
+# Register additional unpack formats
+shutil.register_unpack_format("7zip", [".7z"], py7zr.unpack_7zarchive)
 
 
 # before first request
