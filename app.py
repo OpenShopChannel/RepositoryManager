@@ -41,7 +41,7 @@ scheduler.start()
 
 
 # Register additional unpack formats
-shutil.register_unpack_format("7zip", [".7z"], py7zr.unpack_7zarchive)
+shutil.register_unpack_format("7z", [".7z"], py7zr.unpack_7zarchive)
 
 
 # before first request

@@ -196,27 +196,9 @@ def update_application(oscmeta):
 
         # extract the application files
         if oscmeta["source"]["type"] != "manual":
-            helpers.log_status(f'- Extracting application files')
-            match oscmeta["source"]["format"]:
-                case "zip":
-                    # why do we bother to add ".package" to the filename?
-                    # because windows complains otherwise, as it looks like a directory, and I'm testing on windows.
-
-                    # extract the zip file
-                    with zipfile.ZipFile(filename, 'r') as zip_ref:
-                        zip_ref.extractall(temp_dir)
-
-                    # remove the zip file
-                    os.remove(filename)
-                case "7z":
-                    # extract the 7z file
-                    with py7zr.SevenZipFile(filename, 'r') as archive:
-                        archive.extractall(temp_dir)
-
-                    # remove the 7z file
-                    os.remove(filename)
-                case _:
-                    Exception("Unsupported source format")
+            helpers.log_status('- Extracting application files')
+            shutil.unpack_archive(filename, temp_dir, oscmeta["source"]["format"])
+            os.remove(filename)
 
         helpers.log_status(f'- Applying Treatments:')
 
