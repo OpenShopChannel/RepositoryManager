@@ -240,6 +240,8 @@ def update_application(oscmeta):
                                 meta.set(treatment["arguments"])
                             case "remove_declaration":
                                 meta.remove_declaration()
+                            case "remove_comments":
+                                meta.remove_comments()
                     case "web":
                         web = treatments.Web(user_agent, temp_dir, oscmeta, oscmeta["information"]["slug"])
                         match treatment["treatment"][treatment["treatment"].index(".") + 1:]:

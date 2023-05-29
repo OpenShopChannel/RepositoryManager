@@ -1,5 +1,6 @@
 import glob
 import os
+import re
 import shutil
 from xml.etree import ElementTree as et
 
@@ -96,6 +97,24 @@ class Meta(Treatment):
             f.write(xml)
 
         helpers.log_status(f'  - Removed unicode declaration from meta.xml', 'success')
+
+    def remove_comments(self):
+        # Remove comments from meta.xml, can help with some broken meta.xml files
+
+        meta_xml_path = os.path.join(self.directory, "apps", self.slug, "meta.xml")
+
+        # read meta.xml as file
+        with open(meta_xml_path, "r") as f:
+            xml = f.read()
+
+            # Remove comments
+            xml = re.sub(r"<!--(.|\s)*?-->", "", xml)
+
+        # write meta.xml
+        with open(meta_xml_path, "w") as f:
+            f.write(xml)
+
+        helpers.log_status(f'  - Removed comments from meta.xml', 'success')
 
 
 class Web(Treatment):
