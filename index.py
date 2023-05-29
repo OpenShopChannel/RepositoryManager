@@ -246,7 +246,8 @@ def update_application(oscmeta):
 
     # we will create a zip for homebrew browser and the API to use
     # create the zip file
-    with zipfile.ZipFile(os.path.join("data", "contents", oscmeta["information"]["slug"] + ".zip"), 'w') as zip_ref:
+    with zipfile.ZipFile(os.path.join("data", "contents", oscmeta["information"]["slug"] + ".zip"), 'w',
+                         compression=zipfile.ZIP_DEFLATED, compresslevel=9) as zip_ref:
         # iterate through the files starting at the app directory
         for root, dirs, files in os.walk(app_directory):
             # iterate through the files
