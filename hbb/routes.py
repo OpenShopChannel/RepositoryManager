@@ -72,7 +72,7 @@ def apps_list():
         # Name
         content.add_line(app["metaxml"]["app"]["name"])
         # Author
-        if app["metaxml"]["app"]["coder"]:
+        if "coder" in app["metaxml"]["app"]:
             content.add_line(app["metaxml"]["app"]["coder"])
         else:
             content.add_line(app["information"]["author"])
