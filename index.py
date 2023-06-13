@@ -280,22 +280,24 @@ def update_application(oscmeta):
     # determine release date timestamp and add it to the oscmeta file
     if "release_date" in metadata["app"]:
         timestamp = metadata["app"]["release_date"]
-        if len(timestamp) == 14:
-            timestamp = datetime.strptime(timestamp, "%Y%m%d%H%M%S")
-        elif len(timestamp) == 12:
-            timestamp = datetime.strptime(timestamp, "%Y%m%d%H%M")
-        elif len(timestamp) == 8:
-            timestamp = datetime.strptime(timestamp, "%Y%m%d")
+        formats = ["%Y%m%d%H%M%S", "%Y%m%d%H%M", "%Y%m%d"]
+
+        for fmt in formats:
+            try:
+                timestamp = datetime.strptime(timestamp, fmt)
+                break
+            except ValueError:
+                continue
         else:
-            # we will obtain the timestamp from the boot.dol creation date, because the meta.xml lacks a release date
-            timestamp = os.path.getmtime(os.path.join(app_directory, 'apps', oscmeta["information"]["slug"],
-                                                      "boot." + oscmeta["index_computed_info"]["package_type"]))
-            timestamp = datetime.fromtimestamp(timestamp)
+            # We will obtain the timestamp from the boot.dol creation date
+            boot_path = os.path.join(app_directory, 'apps', oscmeta["information"]["slug"],
+                                     "boot." + oscmeta["index_computed_info"]["package_type"])
+            timestamp = datetime.fromtimestamp(os.path.getmtime(boot_path))
     else:
-        # we will obtain the timestamp from the boot.dol creation date, because the meta.xml lacks a release date
-        timestamp = os.path.getmtime(os.path.join(app_directory, 'apps', oscmeta["information"]["slug"],
-                                                  "boot." + oscmeta["index_computed_info"]["package_type"]))
-        timestamp = datetime.fromtimestamp(timestamp)
+        # We will obtain the timestamp from the boot.dol creation date
+        boot_path = os.path.join(app_directory, 'apps', oscmeta["information"]["slug"],
+                                 "boot." + oscmeta["index_computed_info"]["package_type"])
+        timestamp = datetime.fromtimestamp(os.path.getmtime(boot_path))
 
     timestamp = int(time.mktime(timestamp.timetuple()))
 
