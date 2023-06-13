@@ -17,6 +17,13 @@ class Treatment:
         self.oscmeta = oscmeta
         self.slug = slug
 
+    def path_allowed_check(self, path):
+        # Check if the treatment is allowed to perform a file operation on a certain path
+
+        # Check if path is outside the temporary directory
+        if not (os.path.abspath(path).startswith(os.path.abspath(self.directory))):
+            raise Exception(f"CRITICAL INCIDENT! Treatment tried to deal with a prohibited path (Please resolve!): {path}")
+
 
 # Treatments for managing contents
 class Contents(Treatment):
@@ -26,6 +33,8 @@ class Contents(Treatment):
 
         from_path = os.path.normpath(os.path.join(self.directory, parameters[0]))
         to_path = os.path.normpath(os.path.join(self.directory, parameters[1]))
+        self.path_allowed_check(from_path)
+        self.path_allowed_check(to_path)
 
         # create directories in the to_path if they don't exist
         if not os.path.exists(os.path.dirname(to_path)):
@@ -42,6 +51,7 @@ class Contents(Treatment):
         # parameters: ["path"]
 
         path = os.path.normpath(os.path.join(self.directory, parameters[0]))
+        self.path_allowed_check(path)
 
         if os.path.isfile(path):
             os.remove(path)
@@ -156,6 +166,7 @@ class Web(Treatment):
 
         url = parameters[0]
         path = os.path.normpath(os.path.join(self.directory, parameters[1]))
+        self.path_allowed_check(path)
 
         # create directories in the path if they don't exist
         if not os.path.exists(os.path.dirname(path)):
@@ -180,6 +191,8 @@ class Archive(Treatment):
 
         path = os.path.normpath(os.path.join(self.directory, parameters[0]))
         to_path = os.path.normpath(os.path.join(self.directory, parameters[1]))
+        self.path_allowed_check(path)
+        self.path_allowed_check(to_path)
 
         # create directories in the to_path if they don't exist
         if not os.path.exists(os.path.dirname(to_path)):
