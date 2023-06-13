@@ -72,7 +72,10 @@ def apps_list():
         # Name
         content.add_line(app["metaxml"]["app"]["name"])
         # Author
-        content.add_line(app["metaxml"]["app"]["coder"])
+        if app["metaxml"]["app"]["coder"]:
+            content.add_line(app["metaxml"]["app"]["coder"])
+        else:
+            content.add_line(app["information"]["author"])
         # Version
         content.add_line(app["metaxml"]["app"]["version"])
         # Extracted Size
