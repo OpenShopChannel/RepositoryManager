@@ -53,6 +53,34 @@ class Contents(Treatment):
 
 # Treatments for editing meta.xml
 class Meta(Treatment):
+    def init(self):
+        # initializes a new meta.xml file with default values
+
+        default_values = {
+            "name": self.oscmeta["information"]["name"],
+            "coder": self.oscmeta["information"]["author"],
+            "version": self.oscmeta["information"]["version"],
+            "short_description": "No description provided."
+        }
+
+        meta_xml_path = os.path.join(self.directory, "apps", self.slug, "meta.xml")
+
+        # create the root element
+        root = et.Element("app", version="1")
+
+        # create child elements and set their values from the dictionary
+        for key, value in default_values.items():
+            element = et.SubElement(root, key)
+            element.text = value
+
+        # create the XML tree
+        meta_xml = et.ElementTree(root)
+
+        # write meta.xml
+        meta_xml.write(meta_xml_path, encoding="UTF-8", xml_declaration=True)
+
+        helpers.log_status(f'  - Created new meta.xml file', 'success')
+
     def set(self, parameters):
         # set a value in meta.xml (oscmeta is not the same as meta.xml)
         # parameters: ["key", "value"]

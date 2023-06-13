@@ -8,7 +8,6 @@ import fnmatch
 from datetime import datetime
 
 import eventlet
-import py7zr
 import requests
 import xmltodict
 
@@ -218,6 +217,8 @@ def update_application(oscmeta):
                     case "meta":
                         meta = treatments.Meta(temp_dir, oscmeta, oscmeta["information"]["slug"])
                         match treatment["treatment"][treatment["treatment"].index(".") + 1:]:
+                            case "init":
+                                meta.init()
                             case "set":
                                 meta.set(treatment["arguments"])
                             case "remove_declaration":
