@@ -149,9 +149,9 @@ def update_application(oscmeta):
 
                 headers = {"User-Agent": user_agent}
 
-                filename = os.path.join(temp_dir, oscmeta["information"]["slug"] + ".package")
+                archive_filename = os.path.join(temp_dir, oscmeta["information"]["slug"] + ".package")
                 # download the file
-                with open(filename, "wb") as f:
+                with open(archive_filename, "wb") as f:
                     with eventlet.Timeout(config.URL_DOWNLOAD_TIMEOUT):
                         if "user-agent" in oscmeta["source"]:
                             helpers.log_status(f'  - Using custom user-agent: {oscmeta["source"]["user-agent"]}')
@@ -174,20 +174,35 @@ def update_application(oscmeta):
                 if response.status_code == 200:
                     helpers.log_status(f'  - Successfully fetched latest release')
                     assets = response.json()["assets"]
-                    for asset in assets:
-                        # check if asset name matches pattern
-                        if fnmatch.fnmatch(asset["name"], oscmeta["source"]["file"]):
-                            helpers.log_status(f'  - Found asset {asset["name"]}')
-                            # download the asset
-                            url = asset["browser_download_url"]
 
-                            filename = os.path.join(temp_dir, oscmeta["information"]["slug"] + ".package")
-                            # download the file
-                            with open(filename, "wb") as f:
-                                f.write(requests.get(url).content)
+                    # check if additional files are specified
+                    if "additional_files" in oscmeta["source"]:
+                        files = [oscmeta["source"]["file"]] + oscmeta["source"]["additional_files"]
+                    else:
+                        files = [oscmeta["source"]["file"]]
 
-                            helpers.log_status(f'  - Downloaded asset {asset["name"]}')
-                            break
+                    for file in files:
+                        for asset in assets:
+                            # check if asset name matches pattern
+                            if fnmatch.fnmatch(asset["name"], file):
+                                helpers.log_status(f'  - Found asset {asset["name"]}')
+                                # download the asset
+                                url = asset["browser_download_url"]
+
+                                # check if archive
+                                if file == oscmeta["source"]["file"]:
+                                    archive_filename = os.path.join(temp_dir, oscmeta["information"]["slug"] + ".package")
+
+                                    # download the file
+                                    with open(archive_filename, "wb") as f:
+                                        f.write(requests.get(url).content)
+                                else:
+                                    # download the file
+                                    with open(os.path.join(temp_dir, file), "wb") as f:
+                                        f.write(requests.get(url).content)
+
+                                helpers.log_status(f'  - Downloaded asset {asset["name"]}')
+                                break
             case "manual":
                 helpers.log_status(f'  - Manual source type, downloads will be handled by treatments')
             case _:
@@ -196,8 +211,8 @@ def update_application(oscmeta):
         # extract the application files
         if oscmeta["source"]["type"] != "manual":
             helpers.log_status('- Extracting application files')
-            shutil.unpack_archive(filename, temp_dir, oscmeta["source"]["format"])
-            os.remove(filename)
+            shutil.unpack_archive(archive_filename, temp_dir, oscmeta["source"]["format"])
+            os.remove(archive_filename)
 
         helpers.log_status(f'- Applying Treatments:')
 
