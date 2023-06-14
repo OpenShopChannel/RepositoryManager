@@ -9,7 +9,7 @@ import index
 from admin.routes import admin
 from api.routes import api
 from hbb.routes import hbb
-from models import db, login, StatusLogsModel
+from models import db, login
 from scheduler import scheduler, socketio
 from setup.routes import setup
 
@@ -48,12 +48,6 @@ shutil.register_unpack_format("7z", [".7z"], py7zr.unpack_7zarchive)
 with app.app_context():
     db.create_all()
     index.initialize()
-
-    # clear all status logs
-    for log in StatusLogsModel.query.all():
-        db.session.delete(log)
-    db.session.commit()
-    helpers.log('Started Repository Manager!', 'success')
 
 app.jinja_env.globals.update(index=index.get)
 

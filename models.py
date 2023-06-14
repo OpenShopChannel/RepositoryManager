@@ -35,11 +35,3 @@ class SettingsModel(UserMixin, db.Model):
     key = db.Column(db.String, primary_key=True)
     value = db.Column(db.String)
 
-
-class StatusLogsModel(UserMixin, db.Model):
-    __tablename__ = 'status_logs'
-
-    id = db.Column(db.Integer, primary_key=True)
-    status = db.Column(db.String)
-    message = db.Column(db.String)
-    timestamp = db.Column(db.DateTime, default=datetime.now)

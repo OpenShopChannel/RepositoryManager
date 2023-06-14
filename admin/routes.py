@@ -7,7 +7,7 @@ import config
 import helpers
 import index
 import repository
-from models import UserModel, db, SettingsModel, StatusLogsModel
+from models import UserModel, db, SettingsModel
 from scheduler import scheduler
 
 admin = Blueprint('admin', __name__, template_folder='templates', url_prefix='/admin')
@@ -30,30 +30,10 @@ def debug():
     return render_template('admin/debug.html')
 
 
-@admin.route('/log')
-@login_required
-def log():
-    return render_template('admin/log.html')
-
-
 @admin.route('/status')
 @login_required
 def status():
     return render_template('admin/task_status.html')
-
-
-@admin.route('/log/json')
-@login_required
-def log_json():
-    logs = []
-    for log in StatusLogsModel.query.all():
-        logs.append({
-            'id': log.id,
-            'status': log.status,
-            'message': log.message,
-            'timestamp': log.timestamp
-        })
-    return jsonify(logs)
 
 
 @admin.route('/debug/<action>')
@@ -68,8 +48,6 @@ def debug_action(action):
     elif action == 'update_index':
         index.update()
         flash('Successfully updated index', 'success')
-    elif action == 'test_log':
-        helpers.log_status("This is a test log")
     return redirect(url_for('admin.debug'))
 
 

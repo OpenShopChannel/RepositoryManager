@@ -5,8 +5,7 @@ import pygit2
 
 import index
 import repository
-from models import SettingsModel, db, StatusLogsModel
-from scheduler import log_signal
+from models import SettingsModel, db
 
 
 def get_settings():
@@ -87,14 +86,6 @@ def pull(repo, remote_name='origin', branch='master'):
 
 def app_index_directory_location(slug):
     return os.path.join('data', 'contents', slug)
-
-
-def log(message, status='info'):
-    print(f"[{status}] {message}")
-
-    log = StatusLogsModel(message=message, status=status)
-    db.session.add(log)
-    db.session.commit()
 
 
 def pull_repo_and_update_index():
