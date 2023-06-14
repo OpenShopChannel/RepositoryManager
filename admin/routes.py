@@ -45,13 +45,14 @@ def logs():
     if os.path.exists("logs"):
         for log in os.listdir("logs"):
             with open(os.path.join("logs", log), 'r') as file:
+                lines = file.readlines()
                 log_files.append({
                     "name": log,
-                    "length": len(file.readlines()),
+                    "length": len(lines),
+                    "errors": sum(1 for line in lines if '[error]' in line),
                     "created": datetime.datetime.fromtimestamp(os.stat(os.path.join("logs", log)).st_ctime).strftime(
                         '%Y-%m-%d %H:%M:%S')
                 })
-        log_files = sorted(log_files, key=lambda x: x["created"], reverse=True)
     return render_template('admin/logs.html', log_files=log_files)
 
 

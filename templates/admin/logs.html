@@ -10,6 +10,7 @@
                 <th></th>
                 <th>File</th>
                 <th>Length</th>
+                <th>Errors</th>
                 <th>Creation Date</th>
                 <th></th>
             </tr>
@@ -20,6 +21,7 @@
                     <th style="text-align: center"><i class="fa-solid fa-file-lines"></i></th>
                     <th>{{ log_file["name"] }}</th>
                     <th>{{ log_file["length"] }} Lines</th>
+                    <th>{{ log_file["errors"] }}</th>
                     <td>{{ log_file["created"] }}</td>
                     <td><a href="{{ url_for("admin.log", file=log_file["name"]) }}" class="btn" type="button">Download</a></td>
                 </tr>
