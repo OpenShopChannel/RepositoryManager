@@ -8,14 +8,15 @@ import eventlet
 import requests
 
 import config
-import helpers
+import logger
 
 
 class Treatment:
-    def __init__(self, directory, oscmeta, slug):
+    def __init__(self, directory, oscmeta, slug, log=logger.Log("treatment")):
         self.directory = directory
         self.oscmeta = oscmeta
         self.slug = slug
+        self.log = log
 
     def path_allowed_check(self, path):
         # Check if the treatment is allowed to perform a file operation on a certain path
@@ -44,7 +45,7 @@ class Contents(Treatment):
         for file in files:
             shutil.move(file, to_path)  # Move each file to the target directory
 
-        helpers.log_status(f'  - Moved {parameters[0]} to {parameters[1]}', 'success')
+        self.log.log_status(f'  - Moved {parameters[0]} to {parameters[1]}', 'success')
 
     def delete(self, parameters):
         # delete a file or directory
@@ -58,7 +59,7 @@ class Contents(Treatment):
         else:
             shutil.rmtree(path)
 
-        helpers.log_status(f'  - Deleted {parameters[0]}', 'success')
+        self.log.log_status(f'  - Deleted {parameters[0]}', 'success')
 
 
 # Treatments for editing meta.xml
@@ -89,7 +90,7 @@ class Meta(Treatment):
         # write meta.xml
         meta_xml.write(meta_xml_path, encoding="UTF-8", xml_declaration=True)
 
-        helpers.log_status(f'  - Created new meta.xml file', 'success')
+        self.log.log_status(f'  - Created new meta.xml file', 'success')
 
     def set(self, parameters):
         # set a value in meta.xml (oscmeta is not the same as meta.xml)
@@ -116,7 +117,7 @@ class Meta(Treatment):
         # write meta.xml
         meta_xml.write(meta_xml_path)
 
-        helpers.log_status(f'  - Set {key} to {value} in meta.xml', 'success')
+        self.log.log_status(f'  - Set {key} to {value} in meta.xml', 'success')
 
     def remove_declaration(self):
         # Remove the unicode declaration from meta.xml, can help with some broken meta.xml files
@@ -134,7 +135,7 @@ class Meta(Treatment):
         with open(meta_xml_path, "w") as f:
             f.write(xml)
 
-        helpers.log_status(f'  - Removed unicode declaration from meta.xml', 'success')
+        self.log.log_status(f'  - Removed unicode declaration from meta.xml', 'success')
 
     def remove_comments(self):
         # Remove comments from meta.xml, can help with some broken meta.xml files
@@ -152,7 +153,7 @@ class Meta(Treatment):
         with open(meta_xml_path, "w") as f:
             f.write(xml)
 
-        helpers.log_status(f'  - Removed comments from meta.xml', 'success')
+        self.log.log_status(f'  - Removed comments from meta.xml', 'success')
 
 
 class Web(Treatment):
@@ -178,7 +179,7 @@ class Web(Treatment):
             with open(path, "wb") as f:
                 f.write(r.content)
 
-        helpers.log_status(f'  - Downloaded {parameters[0]} to {parameters[1]}', 'success')
+        self.log.log_status(f'  - Downloaded {parameters[0]} to {parameters[1]}', 'success')
 
 
 class Archive(Treatment):
@@ -200,4 +201,4 @@ class Archive(Treatment):
 
         shutil.unpack_archive(path, to_path)
 
-        helpers.log_status(f'  - Extracted {parameters[0]} to {parameters[1]}', 'success')
+        self.log.log_status(f'  - Extracted {parameters[0]} to {parameters[1]}', 'success')

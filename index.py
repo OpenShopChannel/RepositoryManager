@@ -13,6 +13,7 @@ import xmltodict
 
 import config
 import helpers
+import logger
 import treatments
 
 # why do we use IO instead of the database we already have set up?
@@ -37,7 +38,8 @@ def initialize():
 
 
 def update():
-    helpers.log_status(f'Updating repository index')
+    log = logger.Log("index")
+    log.log_status(f'Updating repository index')
     repo_index = {}
 
     # index the repository.json file
@@ -59,16 +61,16 @@ def update():
             with open(os.path.join(config.REPO_DIR, 'contents', file)) as f:
                 oscmeta = json.load(f)
 
-                helpers.log_status(f'Loaded {file}')
+                log.log_status(f'Loaded {file}')
 
                 # add the slug to the oscmeta
                 oscmeta["information"]["slug"] = file.replace('.oscmeta', '')
 
                 # download application files to add to the index, and update the oscmeta with the obtained meta.xml
                 try:
-                    oscmeta["metaxml"] = update_application(oscmeta)
+                    oscmeta["metaxml"] = update_application(oscmeta, log)
                 except (Exception, eventlet.timeout.Timeout) as e:
-                    helpers.log_status(f'Failed to process {file}, moving on. ({type(e).__name__}: {e})', 'error')
+                    log.log_status(f'Failed to process {file}, moving on. ({type(e).__name__}: {e})', 'error')
 
                     # load the previous index file and set it to the current index for this app, to avoid losing it
                     with open(os.path.join('data', 'index.json')) as f:
@@ -91,7 +93,7 @@ def update():
 
     # put all icons into a zip file called icons.zip
     # this will be used for the icon cache that the HBB downloads
-    helpers.log_status(f'Creating HBB icon cache')
+    log.log_status(f'Creating HBB icon cache')
     if not os.path.exists(os.path.join("data", "icons")):
         os.makedirs(os.path.join("data", "icons"))
 
@@ -106,7 +108,7 @@ def update():
 
     shutil.rmtree(os.path.join("data", "icons"))
 
-    helpers.log_status(f'Finished updating repository index', 'success')
+    log.log_status(f'Finished updating repository index', 'success')
     return repo_index
 
 
@@ -116,9 +118,9 @@ def get():
         return json.load(f)
 
 
-def update_application(oscmeta):
+def update_application(oscmeta, log=logger.Log("application_update")):
     # update the application contents in the index
-    helpers.log_status(f'Updating application {oscmeta["information"]["slug"]}')
+    log.log_status(f'Updating application {oscmeta["information"]["slug"]}')
 
     metadata = None
     app_directory = helpers.app_index_directory_location(oscmeta["information"]["slug"])
@@ -142,7 +144,7 @@ def update_application(oscmeta):
     # create temporary directory where we will download the application files and run the treatments
     with tempfile.TemporaryDirectory() as temp_dir:
         # download the application files
-        helpers.log_status(f'- Downloading application files')
+        log.log_status(f'- Downloading application files')
         match oscmeta["source"]["type"]:
             case "url":
                 url = oscmeta["source"]["location"]
@@ -154,16 +156,16 @@ def update_application(oscmeta):
                 with open(archive_filename, "wb") as f:
                     with eventlet.Timeout(config.URL_DOWNLOAD_TIMEOUT):
                         if "user-agent" in oscmeta["source"]:
-                            helpers.log_status(f'  - Using custom user-agent: {oscmeta["source"]["user-agent"]}')
+                            log.log_status(f'  - Using custom user-agent: {oscmeta["source"]["user-agent"]}')
                         f.write(requests.get(url, headers=headers).content)
 
             case "github_release":
                 if config.GITHUB_TOKEN != "":
                     # we have a token, let's use it
-                    helpers.log_status(f'  - Authenticating with GitHub')
+                    log.log_status(f'  - Authenticating with GitHub')
                     headers = {"Authorization": f"token {config.GITHUB_TOKEN}"}
                 else:
-                    helpers.log_status(f'  - No valid GitHub token found, using unauthenticated requests. '
+                    log.log_status(f'  - No valid GitHub token found, using unauthenticated requests. '
                                        f'Please configure a token in config.py')
                     headers = {}
 
@@ -172,7 +174,7 @@ def update_application(oscmeta):
                 response = requests.get(url, headers=headers)
 
                 if response.status_code == 200:
-                    helpers.log_status(f'  - Successfully fetched latest release')
+                    log.log_status(f'  - Successfully fetched latest release')
                     assets = response.json()["assets"]
 
                     # check if additional files are specified
@@ -185,7 +187,7 @@ def update_application(oscmeta):
                         for asset in assets:
                             # check if asset name matches pattern
                             if fnmatch.fnmatch(asset["name"], file):
-                                helpers.log_status(f'  - Found asset {asset["name"]}')
+                                log.log_status(f'  - Found asset {asset["name"]}')
                                 # download the asset
                                 url = asset["browser_download_url"]
 
@@ -201,20 +203,20 @@ def update_application(oscmeta):
                                     with open(os.path.join(temp_dir, file), "wb") as f:
                                         f.write(requests.get(url).content)
 
-                                helpers.log_status(f'  - Downloaded asset {asset["name"]}')
+                                log.log_status(f'  - Downloaded asset {asset["name"]}')
                                 break
             case "manual":
-                helpers.log_status(f'  - Manual source type, downloads will be handled by treatments')
+                log.log_status(f'  - Manual source type, downloads will be handled by treatments')
             case _:
                 Exception("Unsupported source type")
 
         # extract the application files
         if oscmeta["source"]["type"] != "manual":
-            helpers.log_status('- Extracting application files')
+            log.log_status('- Extracting application files')
             shutil.unpack_archive(archive_filename, temp_dir, oscmeta["source"]["format"])
             os.remove(archive_filename)
 
-        helpers.log_status(f'- Applying Treatments:')
+        log.log_status(f'- Applying Treatments:')
 
         # process treatments, eventually will be moved to a separate function
         if "treatments" in oscmeta:
@@ -222,7 +224,7 @@ def update_application(oscmeta):
                 # math the treatment group (e.g. contents)
                 match treatment["treatment"][:treatment["treatment"].index(".")]:
                     case "contents":
-                        contents = treatments.Contents(temp_dir, oscmeta, oscmeta["information"]["slug"])
+                        contents = treatments.Contents(temp_dir, oscmeta, oscmeta["information"]["slug"], log)
                         # match the treatment (e.g. move)
                         match treatment["treatment"][treatment["treatment"].index(".") + 1:]:
                             case "move":
@@ -230,7 +232,7 @@ def update_application(oscmeta):
                             case "delete":
                                 contents.delete(treatment["arguments"])
                     case "meta":
-                        meta = treatments.Meta(temp_dir, oscmeta, oscmeta["information"]["slug"])
+                        meta = treatments.Meta(temp_dir, oscmeta, oscmeta["information"]["slug"], log)
                         match treatment["treatment"][treatment["treatment"].index(".") + 1:]:
                             case "init":
                                 meta.init()
@@ -241,12 +243,12 @@ def update_application(oscmeta):
                             case "remove_comments":
                                 meta.remove_comments()
                     case "web":
-                        web = treatments.Web(user_agent, temp_dir, oscmeta, oscmeta["information"]["slug"])
+                        web = treatments.Web(user_agent, temp_dir, oscmeta, oscmeta["information"]["slug"], log)
                         match treatment["treatment"][treatment["treatment"].index(".") + 1:]:
                             case "download":
                                 web.download(treatment["arguments"])
                     case "archive":
-                        archive = treatments.Archive(temp_dir, oscmeta, oscmeta["information"]["slug"])
+                        archive = treatments.Archive(temp_dir, oscmeta, oscmeta["information"]["slug"], log)
                         match treatment["treatment"][treatment["treatment"].index(".") + 1:]:
                             case "extract":
                                 archive.extract(treatment["arguments"])
@@ -258,7 +260,7 @@ def update_application(oscmeta):
         # copy the files to app directory in the index
         shutil.copytree(temp_dir, app_directory, dirs_exist_ok=True)
 
-    helpers.log_status(f'- Creating ZIP file')
+    log.log_status(f'- Creating ZIP file')
 
     # we will create a zip for homebrew browser and the API to use
     # create the zip file
@@ -283,7 +285,7 @@ def update_application(oscmeta):
         metadata = json.loads(json.dumps(xmltodict.parse(f.read())))
 
     # time for determining some extra information needed by API and Homebrew Browser, and adding to index
-    helpers.log_status(f'- Retrieving Extra Information')
+    log.log_status(f'- Retrieving Extra Information')
     oscmeta["index_computed_info"] = {}
 
     # Check type (dol/elf)
@@ -361,6 +363,6 @@ def update_application(oscmeta):
             oscmeta["index_computed_info"]["subdirectories"].append(os.path.relpath(os.path.join(root, dir), os.path.join(app_directory, 'apps', oscmeta["information"]["slug"])))
             oscmeta["index_computed_info"]["subdirectories"][-1] = "/apps/" + oscmeta["information"]["slug"] + "/" + oscmeta["index_computed_info"]["subdirectories"][-1].replace("\\", "/")
 
-    helpers.log_status(f'- Adding to Index')
+    log.log_status(f'- Adding to Index')
 
     return metadata

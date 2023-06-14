@@ -97,12 +97,6 @@ def log(message, status='info'):
     db.session.commit()
 
 
-def log_status(message, status='info'):
-    print(f"[{status}] {message}")
-
-    log_signal.send(message)
-
-
 def pull_repo_and_update_index():
     repository.pull()
     index.update()
