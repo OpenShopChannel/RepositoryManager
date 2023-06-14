@@ -1,6 +1,8 @@
 import datetime
+import os
 
-from flask import Blueprint, redirect, url_for, request, render_template, flash, jsonify, copy_current_request_context
+from flask import Blueprint, redirect, url_for, request, render_template, flash, jsonify, copy_current_request_context, \
+    abort, send_file
 from flask_login import current_user, login_user, login_required
 
 import config
@@ -34,6 +36,33 @@ def debug():
 @login_required
 def status():
     return render_template('admin/task_status.html')
+
+
+@admin.route('/logs')
+@login_required
+def logs():
+    log_files = []
+    if os.path.exists("logs"):
+        for log in os.listdir("logs"):
+            with open(os.path.join("logs", log), 'r') as file:
+                log_files.append({
+                    "name": log,
+                    "length": len(file.readlines()),
+                    "created": datetime.datetime.fromtimestamp(os.stat(os.path.join("logs", log)).st_ctime).strftime(
+                        '%Y-%m-%d %H:%M:%S')
+                })
+        log_files = sorted(log_files, key=lambda x: x["created"], reverse=True)
+    return render_template('admin/logs.html', log_files=log_files)
+
+
+@admin.route('/log/<file>')
+@login_required
+def log(file):
+    log_path = os.path.join("logs", file)
+    if not os.path.exists(log_path):
+        abort(404)  # Log file not found
+
+    return send_file(log_path)
 
 
 @admin.route('/debug/<action>')
