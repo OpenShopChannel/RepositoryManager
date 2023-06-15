@@ -3,8 +3,6 @@ import stat
 
 import pygit2
 
-import index
-import repository
 from models import SettingsModel, db
 
 
@@ -86,8 +84,3 @@ def pull(repo, remote_name='origin', branch='master'):
 
 def app_index_directory_location(slug):
     return os.path.join('data', 'contents', slug)
-
-
-def pull_repo_and_update_index():
-    repository.pull()
-    index.update()

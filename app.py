@@ -4,8 +4,8 @@ import py7zr
 from flask import Flask
 
 import config
-import helpers
 import index
+import repository
 from admin.routes import admin
 from api.routes import api
 from hbb.routes import hbb
@@ -35,8 +35,14 @@ login.init_app(app)
 login.login_view = 'admin.login'
 
 
+def pull_repo_and_update_index():
+    with app.app_context():
+        repository.pull()
+        index.update()
+
+
 # Register scheduler jobs
-scheduler.add_job(helpers.pull_repo_and_update_index, 'interval', hours=24, replace_existing=True, id='update', args=[])
+scheduler.add_job(pull_repo_and_update_index, 'interval', hours=24, replace_existing=True, id='update', args=[])
 scheduler.start()
 
 

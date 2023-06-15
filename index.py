@@ -1,5 +1,7 @@
+import hashlib
 import json
 import os
+import pathlib
 import shutil
 import time
 import zipfile
@@ -15,6 +17,8 @@ import config
 import helpers
 import logger
 import treatments
+from models import db, ModeratedBinariesModel
+
 
 # why do we use IO instead of the database we already have set up?
 # because it's easier to manage. we don't need to worry about migrations, etc.
@@ -253,10 +257,64 @@ def update_application(oscmeta, log=logger.Log("application_update")):
                             case "extract":
                                 archive.extract(treatment["arguments"])
 
+        # create a dictionary for extra stuff
+        oscmeta["index_computed_info"] = {}
+
+        # Check type (dol/elf)
+        if os.path.exists(os.path.join(app_directory, 'apps', oscmeta["information"]["slug"], "boot.dol")):
+            oscmeta["index_computed_info"]["package_type"] = "dol"
+        elif os.path.exists(os.path.join(app_directory, 'apps', oscmeta["information"]["slug"], "boot.elf")):
+            oscmeta["index_computed_info"]["package_type"] = "elf"
+
+        # Calculate MD5 checksum of boot.dol/boot.elf
+        file_hash = hashlib.md5(pathlib.Path(app_directory, 'apps', oscmeta["information"]["slug"],
+                                             "boot." + oscmeta["index_computed_info"][
+                                                 "package_type"]).read_bytes()).hexdigest()
+
+        oscmeta["index_computed_info"]["binary_size"] = file_hash
+
+        # time for moderation!
+        log.log_status("- Checking moderation status")
+
+        log.log_status("  - Binary checksum: " + file_hash)
+
+        # check if binary exists in moderation table
+        moderation_entry = db.session.query(ModeratedBinaries).filter_by(checksum=file_hash).first()
+        if moderation_entry:
+            if moderation_entry.status == "approved":
+                log.log_status("  - Application binary is approved by moderation.")
+            elif moderation_entry.status == "pending":
+                log.log_status("  - Application binary is currently pending moderation.")
+                zip_up_application(temp_dir, os.path.join("data", "moderation", file_hash + ".zip"))
+                log.log_status("  - Updated moderation archive.")
+                raise Exception("Binary requires moderation.")
+            elif moderation_entry.status == "rejected":
+                log.log_status("  - Application binary has been rejected by moderation.")
+                zip_up_application(temp_dir, os.path.join("data", "moderation", file_hash + ".zip"))
+                log.log_status("  - Updated moderation archive.")
+                raise Exception("Binary rejected in moderation.")
+        else:
+            # Create a new entry in moderation table
+            new_entry = ModeratedBinariesModel(
+                checksum=file_hash,
+                app_slug=oscmeta["information"]["slug"],
+                status="pending",
+                discovery_date=datetime.utcnow(),
+                modified_date=datetime.utcnow()
+            )
+            db.session.add(new_entry)
+            db.session.commit()
+
+            log.log_status("  - Submitted application binary for moderation.")
+            zip_up_application(temp_dir, os.path.join("data", "moderation", file_hash + ".zip"))
+            log.log_status("  - Updated moderation archive.")
+            raise Exception("Binary requires moderation.")
+
+        # alright, we passed moderation!
+
         # remove the app directory if it exists (to ensure we don't have any old files)
         if os.path.exists(os.path.join(app_directory)):
             shutil.rmtree(os.path.join(app_directory))
-
         # copy the files to app directory in the index
         shutil.copytree(temp_dir, app_directory, dirs_exist_ok=True)
 
@@ -264,20 +322,7 @@ def update_application(oscmeta, log=logger.Log("application_update")):
 
     # we will create a zip for homebrew browser and the API to use
     # create the zip file
-    with zipfile.ZipFile(os.path.join("data", "contents", oscmeta["information"]["slug"] + ".zip"), 'w',
-                         compression=zipfile.ZIP_DEFLATED, compresslevel=9) as zip_ref:
-        # iterate through the files starting at the app directory
-        for root, dirs, files in os.walk(app_directory):
-            # iterate through the files
-            for file in files:
-                # get the full path of the file
-                file_path = os.path.join(root, file)
-
-                # get the relative path of the file
-                relative_path = os.path.relpath(file_path, app_directory)
-
-                # add the file to the zip
-                zip_ref.write(file_path, relative_path)
+    zip_up_application(app_directory, os.path.join("data", "contents", oscmeta["information"]["slug"] + ".zip"))
 
     # open the metadata file
     with open(os.path.join(app_directory, 'apps', oscmeta["information"]["slug"], "meta.xml")) as f:
@@ -286,13 +331,6 @@ def update_application(oscmeta, log=logger.Log("application_update")):
 
     # time for determining some extra information needed by API and Homebrew Browser, and adding to index
     log.log_status(f'- Retrieving Extra Information')
-    oscmeta["index_computed_info"] = {}
-
-    # Check type (dol/elf)
-    if os.path.exists(os.path.join(app_directory, 'apps', oscmeta["information"]["slug"], "boot.dol")):
-        oscmeta["index_computed_info"]["package_type"] = "dol"
-    elif os.path.exists(os.path.join(app_directory, 'apps', oscmeta["information"]["slug"], "boot.elf")):
-        oscmeta["index_computed_info"]["package_type"] = "elf"
 
     # determine release date timestamp and add it to the oscmeta file
     if "release_date" in metadata["app"]:
@@ -366,3 +404,22 @@ def update_application(oscmeta, log=logger.Log("application_update")):
     log.log_status(f'- Adding to Index')
 
     return metadata
+
+
+def zip_up_application(source, destination):
+    # Create the destination directory if it doesn't exist
+    os.makedirs(os.path.dirname(destination), exist_ok=True)
+
+    with zipfile.ZipFile(destination, 'w', compression=zipfile.ZIP_DEFLATED, compresslevel=9) as zip_ref:
+        # iterate through the files starting at the app directory
+        for root, dirs, files in os.walk(source):
+            # iterate through the files
+            for file in files:
+                # get the full path of the file
+                file_path = os.path.join(root, file)
+
+                # get the relative path of the file
+                relative_path = os.path.relpath(file_path, source)
+
+                # add the file to the zip
+                zip_ref.write(file_path, relative_path)

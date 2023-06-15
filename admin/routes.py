@@ -9,7 +9,7 @@ import config
 import helpers
 import index
 import repository
-from models import UserModel, db, SettingsModel
+from models import UserModel, db, SettingsModel, ModeratedBinariesModel
 from scheduler import scheduler
 
 admin = Blueprint('admin', __name__, template_folder='templates', url_prefix='/admin')
@@ -54,6 +54,39 @@ def logs():
                         '%Y-%m-%d %H:%M:%S')
                 })
     return render_template('admin/logs.html', log_files=log_files)
+
+
+@admin.route('/moderation')
+@login_required
+def moderation():
+    return render_template('admin/moderation.html', mod_entries=ModeratedBinariesModel.query.all())
+
+
+@admin.route('/moderation/<checksum>/<action>')
+@login_required
+def moderation_action(checksum, action):
+    moderation_entry = db.session.query(ModeratedBinariesModel).filter_by(checksum=checksum).first()
+    match action:
+        case "approve":
+            moderation_entry.status = "approved"
+            moderation_entry.moderated_by = current_user.id
+            moderation_entry.modified_date = datetime.datetime.now()
+            db.session.commit()
+            flash(f'Approved \"{moderation_entry.app_slug}-{checksum}\"', 'success')
+        case "reject":
+            moderation_entry.status = "rejected"
+            moderation_entry.moderated_by = current_user.id
+            moderation_entry.modified_date = datetime.datetime.now()
+            db.session.commit()
+            flash(f'Rejected \"{moderation_entry.app_slug}-{checksum}\"', 'danger')
+        case "download":
+            moderation_archive = os.path.join("data", "moderation", checksum + ".zip")
+            if not os.path.exists(moderation_archive):
+                abort(404)  # Archive not found
+
+            return send_file(moderation_archive)
+
+    return redirect(url_for('admin.moderation'))
 
 
 @admin.route('/log/<file>')

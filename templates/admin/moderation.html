@@ -1,0 +1,56 @@
+{% extends "admin/base.html" %}
+
+{% macro table(entries, status) %}
+    <table class="table table-bordered">
+        <thead>
+        <tr>
+            <th></th>
+            <th>Meta File</th>
+            <th>Binary ID</th>
+            <th>Discovered</th>
+            <th>Mod Actions</th>
+            <th>Links</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for mod_entry in entries %}
+            {% if mod_entry.status == status %}
+                <tr>
+                    <th style="text-align: center"><i class="fa-solid fa-gavel"></i></th>
+                    <th>{{ mod_entry.app_slug }}.oscmeta</th>
+                    <th>{{ mod_entry.checksum | truncate(12) }}</th>
+                    <th>{{ mod_entry.discovery_date }}</th>
+                    <td>
+                        <div class="btn-group" role="group">
+                            {% if mod_entry.status != "approved" %}
+                                <a href="{{ url_for("admin.moderation_action", checksum=mod_entry.checksum, action="approve") }}" class="btn btn-success" type="button">Approve</a>
+                            {% endif %}
+                            {% if mod_entry.status != "rejected" %}
+                                <a href="{{ url_for("admin.moderation_action", checksum=mod_entry.checksum, action="reject") }}" class="btn btn-danger" type="button">Reject</a>
+                            {% endif %}
+                        </div>
+                    </td>
+                    <td><a href="{{ url_for("admin.moderation_action", checksum=mod_entry.checksum, action="download") }}" class="btn" type="button">Download .ZIP</a></td>
+                </tr>
+            {% endif %}
+        {% endfor %}
+        </tbody>
+    </table>
+{% endmacro %}
+
+{% block content %}
+    <div class="content">
+        <h1 class="content-title font-size-22">
+            Moderation
+        </h1>
+
+        <h2>Pending Apps</h2>
+        {{ table(mod_entries, "pending") }}
+
+        <h2>Approved Apps</h2>
+        {{ table(mod_entries, "approved") }}
+
+        <h2>Rejected Apps</h2>
+        {{ table(mod_entries, "rejected") }}
+    </div>
+{% endblock %}

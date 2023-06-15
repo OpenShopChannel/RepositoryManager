@@ -35,3 +35,13 @@ class SettingsModel(UserMixin, db.Model):
     key = db.Column(db.String, primary_key=True)
     value = db.Column(db.String)
 
+
+class ModeratedBinariesModel(UserMixin, db.Model):
+    __tablename__ = 'moderated_binaries'
+
+    checksum = db.Column(db.String, primary_key=True)
+    app_slug = db.Column(db.String, nullable=False)
+    status = db.Column(db.String, default="pending", nullable=False)
+    discovery_date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow())
+    modified_date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow())
+    moderated_by = db.Column(db.Integer, db.ForeignKey('users.id'))
