@@ -53,6 +53,7 @@ def logs():
                     "created": datetime.datetime.fromtimestamp(os.stat(os.path.join("logs", log)).st_ctime).strftime(
                         '%Y-%m-%d %H:%M:%S')
                 })
+        log_files = sorted(log_files, key=lambda x: x["created"], reverse=True)
     return render_template('admin/logs.html', log_files=log_files)
 
 
