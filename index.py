@@ -261,9 +261,9 @@ def update_application(oscmeta, log=logger.Log("application_update")):
         oscmeta["index_computed_info"] = {}
 
         # Check type (dol/elf)
-        if os.path.exists(os.path.join(app_directory, 'apps', oscmeta["information"]["slug"], "boot.dol")):
+        if os.path.exists(os.path.join(temp_dir, 'apps', oscmeta["information"]["slug"], "boot.dol")):
             oscmeta["index_computed_info"]["package_type"] = "dol"
-        elif os.path.exists(os.path.join(app_directory, 'apps', oscmeta["information"]["slug"], "boot.elf")):
+        elif os.path.exists(os.path.join(temp_dir, 'apps', oscmeta["information"]["slug"], "boot.elf")):
             oscmeta["index_computed_info"]["package_type"] = "elf"
 
         # Calculate MD5 checksum of boot.dol/boot.elf
