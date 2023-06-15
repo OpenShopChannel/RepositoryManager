@@ -344,7 +344,7 @@ def update_application(oscmeta, log=logger.Log("application_update")):
     log.log_status(f'- Retrieving Extra Information')
 
     # determine release date timestamp and add it to the oscmeta file
-    if "release_date" in metadata["app"]:
+    if ("release_date" in metadata["app"]) and (metadata["app"]["release_date"] is not None):
         timestamp = metadata["app"]["release_date"]
         formats = ["%Y%m%d%H%M%S", "%Y%m%d%H%M", "%Y%m%d"]
 
