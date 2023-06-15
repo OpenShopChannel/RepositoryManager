@@ -279,7 +279,7 @@ def update_application(oscmeta, log=logger.Log("application_update")):
         log.log_status("  - Binary checksum: " + file_hash)
 
         # check if binary exists in moderation table
-        moderation_entry = db.session.query(ModeratedBinaries).filter_by(checksum=file_hash).first()
+        moderation_entry = db.session.query(ModeratedBinariesModel).filter_by(checksum=file_hash).first()
         if moderation_entry:
             if moderation_entry.status == "approved":
                 log.log_status("  - Application binary is approved by moderation.")
