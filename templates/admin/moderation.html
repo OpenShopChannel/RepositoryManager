@@ -1,11 +1,10 @@
 {% extends "admin/base.html" %}
 
 {% macro table(entries, status) %}
-    <table class="table table-bordered">
+    <table class="table table-bordered table-hover table-striped">
         <thead>
         <tr>
             <th></th>
-            <th>Meta File</th>
             <th>Binary ID</th>
             <th>Discovered</th>
             <th>Mod Actions</th>
@@ -17,8 +16,7 @@
             {% if mod_entry.status == status %}
                 <tr>
                     <th style="text-align: center"><i class="fa-solid fa-gavel"></i></th>
-                    <th>{{ mod_entry.app_slug }}.oscmeta</th>
-                    <th>{{ mod_entry.checksum | truncate(12) }}</th>
+                    <th>{{ mod_entry.app_slug }}-{{ mod_entry.checksum | truncate(24) }}</th>
                     <th>{{ mod_entry.discovery_date }}</th>
                     <td>
                         <div class="btn-group" role="group">
@@ -44,13 +42,33 @@
             Moderation
         </h1>
 
-        <h2>Pending Apps</h2>
-        {{ table(mod_entries, "pending") }}
+        <div class="collapse-group">
+            <details class="collapse-panel" open>
+                <summary class="collapse-header">
+                    Pending Apps
+                </summary>
+                <div class="collapse-content">
+                    {{ table(mod_entries, "pending") }}
+                </div>
+            </details>
 
-        <h2>Approved Apps</h2>
-        {{ table(mod_entries, "approved") }}
+            <details class="collapse-panel">
+                <summary class="collapse-header">
+                    Approved Apps
+                </summary>
+                <div class="collapse-content">
+                    {{ table(mod_entries, "approved") }}
+                </div>
+            </details>
 
-        <h2>Rejected Apps</h2>
-        {{ table(mod_entries, "rejected") }}
+            <details class="collapse-panel">
+                <summary class="collapse-header">
+                    Rejected Apps
+                </summary>
+                <div class="collapse-content">
+                    {{ table(mod_entries, "rejected") }}
+                </div>
+            </details>
+        </div>
     </div>
 {% endblock %}
