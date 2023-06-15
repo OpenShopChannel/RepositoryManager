@@ -63,6 +63,12 @@ def moderation():
     return render_template('admin/moderation.html', mod_entries=ModeratedBinariesModel.query.all())
 
 
+@admin.route('/users')
+@login_required
+def users():
+    return render_template('admin/users.html', users=UserModel.query.all())
+
+
 @admin.route('/moderation/<checksum>/<action>')
 @login_required
 def moderation_action(checksum, action):
