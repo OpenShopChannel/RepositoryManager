@@ -257,6 +257,12 @@ def update_application(oscmeta, log=logger.Log("application_update")):
                             case "extract":
                                 archive.extract(treatment["arguments"])
 
+        # we will check if all files are in the location they are expected to be in
+        if not os.path.exists(os.path.join(temp_dir, 'apps', oscmeta["information"]["slug"], "icon.png")):
+            raise Exception("Couldn't find icon.png file.")
+        if not os.path.exists(os.path.join(temp_dir, 'apps', oscmeta["information"]["slug"], "meta.xml")):
+            raise Exception("Couldn't find meta.xml file.")
+
         # create a dictionary for extra stuff
         oscmeta["index_computed_info"] = {}
 
@@ -265,6 +271,8 @@ def update_application(oscmeta, log=logger.Log("application_update")):
             oscmeta["index_computed_info"]["package_type"] = "dol"
         elif os.path.exists(os.path.join(temp_dir, 'apps', oscmeta["information"]["slug"], "boot.elf")):
             oscmeta["index_computed_info"]["package_type"] = "elf"
+        else:
+            raise Exception("Couldn't find binary.")
 
         # Calculate MD5 checksum of boot.dol/boot.elf
         file_hash = hashlib.md5(pathlib.Path(temp_dir, 'apps', oscmeta["information"]["slug"],
