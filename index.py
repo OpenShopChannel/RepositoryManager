@@ -267,7 +267,7 @@ def update_application(oscmeta, log=logger.Log("application_update")):
             oscmeta["index_computed_info"]["package_type"] = "elf"
 
         # Calculate MD5 checksum of boot.dol/boot.elf
-        file_hash = hashlib.md5(pathlib.Path(app_directory, 'apps', oscmeta["information"]["slug"],
+        file_hash = hashlib.md5(pathlib.Path(temp_dir, 'apps', oscmeta["information"]["slug"],
                                              "boot." + oscmeta["index_computed_info"][
                                                  "package_type"]).read_bytes()).hexdigest()
 
