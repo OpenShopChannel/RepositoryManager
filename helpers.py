@@ -3,7 +3,7 @@ import stat
 
 import pygit2
 
-from models import SettingsModel, db
+from models import SettingsModel, db, ModeratedBinariesModel
 
 
 def get_settings():
@@ -84,3 +84,9 @@ def pull(repo, remote_name='origin', branch='master'):
 
 def app_index_directory_location(slug):
     return os.path.join('data', 'contents', slug)
+
+
+def notifications():
+    return {
+        "pending_moderation": str(ModeratedBinariesModel.query.filter_by(status='pending').count()) + " pending"
+    }

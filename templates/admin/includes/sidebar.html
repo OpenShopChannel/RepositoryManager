@@ -1,8 +1,8 @@
-{% macro page(title, icon, endpoint) %}
+{% macro page(title, icon, endpoint, badge=None) %}
     <a href="{{ url_for(endpoint) }}"
        class="sidebar-link sidebar-link-with-icon {% if request.endpoint == endpoint %}active{% endif %}">
         <span class="sidebar-icon"><i class="fa {{ icon }}" aria-hidden="true"></i></span>
-        {{ title }}
+        {{ title }}{% if badge %}<span class="badge badge-pill badge-danger" style="margin-left: 5px;">{{ badge }}</span>{% endif %}
     </a>
 {% endmacro %}
 {% macro category(title) %}
@@ -23,7 +23,7 @@
         {{ page("Home", "fa-home", "admin.home") }}
         {{ page("Debug", "fa-bug", "admin.debug") }}
         {{ category('Moderation') }}
-        {{ page("Moderation", "fa-gavel", "admin.moderation") }}
+        {{ page("Moderation", "fa-gavel", "admin.moderation", notifications()["pending_moderation"]) }}
         {{ category('Repository') }}
         {{ page("Applications", "fa-rectangle-list", "admin.apps") }}
         {{ category('System') }}

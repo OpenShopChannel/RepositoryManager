@@ -4,6 +4,7 @@ import py7zr
 from flask import Flask
 
 import config
+import helpers
 import index
 import repository
 from admin.routes import admin
@@ -56,6 +57,7 @@ with app.app_context():
     index.initialize()
 
 app.jinja_env.globals.update(index=index.get)
+app.jinja_env.globals.update(notifications=helpers.notifications)
 
 
 @app.route('/')
