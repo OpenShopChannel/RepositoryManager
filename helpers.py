@@ -88,5 +88,5 @@ def app_index_directory_location(slug):
 
 def notifications():
     return {
-        "pending_moderation": str(ModeratedBinariesModel.query.filter_by(status='pending').count()) + " pending"
+        "pending_moderation": ModeratedBinariesModel.query.filter_by(status='pending').count()
     }
