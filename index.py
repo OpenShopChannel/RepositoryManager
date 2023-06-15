@@ -58,14 +58,17 @@ def update():
 
     # index the application manifests
     repo_index['contents'] = []
-    for file in os.listdir(os.path.join(config.REPO_DIR, 'contents')):
+    i = 0
+    files = os.listdir(os.path.join(config.REPO_DIR, 'contents'))
+    for file in files:
+        i += 1
         # check if the file is a .oscmeta file
         if file.endswith('.oscmeta'):
             # open the file
             with open(os.path.join(config.REPO_DIR, 'contents', file)) as f:
                 oscmeta = json.load(f)
 
-                log.log_status(f'Loaded {file}')
+                log.log_status(f'Loaded {file} ({i}/{len(files)})')
 
                 # add the slug to the oscmeta
                 oscmeta["information"]["slug"] = file.replace('.oscmeta', '')
