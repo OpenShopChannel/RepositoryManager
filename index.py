@@ -69,7 +69,7 @@ def update():
                 try:
                     oscmeta = json.load(f)
                 except Exception as e:
-                    log.log_status(f"Failed to parse JSON: \"{type(e).__name__}: {e}\"")
+                    log.log_status(f"Failed to parse JSON: \"{type(e).__name__}: {e}\"", 'error')
 
                 log.log_status(f'Loaded {file} ({i}/{len(files)})')
 
