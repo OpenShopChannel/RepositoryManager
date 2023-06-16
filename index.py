@@ -413,6 +413,8 @@ def update_application(oscmeta, log=logger.Log("application_update")):
                 oscmeta["index_computed_info"]["peripherals"] += "k"
             case "Wii Zapper":
                 oscmeta["index_computed_info"]["peripherals"] += "z"
+            case _:
+                log.log_status("  - Unknown peripheral: " + peripheral)
 
     # Create subdirectories list
     oscmeta["index_computed_info"]["subdirectories"] = []
