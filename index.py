@@ -212,6 +212,17 @@ def update_application(oscmeta, log=logger.Log("application_update")):
 
                                 log.log_status(f'  - Downloaded asset {asset["name"]}')
                                 break
+            case "sourceforge_release":
+                best_release = requests.get(
+                    f"https://sourceforge.net/projects/{oscmeta['source']['project']}/best_release.json").json()
+                log.log_status("- Successfully \"best release\" information from SourceForge")
+
+                archive_filename = os.path.join(temp_dir, oscmeta["information"]["slug"] + ".package")
+
+                # download the archive
+                with open(archive_filename, "wb") as f:
+                    f.write(requests.get(best_release["platform_releases"]["windows"]["url"]).content)
+                log.log_status(f"- Downloaded file \"{ best_release['release']['filename'] }\"")
             case "manual":
                 log.log_status(f'  - Manual source type, downloads will be handled by treatments')
             case _:
