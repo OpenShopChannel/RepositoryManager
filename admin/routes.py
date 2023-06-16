@@ -60,7 +60,7 @@ def logs():
 @admin.route('/moderation')
 @login_required
 def moderation():
-    return render_template('admin/moderation.html', mod_entries=ModeratedBinariesModel.query.all())
+    return render_template('admin/moderation.html', mod_entries=ModeratedBinariesModel.query.all()[::-1])
 
 
 @admin.route('/users')
