@@ -218,7 +218,7 @@ def update_application(oscmeta, log=logger.Log("application_update")):
             case "sourceforge_release":
                 best_release = requests.get(
                     f"https://sourceforge.net/projects/{oscmeta['source']['project']}/best_release.json").json()
-                log.log_status("- Successfully \"best release\" information from SourceForge")
+                log.log_status("- Successfully retrieved \"best release\" information from SourceForge")
 
                 archive_filename = os.path.join(temp_dir, oscmeta["information"]["slug"] + ".package")
 
@@ -307,17 +307,17 @@ def update_application(oscmeta, log=logger.Log("application_update")):
         moderation_entry = db.session.query(ModeratedBinariesModel).filter_by(checksum=file_hash).first()
         if moderation_entry:
             if moderation_entry.status == "approved":
-                log.log_status("  - Application binary is approved by moderation.")
+                log.log_status("  - Application binary is approved by moderation")
             elif moderation_entry.status == "pending":
-                log.log_status("  - Application binary is currently pending moderation.")
+                log.log_status("  - Application binary is currently pending moderation")
                 zip_up_application(temp_dir, os.path.join("data", "moderation", file_hash + ".zip"))
                 log.log_status("  - Updated moderation archive.")
-                raise Exception("Binary requires moderation.")
+                raise Exception("Binary requires moderation")
             elif moderation_entry.status == "rejected":
-                log.log_status("  - Application binary has been rejected by moderation.")
+                log.log_status("  - Application binary has been rejected by moderation")
                 zip_up_application(temp_dir, os.path.join("data", "moderation", file_hash + ".zip"))
-                log.log_status("  - Updated moderation archive.")
-                raise Exception("Binary rejected in moderation.")
+                log.log_status("  - Updated moderation archive")
+                raise Exception("Binary rejected in moderation")
         else:
             # Create a new entry in moderation table
             new_entry = ModeratedBinariesModel(
@@ -330,9 +330,9 @@ def update_application(oscmeta, log=logger.Log("application_update")):
             db.session.add(new_entry)
             db.session.commit()
 
-            log.log_status("  - Submitted application binary for moderation.")
+            log.log_status("  - Submitted application binary for moderation")
             zip_up_application(temp_dir, os.path.join("data", "moderation", file_hash + ".zip"))
-            log.log_status("  - Updated moderation archive.")
+            log.log_status("  - Updated moderation archive")
             raise Exception("Binary requires moderation.")
 
         # alright, we passed moderation!
