@@ -1,7 +1,9 @@
 import shutil
 
+import flask_migrate
 import py7zr
 from flask import Flask
+from flask_migrate import Migrate
 
 import config
 import helpers
@@ -34,6 +36,7 @@ app.secret_key = config.secret_key
 db.init_app(app)
 login.init_app(app)
 login.login_view = 'admin.login'
+migrate = Migrate(app, db)
 
 
 def pull_repo_and_update_index():
@@ -54,6 +57,7 @@ shutil.register_unpack_format("7z", [".7z"], py7zr.unpack_7zarchive)
 # before first request
 with app.app_context():
     db.create_all()
+    flask_migrate.upgrade("migrations")
     index.initialize()
 
 app.jinja_env.globals.update(index=index.get)
