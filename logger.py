@@ -22,14 +22,18 @@ class Log:
         log_signal.send(message)
 
     def save_log(self):
-        directory = 'logs'
-        if not os.path.exists(directory):
-            os.makedirs(directory)
+        try:
+            directory = 'logs'
+            if not os.path.exists(directory):
+                os.makedirs(directory)
 
-        filename = f"{self.name}-{self.timestamp}.log"
-        filepath = os.path.join(directory, filename)
-        with open(filepath, 'w') as file:
-            for timestamp, log_entry in self.log_lines.items():
-                file.write(f"{timestamp}: {log_entry}\n")
+            filename = f"{self.name}-{self.timestamp}.log"
+            filepath = os.path.join(directory, filename)
+            with open(filepath, 'w') as file:
+                for timestamp, log_entry in self.log_lines.items():
+                    file.write(f"{timestamp}: {log_entry}\n")
 
-        self.log_status("Saved copy of this log to file: " + filename)
+            self.log_status("Saved copy of this log to file: " + filename)
+        except NameError:
+            # Python is likely shutting down. We will abort log saving in this case.
+            pass
