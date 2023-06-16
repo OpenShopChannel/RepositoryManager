@@ -66,7 +66,10 @@ def update():
         if file.endswith('.oscmeta'):
             # open the file
             with open(os.path.join(config.REPO_DIR, 'contents', file)) as f:
-                oscmeta = json.load(f)
+                try:
+                    oscmeta = json.load(f)
+                except Exception as e:
+                    log.log_status(f"Failed to parse JSON: \"{type(e).__name__}: {e}\"")
 
                 log.log_status(f'Loaded {file} ({i}/{len(files)})')
 
