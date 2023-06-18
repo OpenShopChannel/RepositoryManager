@@ -13,6 +13,7 @@ REPO_DIR = "repository"
 
 # API access tokens
 GITHUB_TOKEN = ""
+ITCHIO_KEY = ""
 
 # Other settings
 SOCKETIO_CORS_ALLOWED_ORIGINS = "*"

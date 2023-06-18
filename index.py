@@ -218,14 +218,38 @@ def update_application(oscmeta, log=logger.Log("application_update")):
             case "sourceforge_release":
                 best_release = requests.get(
                     f"https://sourceforge.net/projects/{oscmeta['source']['project']}/best_release.json").json()
-                log.log_status("- Successfully retrieved \"best release\" information from SourceForge")
+                log.log_status("  - Successfully retrieved \"best release\" information from SourceForge")
 
                 archive_filename = os.path.join(temp_dir, oscmeta["information"]["slug"] + ".package")
 
                 # download the archive
                 with open(archive_filename, "wb") as f:
                     f.write(requests.get(best_release["platform_releases"]["windows"]["url"]).content)
-                log.log_status(f"- Downloaded file \"{ best_release['release']['filename'] }\"")
+                log.log_status(f"  - Downloaded file \"{ best_release['release']['filename'] }\"")
+            case "itchio":
+                game = requests.get(
+                    f"https://{oscmeta['source']['creator']}.itch.io/{oscmeta['source']['game']}/data.json").json()
+                log.log_status(f"  - Successfully found itch.io game \"{game['title']}\"")
+
+                log.log_status(f"  - Authenticating with itch.io")
+                uploads = requests.get(f"https://itch.io/api/1/{config.ITCHIO_KEY}/game/{game['id']}/uploads").json()
+
+                # find the specified file
+                found = False
+                for upload in uploads["uploads"]:
+                    if upload["display_name"] == oscmeta["source"]["upload"]:
+                        found = True
+                        log.log_status(f"  - Found upload with ID {upload['id']}")
+                        download = requests.get(f"https://itch.io/api/1/{config.ITCHIO_KEY}/upload/{upload['id']}/download").json()
+
+                        # download the archive
+                        archive_filename = os.path.join(temp_dir, oscmeta["information"]["slug"] + ".package")
+                        with open(archive_filename, "wb") as f:
+                            f.write(requests.get(download['url']).content)
+                        log.log_status(f"  - Downloaded upload \"{upload['filename']}\"")
+
+                if not found:
+                    raise Exception("Could not find itch.io upload")
             case "manual":
                 log.log_status(f'  - Manual source type, downloads will be handled by treatments')
             case _:
