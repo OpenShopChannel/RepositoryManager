@@ -18,6 +18,7 @@ import helpers
 import logger
 import treatments
 from models import db, ModeratedBinariesModel
+from scheduler import scheduler
 
 
 # why do we use IO instead of the database we already have set up?
@@ -44,6 +45,12 @@ def initialize():
 def update():
     log = logger.Log("index")
     log.log_status(f'Updating repository index')
+
+    # Print job details
+    for job in scheduler.get_jobs():
+        if job.id == "update":
+            log.log_status(f"Next Scheduled Index Run Time: {job.next_run_time}")
+
     repo_index = {}
 
     # index the repository.json file
