@@ -17,6 +17,7 @@ import config
 import helpers
 import logger
 import treatments
+from integrations.discord import send_webhook_message
 from models import db, ModeratedBinariesModel
 from scheduler import scheduler
 
@@ -360,6 +361,9 @@ def update_application(oscmeta, log=logger.Log("application_update")):
             )
             db.session.add(new_entry)
             db.session.commit()
+
+            send_webhook_message(config.DISCORD_MOD_WEBHOOK_URL, "New binary discovered and pending moderation!",
+                                 f"{oscmeta['information']['slug']}-{file_hash}")
 
             log.log_status("  - Submitted application binary for moderation")
             zip_up_application(temp_dir, os.path.join("data", "moderation", file_hash + ".zip"))

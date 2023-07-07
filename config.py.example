@@ -15,6 +15,10 @@ REPO_DIR = "repository"
 GITHUB_TOKEN = ""
 ITCHIO_KEY = ""
 
+# Discord webhooks
+ENABLE_DISCORD_WEBHOOKS = False
+DISCORD_MOD_WEBHOOK_URL = ""
+
 # Other settings
 SOCKETIO_CORS_ALLOWED_ORIGINS = "*"
 URL_DOWNLOAD_TIMEOUT = 60
