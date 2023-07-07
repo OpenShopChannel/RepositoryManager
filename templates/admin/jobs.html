@@ -1,0 +1,30 @@
+{% extends "admin/base.html" %}
+{% block content %}
+    <div class="content">
+        <h1 class="content-title font-size-22">
+            Scheduled Jobs
+        </h1>
+        <table class="table table-bordered table-hover table-striped">
+            <thead>
+            <tr>
+                <th></th>
+                <th>ID</th>
+                <th>Next Run Time</th>
+                <th>Function</th>
+                <th>Trigger</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for job in jobs %}
+                <tr>
+                    <th style="text-align: center"><i class="fa-solid fa-clock"></i></th>
+                    <th>{{ job.id }}</th>
+                    <th>{{ job.next_run_time }}</th>
+                    <th>{{ job.func_ref }}</th>
+                    <th>{{ job.trigger }}</th>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

@@ -69,6 +69,12 @@ def users():
     return render_template('admin/users.html', users=UserModel.query.all())
 
 
+@admin.route('/jobs')
+@login_required
+def jobs():
+    return render_template('admin/jobs.html', jobs=scheduler.get_jobs())
+
+
 @admin.route('/moderation/<checksum>/<action>')
 @login_required
 def moderation_action(checksum, action):
