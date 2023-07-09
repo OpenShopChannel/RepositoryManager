@@ -2,6 +2,7 @@ import hashlib
 import json
 import os
 import pathlib
+import re
 import shutil
 import time
 import zipfile
@@ -258,6 +259,40 @@ def update_application(oscmeta, log=logger.Log("application_update")):
 
                 if not found:
                     raise Exception("Could not find itch.io upload")
+            case "mediafire":
+                # mediafire does not have a proper downloads api, and so we will do a little bit of scraping
+                #
+                # thanks https://github.com/Juvenal-Yescas/mediafire-dl (MIT license) for some of
+                # the implementation details.
+
+                session = requests.session()
+                session.headers = {
+                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"
+                }
+
+                url = oscmeta['source']['location']
+
+                while True:
+                    res = session.get(url, stream=True)
+                    if 'Content-Disposition' in res.headers:
+                        break
+
+                    for line in res.text.splitlines():
+                        m = re.search(r'href="((http|https)://download[^"]+)', line)
+                        if m:
+                            url = m.groups()[0]
+                            break
+                    else:
+                        raise Exception("Permission denied on mediafire file download")
+
+                log.log_status("  - Successfully retrieved file location from MediaFire")
+                log.log_status(f'    - Location: {url}')
+
+                # download the archive
+                archive_filename = os.path.join(temp_dir, oscmeta["information"]["slug"] + ".package")
+                with open(archive_filename, "wb") as f:
+                    f.write(res.content)
+                log.log_status(f"  - Downloaded file from MediaFire successfully")
             case "manual":
                 log.log_status(f'  - Manual source type, downloads will be handled by treatments')
             case _:
