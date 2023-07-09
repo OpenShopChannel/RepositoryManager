@@ -1,17 +1,16 @@
 import hashlib
+import importlib
 import json
 import os
 import pathlib
-import re
 import shutil
+import sys
 import time
 import zipfile
 import tempfile
-import fnmatch
 from datetime import datetime
 
 import eventlet
-import requests
 import xmltodict
 
 import config
@@ -27,6 +26,21 @@ from scheduler import scheduler
 # because it's easier to manage. we don't need to worry about migrations, etc.
 # we can just use a simple JSON file to store the index! (SSD manufacturers hate this guy)
 # you might be wondering, "why do we use a database at all?", and the answer is "passwords, settings and analytics"
+
+
+def load_source_downloader(source_type):
+    module_path = os.path.join(sys.path[0], "sources", f"{source_type}.py")
+    if not os.path.isfile(module_path):
+        raise Exception(f"Unsupported source type: {source_type}")
+    spec = importlib.util.spec_from_file_location(source_type, module_path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+
+    SourceDownloader = getattr(module, "SourceDownloader", None)
+    if SourceDownloader is None:
+        raise Exception(f"Unsupported source type: {source_type}")
+
+    return SourceDownloader
 
 
 def initialize():
@@ -90,6 +104,10 @@ def update():
                     oscmeta["metaxml"] = update_application(oscmeta, log)
                 except (Exception, eventlet.timeout.Timeout) as e:
                     log.log_status(f'Failed to process {file}, moving on. ({type(e).__name__}: {e})', 'error')
+
+                    # we will sleep for a few moments because for some mysterious reason sometimes it skips log lines,
+                    # and the errors are pretty important to know about
+                    time.sleep(1)
 
                     # load the previous index file and set it to the current index for this app, to avoid losing it
                     with open(os.path.join('data', 'index.json')) as f:
@@ -164,139 +182,14 @@ def update_application(oscmeta, log=logger.Log("application_update")):
     with tempfile.TemporaryDirectory() as temp_dir:
         # download the application files
         log.log_status(f'- Downloading application files')
-        match oscmeta["source"]["type"]:
-            case "url":
-                url = oscmeta["source"]["location"]
 
-                headers = {"User-Agent": user_agent}
+        source_type = oscmeta["source"]["type"]
+        SourceDownloader = load_source_downloader(source_type)
+        downloader = SourceDownloader(oscmeta, temp_dir)
 
-                archive_filename = os.path.join(temp_dir, oscmeta["information"]["slug"] + ".package")
-                # download the file
-                with open(archive_filename, "wb") as f:
-                    with eventlet.Timeout(config.URL_DOWNLOAD_TIMEOUT):
-                        if "user-agent" in oscmeta["source"]:
-                            log.log_status(f'  - Using custom user-agent: {oscmeta["source"]["user-agent"]}')
-                        f.write(requests.get(url, headers=headers).content)
+        downloader.download_files()
 
-            case "github_release":
-                if config.GITHUB_TOKEN != "":
-                    # we have a token, let's use it
-                    log.log_status(f'  - Authenticating with GitHub')
-                    headers = {"Authorization": f"token {config.GITHUB_TOKEN}"}
-                else:
-                    log.log_status(f'  - No valid GitHub token found, using unauthenticated requests. '
-                                       f'Please configure a token in config.py')
-                    headers = {}
-
-                # fetch the latest release
-                url = f'https://api.github.com/repos/{oscmeta["source"]["repository"]}/releases/latest'
-                response = requests.get(url, headers=headers)
-
-                if response.status_code == 200:
-                    log.log_status(f'  - Successfully fetched latest release')
-                    assets = response.json()["assets"]
-
-                    # check if additional files are specified
-                    if "additional_files" in oscmeta["source"]:
-                        files = [oscmeta["source"]["file"]] + oscmeta["source"]["additional_files"]
-                    else:
-                        files = [oscmeta["source"]["file"]]
-
-                    for file in files:
-                        for asset in assets:
-                            # check if asset name matches pattern
-                            if fnmatch.fnmatch(asset["name"], file):
-                                log.log_status(f'  - Found asset {asset["name"]}')
-                                # download the asset
-                                url = asset["browser_download_url"]
-
-                                # check if archive
-                                if file == oscmeta["source"]["file"]:
-                                    archive_filename = os.path.join(temp_dir, oscmeta["information"]["slug"] + ".package")
-
-                                    # download the file
-                                    with open(archive_filename, "wb") as f:
-                                        f.write(requests.get(url).content)
-                                else:
-                                    # download the file
-                                    with open(os.path.join(temp_dir, file), "wb") as f:
-                                        f.write(requests.get(url).content)
-
-                                log.log_status(f'  - Downloaded asset {asset["name"]}')
-                                break
-            case "sourceforge_release":
-                best_release = requests.get(
-                    f"https://sourceforge.net/projects/{oscmeta['source']['project']}/best_release.json").json()
-                log.log_status("  - Successfully retrieved \"best release\" information from SourceForge")
-
-                archive_filename = os.path.join(temp_dir, oscmeta["information"]["slug"] + ".package")
-
-                # download the archive
-                with open(archive_filename, "wb") as f:
-                    f.write(requests.get(best_release["platform_releases"]["windows"]["url"]).content)
-                log.log_status(f"  - Downloaded file \"{ best_release['release']['filename'] }\"")
-            case "itchio":
-                game = requests.get(
-                    f"https://{oscmeta['source']['creator']}.itch.io/{oscmeta['source']['game']}/data.json").json()
-                log.log_status(f"  - Successfully found itch.io game \"{game['title']}\"")
-
-                log.log_status(f"  - Authenticating with itch.io")
-                uploads = requests.get(f"https://itch.io/api/1/{config.ITCHIO_KEY}/game/{game['id']}/uploads").json()
-
-                # find the specified file
-                found = False
-                for upload in uploads["uploads"]:
-                    if upload["display_name"] == oscmeta["source"]["upload"]:
-                        found = True
-                        log.log_status(f"  - Found upload with ID {upload['id']}")
-                        download = requests.get(f"https://itch.io/api/1/{config.ITCHIO_KEY}/upload/{upload['id']}/download").json()
-
-                        # download the archive
-                        archive_filename = os.path.join(temp_dir, oscmeta["information"]["slug"] + ".package")
-                        with open(archive_filename, "wb") as f:
-                            f.write(requests.get(download['url']).content)
-                        log.log_status(f"  - Downloaded upload \"{upload['filename']}\"")
-
-                if not found:
-                    raise Exception("Could not find itch.io upload")
-            case "mediafire":
-                # mediafire does not have a proper downloads api, and so we will do a little bit of scraping
-                #
-                # thanks https://github.com/Juvenal-Yescas/mediafire-dl (MIT license) for some of
-                # the implementation details.
-
-                session = requests.session()
-                session.headers = {
-                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"
-                }
-
-                url = oscmeta['source']['location']
-
-                while True:
-                    res = session.get(url, stream=True)
-                    if 'Content-Disposition' in res.headers:
-                        break
-
-                    for line in res.text.splitlines():
-                        m = re.search(r'href="((http|https)://download[^"]+)', line)
-                        if m:
-                            url = m.groups()[0]
-                            break
-                    else:
-                        raise Exception("Permission denied on mediafire file download")
-
-                log.log_status("  - Successfully retrieved file location from MediaFire")
-                log.log_status(f'    - Location: {url}')
-
-                # download the archive
-                archive_filename = os.path.join(temp_dir, oscmeta["information"]["slug"] + ".package")
-                with open(archive_filename, "wb") as f:
-                    f.write(res.content)
-                log.log_status(f"  - Downloaded file from MediaFire successfully")
-            case "manual":
-                log.log_status(f'  - Manual source type, downloads will be handled by treatments')
-            case _:
-                Exception("Unsupported source type")
+        archive_filename = os.path.join(temp_dir, oscmeta["information"]["slug"] + ".package")
 
         # extract the application files
         if oscmeta["source"]["type"] != "manual":
