@@ -185,7 +185,7 @@ def update_application(oscmeta, log=logger.Log("application_update")):
 
         source_type = oscmeta["source"]["type"]
         SourceDownloader = load_source_downloader(source_type)
-        downloader = SourceDownloader(oscmeta, temp_dir)
+        downloader = SourceDownloader(oscmeta, temp_dir, log)
 
         downloader.download_files()
 
