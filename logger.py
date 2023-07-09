@@ -14,12 +14,15 @@ class Log:
         self.save_log()
 
     def log_status(self, message, status='info'):
-        timestamp = datetime.datetime.now()
-        log_entry = f"[{status}] {message}"
-        self.log_lines[timestamp] = log_entry
-        print(log_entry)
+        try:
+            timestamp = datetime.datetime.now()
+            log_entry = f"[{status}] {message}"
+            self.log_lines[timestamp] = log_entry
+            print(log_entry)
 
-        log_signal.send(message)
+            log_signal.send(message)
+        except Exception as e:
+            print(f"Failed writing a log line: {e}")
 
     def save_log(self):
         try:
