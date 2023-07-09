@@ -8,8 +8,8 @@ from sources.base_source_downloader import BaseSourceDownloader
 
 
 class SourceDownloader(BaseSourceDownloader):
-    def __init__(self, oscmeta, temp_dir):
-        super().__init__(oscmeta, temp_dir)
+    def __init__(self, oscmeta, temp_dir, log):
+        super().__init__(oscmeta, temp_dir, log)
         self.response = None
         self.url = None
         self.headers = None
