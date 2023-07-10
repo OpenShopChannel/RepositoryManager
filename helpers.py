@@ -1,5 +1,7 @@
+import importlib
 import os
 import stat
+import sys
 
 import pygit2
 
@@ -90,3 +92,39 @@ def notifications():
     return {
         "pending_moderation": ModeratedBinariesModel.query.filter_by(status='pending').count()
     }
+
+
+def load_source_downloader(source_type):
+    module_path = os.path.join(sys.path[0], "sources", f"{source_type}.py")
+    if not os.path.isfile(module_path):
+        raise Exception(f"Unsupported source type: {source_type}")
+    spec = importlib.util.spec_from_file_location(source_type, module_path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+
+    SourceDownloader = getattr(module, "SourceDownloader", None)
+    if SourceDownloader is None:
+        raise Exception(f"Unsupported source type: {source_type}")
+
+    return SourceDownloader
+
+
+def get_available_source_downloader_details():
+    source_directory = "sources"
+    source_files = [f for f in os.listdir(source_directory) if f.endswith(".py") and f != "base_source_downloader.py"]
+
+    source_details = []
+    for source_file in source_files:
+        source_type = source_file[:-3]  # Remove the ".py" extension
+        SourceDownloader = load_source_downloader(source_type)
+
+        name = getattr(SourceDownloader, "name")
+        description = getattr(SourceDownloader, "description")
+
+        source_details.append({
+            "type": source_type,
+            "name": name,
+            "description": description
+        })
+
+    return source_details

@@ -8,6 +8,9 @@ from sources.base_source_downloader import BaseSourceDownloader
 
 
 class SourceDownloader(BaseSourceDownloader):
+    name = "GitHub Release Source Downloader"
+    description = "Downloads files from a GitHub release."
+
     def __init__(self, oscmeta, temp_dir, log):
         super().__init__(oscmeta, temp_dir, log)
         self.response = None

@@ -4,6 +4,9 @@ import logger
 
 
 class BaseSourceDownloader:
+    name = "Unknown Source Downloader"
+    description = "Source Downloaders download files from source."
+
     def __init__(self, oscmeta, temp_dir, log=logger.Log("source_downloader")):
         self.oscmeta = oscmeta
         self.temp_dir = temp_dir

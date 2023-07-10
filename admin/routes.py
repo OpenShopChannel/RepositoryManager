@@ -76,6 +76,12 @@ def jobs():
     return render_template('admin/jobs.html', jobs=scheduler.get_jobs())
 
 
+@admin.route('/sources')
+@login_required
+def sources():
+    return render_template('admin/sources.html', sources=helpers.get_available_source_downloader_details())
+
+
 @admin.route('/moderation/<checksum>/<action>')
 @login_required
 def moderation_action(checksum, action):

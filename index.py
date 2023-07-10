@@ -1,10 +1,8 @@
 import hashlib
-import importlib
 import json
 import os
 import pathlib
 import shutil
-import sys
 import time
 import zipfile
 import tempfile
@@ -26,21 +24,6 @@ from scheduler import scheduler
 # because it's easier to manage. we don't need to worry about migrations, etc.
 # we can just use a simple JSON file to store the index! (SSD manufacturers hate this guy)
 # you might be wondering, "why do we use a database at all?", and the answer is "passwords, settings and analytics"
-
-
-def load_source_downloader(source_type):
-    module_path = os.path.join(sys.path[0], "sources", f"{source_type}.py")
-    if not os.path.isfile(module_path):
-        raise Exception(f"Unsupported source type: {source_type}")
-    spec = importlib.util.spec_from_file_location(source_type, module_path)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-
-    SourceDownloader = getattr(module, "SourceDownloader", None)
-    if SourceDownloader is None:
-        raise Exception(f"Unsupported source type: {source_type}")
-
-    return SourceDownloader
 
 
 def initialize():
@@ -69,6 +52,12 @@ def update():
 
     repo_index = {}
 
+    # print available source downloaders
+    for details in helpers.get_available_source_downloader_details():
+        log.log_status(f"Loaded Source Type: {details['type']}")
+        log.log_status(f"- Name: {details['name']}")
+        log.log_status(f"- Description: {details['description']}")
+
     # index the repository.json file
     with open(os.path.join(config.REPO_DIR, 'repository.json')) as f:
         repo_info = json.load(f)
@@ -94,7 +83,7 @@ def update():
                 except Exception as e:
                     log.log_status(f"Failed to parse JSON: \"{type(e).__name__}: {e}\"", 'error')
 
-                log.log_status(f'Loaded {file} ({i}/{len(files)})')
+                log.log_status(f'Loaded Manifest: {file} ({i}/{len(files)})')
 
                 # add the slug to the oscmeta
                 oscmeta["information"]["slug"] = file.replace('.oscmeta', '')
@@ -184,7 +173,8 @@ def update_application(oscmeta, log=logger.Log("application_update")):
         log.log_status(f'- Downloading application files')
 
         source_type = oscmeta["source"]["type"]
-        SourceDownloader = load_source_downloader(source_type)
+        SourceDownloader = helpers.load_source_downloader(source_type)
+        log.log_status(f'  - Source type: {source_type}')
         downloader = SourceDownloader(oscmeta, temp_dir, log)
 
         downloader.download_files()

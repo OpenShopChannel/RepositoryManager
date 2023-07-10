@@ -6,6 +6,9 @@ from sources.base_source_downloader import BaseSourceDownloader
 
 
 class SourceDownloader(BaseSourceDownloader):
+    name = "URL Source Downloader"
+    description = "Downloads files from a URL source."
+
     def __init__(self, oscmeta, temp_dir, log):
         super().__init__(oscmeta, temp_dir, log)
         self.headers = None

@@ -2,6 +2,9 @@ from sources.base_source_downloader import BaseSourceDownloader
 
 
 class SourceDownloader(BaseSourceDownloader):
+    name = "Manual Source Downloader"
+    description = "Handles manual source type."
+
     def __init__(self, oscmeta, temp_dir, log):
         super().__init__(oscmeta, temp_dir, log)
 
