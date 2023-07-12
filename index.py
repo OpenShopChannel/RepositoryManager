@@ -1,9 +1,11 @@
 import hashlib
+import io
 import json
 import os
 import pathlib
 import shutil
 import time
+import traceback
 import zipfile
 import tempfile
 from datetime import datetime
@@ -93,6 +95,14 @@ def update():
                     oscmeta["metaxml"] = update_application(oscmeta, log)
                 except (Exception, eventlet.timeout.Timeout) as e:
                     log.log_status(f'Failed to process {file}, moving on. ({type(e).__name__}: {e})', 'error')
+
+                    # log the exception traceback into an individual error log
+                    error_log = logger.Log("exception-" + oscmeta["information"]["slug"])
+                    traceback_file = io.StringIO()
+                    traceback.print_exception(e, file=traceback_file)
+                    error_log.log_status(traceback_file.getvalue().rstrip(), silent=True)
+                    log.log_status("A traceback for this error will be saved as " + error_log.get_filename())
+                    del error_log
 
                     # we will sleep for a few moments because for some mysterious reason sometimes it skips log lines,
                     # and the errors are pretty important to know about

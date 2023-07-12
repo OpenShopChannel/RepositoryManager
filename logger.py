@@ -13,14 +13,18 @@ class Log:
     def __del__(self):
         self.save_log()
 
-    def log_status(self, message, status='info'):
+    def get_filename(self):
+        return f"{self.name}-{self.timestamp}.log"
+
+    def log_status(self, message, status='info', silent=False):
         try:
             timestamp = datetime.datetime.now()
             log_entry = f"[{status}] {message}"
             self.log_lines[timestamp] = log_entry
             print(log_entry)
 
-            log_signal.send(message)
+            if not silent:
+                log_signal.send(message)
         except Exception as e:
             print(f"Failed writing a log line: {e}")
 
@@ -30,13 +34,12 @@ class Log:
             if not os.path.exists(directory):
                 os.makedirs(directory)
 
-            filename = f"{self.name}-{self.timestamp}.log"
-            filepath = os.path.join(directory, filename)
+            filepath = os.path.join(directory, self.get_filename())
             with open(filepath, 'w') as file:
                 for timestamp, log_entry in self.log_lines.items():
                     file.write(f"{timestamp}: {log_entry}\n")
 
-            self.log_status("Saved copy of this log to file: " + filename)
+            self.log_status("Written log file to: " + self.get_filename())
         except NameError:
             # Python is likely shutting down. We will abort log saving in this case.
             pass
