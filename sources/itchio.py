@@ -25,15 +25,16 @@ class SourceDownloader(BaseSourceDownloader):
         # find the specified archive file and download it
         found = False
         for upload in self.uploads["uploads"]:
-            if upload["display_name"] == self.oscmeta["source"]["upload"]:
-                found = True
-                self.log.log_status(f"  - Found upload with ID {upload['id']}")
-                download = requests.get(
-                    f"https://itch.io/api/1/{config.ITCHIO_KEY}/upload/{upload['id']}/download").json()
+            if "display_name" in upload:
+                if upload["display_name"] == self.oscmeta["source"]["upload"]:
+                    found = True
+                    self.log.log_status(f"  - Found upload with ID {upload['id']}")
+                    download = requests.get(
+                        f"https://itch.io/api/1/{config.ITCHIO_KEY}/upload/{upload['id']}/download").json()
 
-                # download the archive
-                with open(self.archive_path, "wb") as f:
-                    f.write(requests.get(download['url']).content)
-                self.log.log_status(f"  - Downloaded upload \"{upload['filename']}\"")
+                    # download the archive
+                    with open(self.archive_path, "wb") as f:
+                        f.write(requests.get(download['url']).content)
+                    self.log.log_status(f"  - Downloaded upload \"{upload['filename']}\"")
         if not found:
             raise Exception("Could not find itch.io upload")
