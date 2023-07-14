@@ -9,7 +9,6 @@ def send_webhook_message(url, title, description, username="Repository Manager",
         try:
             data = {"content": message,
                     "username": username,
-                    "avatar_url": url_for('static', filename='assets/images/logo.png', _external=True),
                     "embeds": [
                         {
                             "description": description,
