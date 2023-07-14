@@ -19,5 +19,5 @@ def send_webhook_message(url, title, description, username="Repository Manager",
                     }
 
             requests.post(url, json=data)
-        except Exception:
-            pass
+        except Exception as e:
+            print("Could not send a discord webhook.", e)
