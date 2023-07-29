@@ -83,12 +83,12 @@ def apps_list():
         # Short Description
         content.add_line(app["metaxml"]["app"]["short_description"])
         # Long Description
-        try:
+        if "long_description" in app["metaxml"]["app"]:
             if len(app["metaxml"]["app"]["long_description"]) > 128:
                 content.add_line(app["metaxml"]["app"]["long_description"].replace('\n', ' ')[:128] + "...")
             else:
                 content.add_line(app["metaxml"]["app"]["long_description"].replace('\n', ' '))
-        except KeyError:
+        else:
             content.add_line(app["metaxml"]["app"]["short_description"])
     content.add_line(f"={current_category.capitalize()}=")
 
