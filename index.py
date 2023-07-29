@@ -162,6 +162,16 @@ def update_application(oscmeta, log=logger.Log("application_update")):
     # update the application contents in the index
     log.log_status(f'Updating application {oscmeta["information"]["slug"]}')
 
+    # check if application can be processed
+    # check if specified category is available
+    categories = []
+    for category in get()["categories"]:
+        if category["name"] not in categories:
+            categories.append(category["name"])
+    if oscmeta["information"]["category"] not in categories:
+        raise Exception("Category not supported by repository: " + oscmeta["information"]["category"])
+
+
     metadata = None
     app_directory = helpers.app_index_directory_location(oscmeta["information"]["slug"])
 
