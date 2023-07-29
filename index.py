@@ -63,8 +63,12 @@ def update():
     # index the repository.json file
     with open(os.path.join(config.REPO_DIR, 'repository.json')) as f:
         repo_info = json.load(f)
-
         repo_index['repository'] = repo_info
+
+    # index the categories.json file
+    with open(os.path.join(config.REPO_DIR, 'categories.json')) as f:
+        repo_categories = json.load(f)
+        repo_index['categories'] = repo_categories
 
     # create icons directory if it doesn't exist
     if not os.path.exists(os.path.join("data", "icons")):

@@ -48,6 +48,22 @@ def get_contents():
     return jsonify(contents)
 
 
+@api.get("/v3/information")
+def get_information():
+    repository = index.get()["repository"]
+
+    information = {
+        "name": repository["name"],
+        "provider": repository["provider"],
+        "description": repository["description"],
+        "available_categories": index.get()["categories"],
+        "available_apps_count": len(index.get()["contents"]),
+        "git_url": helpers.get_settings()['git_url']
+    }
+
+    return jsonify(information)
+
+
 @api.get("/v3/contents/<slug>/icon.png")
 def get_content_icon(slug):
     icon_path = os.path.join(helpers.app_index_directory_location(slug), "apps", slug, "icon.png")
