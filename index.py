@@ -35,6 +35,7 @@ def initialize():
         repo_index = {'repository': {'name': 'No repository configured',
                                      'provider': 'Open Shop Channel',
                                      'description': 'Please finish the setup process'},
+                      'categories': [],
                       'contents': []}
 
         if not os.path.exists('data'):
