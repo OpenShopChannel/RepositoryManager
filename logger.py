@@ -1,6 +1,8 @@
 import datetime
 import os
 
+import config
+from integrations.discord import send_webhook_message
 from scheduler import log_signal
 
 
@@ -40,6 +42,7 @@ class Log:
                     file.write(f"{timestamp}: {log_entry}\n")
 
             self.log_status("Written log file to: " + self.get_filename())
+            send_webhook_message(config.DISCORD_INFO_WEBHOOK_URL, "Produced new log file", self.get_filename())
         except NameError:
             # Python is likely shutting down. We will abort log saving in this case.
             pass

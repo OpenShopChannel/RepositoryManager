@@ -48,6 +48,8 @@ def update():
     log = logger.Log("index")
     log.log_status(f'Updating repository index')
 
+    send_webhook_message(config.DISCORD_INFO_WEBHOOK_URL, "Updating repository index", "Reindexing all applications...")
+
     # Print job details
     for job in scheduler.get_jobs():
         if job.id == "update":
@@ -99,7 +101,10 @@ def update():
                 try:
                     oscmeta["metaxml"] = update_application(oscmeta, log)
                 except (Exception, eventlet.timeout.Timeout) as e:
-                    log.log_status(f'Failed to process {file}, moving on. ({type(e).__name__}: {e})', 'error')
+                    error_message = f'Failed to process {file}, moving on. ({type(e).__name__}: {e})'
+                    log.log_status(error_message, 'error')
+
+                    send_webhook_message(config.DISCORD_ERROR_WEBHOOK_URL, "App index failure", error_message)
 
                     # log the exception traceback into an individual error log
                     error_log = logger.Log("exception-" + oscmeta["information"]["slug"])
