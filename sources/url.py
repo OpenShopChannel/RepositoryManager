@@ -37,4 +37,7 @@ class SourceDownloader(BaseSourceDownloader):
             with eventlet.Timeout(config.URL_DOWNLOAD_TIMEOUT):
                 if "user-agent" in self.oscmeta["source"]:
                     self.log.log_status(f'  - Using custom user-agent: {self.oscmeta["source"]["user-agent"]}')
-                f.write(requests.get(self.url, headers=self.headers).content)
+                response = requests.get(self.url, headers=self.headers)
+                if response.status_code != 200:
+                    raise ValueError(f"HTTP request failed with status code {response.status_code}")
+                f.write(response.content)
