@@ -44,102 +44,195 @@ def initialize():
             json.dump(repo_index, f)
 
 
+def get():
+    # open the index file
+    try:
+        with open(os.path.join('data', 'index.json')) as f:
+            return json.load(f)
+    except FileNotFoundError:
+        initialize()
+        return get()
+
+
+#
+# Code for index updating
+#
+
 def update():
     log = logger.Log("index")
-    log.log_status(f'Updating repository index')
 
+    log.log_status(f'Updating repository index')
     send_webhook_message(config.DISCORD_INFO_WEBHOOK_URL, "Updating repository index", "Reindexing all applications...")
 
     # Print job details
+    print_scheduled_job_details(log)
+
+    repo_index = {}
+
+    # Print available source downloaders
+    print_available_source_downloaders(log)
+
+    # Index repository and categories
+    index_repository(repo_index)
+    index_categories(repo_index)
+
+    # Index application manifests
+    index_app_manifests(repo_index, log)
+
+    # Write index to file
+    write_index_to_file(repo_index)
+
+    # Create HBB icon cache
+    create_hbb_icon_cache(repo_index, log)
+
+    # Print summary
+    print_index_summary(repo_index, log)
+
+    log.log_status(f'Finished updating repository index', 'success')
+    return repo_index
+
+
+def print_scheduled_job_details(log):
     for job in scheduler.get_jobs():
         if job.id == "update":
             log.log_status(f"Next Scheduled Index Run Time: {job.next_run_time}")
 
-    repo_index = {}
 
-    # print available source downloaders
-    for details in helpers.get_available_source_downloader_details():
-        log.log_status(f"Loaded Source Type: {details['type']}")
-        log.log_status(f"- Name: {details['name']}")
-        log.log_status(f"- Description: {details['description']}")
+def print_index_summary(repo_index, log):
+    # Get next index run time
+    next_run_time = "Unknown"
+    for job in scheduler.get_jobs():
+        if job.id == "update":
+            next_run_time = job.next_run_time
 
-    # index the repository.json file
+    # Count errors in log
+    errors = 0
+    for timestamp, line in log.log_lines.items():
+        if "[error]" in line:
+            errors += 1
+
+    # Total manifests
+    manifest_count = 0
+    files = os.listdir(os.path.join(config.REPO_DIR, 'contents'))
+    for file in files:
+        if file.endswith(".oscmeta"):
+            manifest_count += 1
+
+    index_summary = {
+        "Indexed Applications": len(repo_index["contents"]),
+        "Installed Manifests": manifest_count,
+        "Installed Sources": [f for f in os.listdir("sources") if
+                              f.endswith(".py") and f != "base_source_downloader.py"],
+        "Next Scheduled Index Run Time": str(next_run_time),
+        "Indexing Errors": errors
+    }
+
+    webhook_message = ""
+    log.log_status("** INDEX SUMMARY **")
+    for key, value in index_summary.items():
+        log.log_status(f"{key}: {value}")
+        webhook_message = webhook_message + f"**{key}:** {value}\n"
+
+    send_webhook_message(config.DISCORD_INFO_WEBHOOK_URL, "Index Summary", webhook_message)
+
+
+def print_available_source_downloaders(log):
+    for source_downloader in helpers.get_available_source_downloader_details():
+        log.log_status(f"Loaded Source Type: {source_downloader['type']}")
+        log.log_status(f"- Name: {source_downloader['name']}")
+        log.log_status(f"- Description: {source_downloader['description']}")
+
+
+def index_repository(repo_index):
     with open(os.path.join(config.REPO_DIR, 'repository.json')) as f:
         repo_info = json.load(f)
         repo_index['repository'] = repo_info
 
-    # index the categories.json file
+
+def index_categories(repo_index):
     with open(os.path.join(config.REPO_DIR, 'categories.json')) as f:
         repo_categories = json.load(f)
         repo_index['categories'] = repo_categories
 
-    # create icons directory if it doesn't exist
-    if not os.path.exists(os.path.join("data", "icons")):
-        os.makedirs(os.path.join("data", "icons"))
 
-    # index the application manifests
+def index_app_manifests(repo_index, log):
     repo_index['contents'] = []
+
     i = 0
     files = os.listdir(os.path.join(config.REPO_DIR, 'contents'))
     for file in files:
         i += 1
-        # check if the file is a .oscmeta file
         if file.endswith('.oscmeta'):
-            # open the file
-            with open(os.path.join(config.REPO_DIR, 'contents', file)) as f:
-                try:
-                    oscmeta = json.load(f)
-                except Exception as e:
-                    log.log_status(f"Failed to parse JSON: \"{type(e).__name__}: {e}\"", 'error')
+            log.log_status(f'Loading Manifest \"{file}\" for processing ({i}/{len(files)})')
+            process_oscmeta(file, repo_index, log)
 
-                log.log_status(f'Loaded Manifest: {file} ({i}/{len(files)})')
 
-                # add the slug to the oscmeta
-                oscmeta["information"]["slug"] = file.replace('.oscmeta', '')
+def process_oscmeta(file, repo_index, log):
+    with open(os.path.join(config.REPO_DIR, 'contents', file)) as f:
+        try:
+            oscmeta = json.load(f)
+        except Exception as e:
+            log.log_status(f"Failed to parse JSON: \"{type(e).__name__}: {e}\"", 'error')
+            return
 
-                # download application files to add to the index, and update the oscmeta with the obtained meta.xml
-                try:
-                    oscmeta["metaxml"] = update_application(oscmeta, log)
-                except (Exception, eventlet.timeout.Timeout) as e:
-                    error_message = f'Failed to process {file}, moving on. ({type(e).__name__}: {e})'
-                    log.log_status(error_message, 'error')
+        oscmeta["information"]["slug"] = file.replace('.oscmeta', '')
 
-                    send_webhook_message(config.DISCORD_ERROR_WEBHOOK_URL, "App index failure", error_message)
+        try:
+            # check if application can be updated
+            log.log_status(f'Checking if application can be updated')
+            # check if specified category is available
+            categories = []
+            for category in repo_index["categories"]:
+                if category["name"] not in categories:
+                    categories.append(category["name"])
+            if oscmeta["information"]["category"] not in categories:
+                raise Exception("Category not supported by repository: " + oscmeta["information"]["category"])
 
-                    # log the exception traceback into an individual error log
-                    error_log = logger.Log("exception-" + oscmeta["information"]["slug"])
-                    traceback_file = io.StringIO()
-                    traceback.print_exception(e, file=traceback_file)
-                    error_log.log_status(traceback_file.getvalue().rstrip(), silent=True)
-                    log.log_status("A traceback for this error will be saved as " + error_log.get_filename())
-                    del error_log
+            # update application
+            oscmeta["metaxml"] = update_application(oscmeta, log)
+        except (Exception, eventlet.timeout.Timeout) as e:
+            handle_application_update_failure(oscmeta, e, log, repo_index)
 
-                    # we will sleep for a few moments because for some mysterious reason sometimes it skips log lines,
-                    # and the errors are pretty important to know about
-                    time.sleep(1)
+        if "metaxml" in oscmeta:
+            repo_index['contents'].append(oscmeta)
 
-                    # load the previous index file and set it to the current index for this app, to avoid losing it
-                    with open(os.path.join('data', 'index.json')) as f:
-                        old_repo_index = json.load(f)
-                        for app in old_repo_index['contents']:
-                            if app["information"]["slug"] == oscmeta["information"]["slug"]:
-                                oscmeta = app
 
-                # add the oscmeta to the index if it includes a metaxml
-                if "metaxml" in oscmeta:
-                    repo_index['contents'].append(oscmeta)
+def handle_application_update_failure(oscmeta, error, log, repo_index):
+    error_message = f'Failed to process {oscmeta["information"]["slug"]}, moving on. ({type(error).__name__}: {error})'
+    log.log_status(error_message, 'error')
 
-    # write the index to the index file
+    send_webhook_message(config.DISCORD_ERROR_WEBHOOK_URL, "App index failure", error_message)
+
+    # Log the exception traceback into an individual error log
+    error_log = logger.Log("exception-" + oscmeta["information"]["slug"])
+    traceback_file = io.StringIO()
+    traceback.print_exception(error, file=traceback_file)
+    error_log.log_status(traceback_file.getvalue().rstrip(), silent=True)
+    log.log_status("A traceback for this error will be saved as " + error_log.get_filename())
+    del error_log
+
+    # We will sleep for a few moments because for some mysterious reason sometimes it skips log lines,
+    # and the errors are pretty important to know about
+    time.sleep(1)
+
+    # Load the previous index file and set it to the current index for this app, to avoid losing it
+    with open(os.path.join('data', 'index.json')) as f:
+        old_repo_index = json.load(f)
+        for app in old_repo_index['contents']:
+            if app["information"]["slug"] == oscmeta["information"]["slug"]:
+                oscmeta = app
+
+    # Add the oscmeta to the index if it includes a metaxml
+    if "metaxml" in oscmeta:
+        repo_index['contents'].append(oscmeta)
+
+
+def write_index_to_file(repo_index):
     with open(os.path.join('data', 'index.json'), 'w') as f:
         json.dump(repo_index, f)
 
-    # remove the icons zip if it exists
-    if os.path.exists(os.path.join("data", "icons.zip")):
-        os.remove(os.path.join("data", "icons.zip"))
 
-    # put all icons into a zip file called icons.zip
-    # this will be used for the icon cache that the HBB downloads
-    log.log_status(f'Creating HBB icon cache')
+def create_hbb_icon_cache(repo_index, log):
     if not os.path.exists(os.path.join("data", "icons")):
         os.makedirs(os.path.join("data", "icons"))
 
@@ -148,35 +241,17 @@ def update():
                                  oscmeta["information"]["slug"], "icon.png"),
                     os.path.join("data", "icons", oscmeta["information"]["slug"] + ".png"))
 
-    with zipfile.ZipFile(os.path.join("data", "icons.zip"), "w") as zipf:
-        for file in os.listdir(os.path.join("data", "icons")):
-            zipf.write(os.path.join("data", "icons", file), file)
+    def create_icon_zip():
+        with zipfile.ZipFile(os.path.join("data", "icons.zip"), "w") as zipf:
+            for file in os.listdir(os.path.join("data", "icons")):
+                zipf.write(os.path.join("data", "icons", file), file)
 
     shutil.rmtree(os.path.join("data", "icons"))
-
-    log.log_status(f'Finished updating repository index', 'success')
-    return repo_index
-
-
-def get():
-    # open the index file
-    with open(os.path.join('data', 'index.json')) as f:
-        return json.load(f)
 
 
 def update_application(oscmeta, log=logger.Log("application_update")):
     # update the application contents in the index
     log.log_status(f'Updating application {oscmeta["information"]["slug"]}')
-
-    # check if application can be processed
-    # check if specified category is available
-    categories = []
-    for category in get()["categories"]:
-        if category["name"] not in categories:
-            categories.append(category["name"])
-    if oscmeta["information"]["category"] not in categories:
-        raise Exception("Category not supported by repository: " + oscmeta["information"]["category"])
-
 
     metadata = None
     app_directory = helpers.app_index_directory_location(oscmeta["information"]["slug"])
