@@ -29,19 +29,16 @@ from scheduler import scheduler
 
 
 def initialize():
-    # check if an index file exists
-    if not os.path.exists(os.path.join('data', 'index.json')):
-        # create an empty index file
-        repo_index = {'repository': {'name': 'No repository configured',
-                                     'provider': 'Open Shop Channel',
-                                     'description': 'Please finish the setup process'},
-                      'categories': [],
-                      'contents': []}
-
-        if not os.path.exists('data'):
-            os.mkdir('data')
-        with open(os.path.join('data', 'index.json'), 'w') as f:
-            json.dump(repo_index, f)
+    # create an empty index file
+    repo_index = {'repository': {'name': 'No repository configured',
+                                 'provider': 'Open Shop Channel',
+                                 'description': 'Please finish the setup process'},
+                  'categories': [],
+                  'contents': []}
+    if not os.path.exists('data'):
+        os.mkdir('data')
+    with open(os.path.join('data', 'index.json'), 'w') as f:
+        json.dump(repo_index, f)
 
 
 def get():
@@ -63,9 +60,6 @@ def update():
 
     log.log_status(f'Updating repository index')
     send_webhook_message(config.DISCORD_INFO_WEBHOOK_URL, "Updating repository index", "Reindexing all applications...")
-
-    # Print job details
-    print_scheduled_job_details(log)
 
     repo_index = {}
 
@@ -90,12 +84,6 @@ def update():
 
     log.log_status(f'Finished updating repository index', 'success')
     return repo_index
-
-
-def print_scheduled_job_details(log):
-    for job in scheduler.get_jobs():
-        if job.id == "update":
-            log.log_status(f"Next Scheduled Index Run Time: {job.next_run_time}")
 
 
 def print_index_summary(repo_index, log):
@@ -190,11 +178,63 @@ def process_oscmeta(file, repo_index, log):
 
             # update application
             oscmeta["metaxml"] = update_application(oscmeta, log)
+
+            # announce update to catalog webhook if relevant
+            announce_to_catalog(oscmeta, repo_index, log)
+
         except (Exception, eventlet.timeout.Timeout) as e:
             handle_application_update_failure(oscmeta, e, log, repo_index)
 
         if "metaxml" in oscmeta:
             repo_index['contents'].append(oscmeta)
+
+
+def announce_to_catalog(oscmeta, repo_index, log):
+    log.log_status("- Announcing application update to catalog")
+    # Load the existing index file
+    old_oscmeta = None
+    with open(os.path.join('data', 'index.json')) as f:
+        old_repo_index = json.load(f)
+        for app in old_repo_index['contents']:
+            if app["information"]["slug"] == oscmeta["information"]["slug"]:
+                old_oscmeta = app
+
+    difference = "same"
+    if old_oscmeta is not None:
+        if old_oscmeta["index_computed_info"]["md5_hash"] != oscmeta["index_computed_info"]["md5_hash"]:
+            difference = "new_binary"
+        if old_oscmeta["metaxml"]["app"]["version"] != oscmeta["metaxml"]["app"]["version"]:
+            difference = "new_version"
+    else:
+        if len(old_repo_index['contents']) == 0:
+            difference = "first_run"
+        else:
+            difference = "new_app"
+
+    webhook_username = repo_index["repository"]["name"]
+
+    match difference:
+        case "same":
+            log.log_status("  - No Change")
+        case "first_run":
+            log.log_status("  - First Index")
+        case "new_binary":
+            log.log_status("  - New Binary")
+            send_webhook_message(config.DISCORD_CATALOG_WEBHOOK_URL, "New Update!",
+                                 f"{oscmeta['metaxml']['app']['name']} has been updated",
+                                 webhook_username)
+        case "new_version":
+            log.log_status("  - New Version")
+            send_webhook_message(config.DISCORD_CATALOG_WEBHOOK_URL, "New Update!",
+                                 f"{oscmeta['metaxml']['app']['name']} has been updated "
+                                 f"from {old_oscmeta['metaxml']['app']['version']} "
+                                 f"to {oscmeta['metaxml']['app']['version']}",
+                                 webhook_username)
+        case "new_app":
+            log.log_status("  - New Application")
+            send_webhook_message(config.DISCORD_CATALOG_WEBHOOK_URL, "New Application!",
+                                 f"{oscmeta['metaxml']['app']['name']} has been added to the repository",
+                                 webhook_username)
 
 
 def handle_application_update_failure(oscmeta, error, log, repo_index):
@@ -232,7 +272,7 @@ def write_index_to_file(repo_index):
         json.dump(repo_index, f)
 
 
-def create_hbb_icon_cache(repo_index, log):
+def create_hbb_icon_cache(repo_index):
     if not os.path.exists(os.path.join("data", "icons")):
         os.makedirs(os.path.join("data", "icons"))
 
@@ -241,10 +281,9 @@ def create_hbb_icon_cache(repo_index, log):
                                  oscmeta["information"]["slug"], "icon.png"),
                     os.path.join("data", "icons", oscmeta["information"]["slug"] + ".png"))
 
-    def create_icon_zip():
-        with zipfile.ZipFile(os.path.join("data", "icons.zip"), "w") as zipf:
-            for file in os.listdir(os.path.join("data", "icons")):
-                zipf.write(os.path.join("data", "icons", file), file)
+    with zipfile.ZipFile(os.path.join("data", "icons.zip"), "w") as zipf:
+        for file in os.listdir(os.path.join("data", "icons")):
+            zipf.write(os.path.join("data", "icons", file), file)
 
     shutil.rmtree(os.path.join("data", "icons"))
 
@@ -351,7 +390,7 @@ def update_application(oscmeta, log=logger.Log("application_update")):
                                              "boot." + oscmeta["index_computed_info"][
                                                  "package_type"]).read_bytes()).hexdigest()
 
-        oscmeta["index_computed_info"]["binary_size"] = file_hash
+        oscmeta["index_computed_info"]["md5_hash"] = file_hash
 
         # time for moderation!
         log.log_status("- Checking moderation status")
