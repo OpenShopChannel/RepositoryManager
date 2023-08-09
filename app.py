@@ -1,3 +1,4 @@
+import os
 import shutil
 
 import flask_migrate
@@ -58,7 +59,10 @@ with app.app_context():
     # Prepare flask app
     db.create_all()
     flask_migrate.upgrade("migrations")
-    index.initialize()
+
+    # check if an index file exists
+    if not os.path.exists(os.path.join('data', 'index.json')):
+        index.initialize()
 
 app.jinja_env.globals.update(index=index.get)
 app.jinja_env.globals.update(notifications=helpers.notifications)
