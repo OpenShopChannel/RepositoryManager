@@ -137,6 +137,9 @@ def debug_action(action):
     elif action == 'update_index':
         index.update()
         flash('Successfully updated index', 'success')
+    elif action == 'reset_index':
+        index.initialize()
+        flash('Successfully reset index', 'success')
     return redirect(url_for('admin.debug'))
 
 
