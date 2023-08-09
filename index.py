@@ -77,7 +77,7 @@ def update():
     write_index_to_file(repo_index)
 
     # Create HBB icon cache
-    create_hbb_icon_cache(repo_index, log)
+    create_hbb_icon_cache(repo_index)
 
     # Print summary
     print_index_summary(repo_index, log)
