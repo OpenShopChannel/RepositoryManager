@@ -15,3 +15,4 @@ blinker~=1.6.2
 Flask-SocketIO~=5.3.4
 gevent-websocket~=0.10.1
 eventlet~=0.33.3
+unrar~=0.4

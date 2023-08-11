@@ -328,7 +328,18 @@ def update_application(oscmeta, log=logger.Log("application_update")):
         # extract the application files
         if oscmeta["source"]["type"] != "manual":
             log.log_status('- Extracting application files')
-            shutil.unpack_archive(archive_filename, temp_dir, oscmeta["source"]["format"])
+            if oscmeta["source"]["format"] != "rar":
+                shutil.unpack_archive(archive_filename, temp_dir, oscmeta["source"]["format"])
+            else:
+                try:
+                    # use unrar instead
+                    from unrar import rarfile
+
+                    rar = rarfile.RarFile(archive_filename)
+                    rar.extractall(temp_dir)
+                except LookupError:
+                    raise ImportError("For RAR support, the unrar library must be installed on the system. "
+                                      "https://www.rarlab.com/rar_add.htm")
             os.remove(archive_filename)
 
         log.log_status(f'- Applying Treatments:')
