@@ -27,3 +27,4 @@ SOCKETIO_CORS_ALLOWED_ORIGINS = "*"
 URL_DOWNLOAD_TIMEOUT = 60
 USER_AGENT = "This is a user agent string"
 SECRET_USER_AGENTS = {"fake string": "actual string"}
+UNRAR_LIB_PATH = None  # Set to None to look up automatically

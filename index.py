@@ -333,6 +333,8 @@ def update_application(oscmeta, log=logger.Log("application_update")):
             else:
                 try:
                     # use unrar instead
+                    if config.UNRAR_LIB_PATH is not None:
+                        os.environ["UNRAR_LIB_PATH"] = config.UNRAR_LIB_PATH
                     from unrar import rarfile
 
                     rar = rarfile.RarFile(archive_filename)
