@@ -370,7 +370,11 @@ def update_application(oscmeta, log=logger.Log("application_update")):
 
         # we will check if all files are in the location they are expected to be in
         if not os.path.exists(os.path.join(temp_dir, 'apps', oscmeta["information"]["slug"], "icon.png")):
-            raise Exception("Couldn't find icon.png file.")
+            # move the placeholder icon.png there instead
+            log.log_status("- icon.png is missing. Using placeholder instead.")
+            shutil.copy(os.path.join('static', 'assets', 'images', 'missing.png'),
+                        os.path.join(temp_dir, 'apps', oscmeta["information"]["slug"], "icon.png"))
+
         if not os.path.exists(os.path.join(temp_dir, 'apps', oscmeta["information"]["slug"], "meta.xml")):
             raise Exception("Couldn't find meta.xml file.")
 
