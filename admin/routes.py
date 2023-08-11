@@ -92,7 +92,7 @@ def moderation_action(checksum, action):
             moderation_entry.moderated_by = current_user.id
             moderation_entry.modified_date = datetime.datetime.now()
             db.session.commit()
-            send_webhook_message(config.DISCORD_MOD_WEBHOOK_URL, "Binary approved by moderation",
+            send_webhook_message(config.DISCORD_MOD_WEBHOOK_URL, "Version approved by moderation",
                                  f"{moderation_entry.app_slug}-{moderation_entry.checksum}\n"
                                  f"This application will be available for download starting with the next re-index.")
             flash(f'Approved \"{moderation_entry.app_slug}-{checksum}\"', 'success')
@@ -101,7 +101,7 @@ def moderation_action(checksum, action):
             moderation_entry.moderated_by = current_user.id
             moderation_entry.modified_date = datetime.datetime.now()
             db.session.commit()
-            send_webhook_message(config.DISCORD_MOD_WEBHOOK_URL, "Binary rejected by moderation",
+            send_webhook_message(config.DISCORD_MOD_WEBHOOK_URL, "Version rejected by moderation",
                                  f"{moderation_entry.app_slug}-{moderation_entry.checksum}\n"
                                  f"Consider removing {moderation_entry.app_slug}.oscmeta from repository.")
             flash(f'Rejected \"{moderation_entry.app_slug}-{checksum}\"', 'danger')

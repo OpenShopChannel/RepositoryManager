@@ -441,7 +441,7 @@ def update_application(oscmeta, log=logger.Log("application_update")):
             db.session.add(new_entry)
             db.session.commit()
 
-            send_webhook_message(config.DISCORD_MOD_WEBHOOK_URL, "New binary discovered and pending moderation!",
+            send_webhook_message(config.DISCORD_MOD_WEBHOOK_URL, "New version discovered and pending moderation!",
                                  f"{oscmeta['information']['slug']}-{file_hash}")
 
             log.log_status("  - Submitted application binary for moderation")
