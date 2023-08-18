@@ -22,9 +22,13 @@ DISCORD_CATALOG_WEBHOOK_URL = ""
 DISCORD_INFO_WEBHOOK_URL = ""
 DISCORD_ERROR_WEBHOOK_URL = ""
 
+# Sentry
+SENTRY_DSN = ""  # Keep empty to disable use of Sentry, otherwise specify DSN.
+SENTRY_TRACES_SAMPLE_RATE = 1.0  # Recommended to lower from default of 1.0 on production
+
 # Other settings
 SOCKETIO_CORS_ALLOWED_ORIGINS = "*"
 URL_DOWNLOAD_TIMEOUT = 60
 USER_AGENT = "This is a user agent string"
 SECRET_USER_AGENTS = {"fake string": "actual string"}
-UNRAR_LIB_PATH = None  # Set to None to look up automatically
+UNRAR_LIB_PATH = ""  # Keep empty to look up automatically

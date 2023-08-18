@@ -5,6 +5,8 @@ import flask_migrate
 import py7zr
 from flask import Flask
 from flask_migrate import Migrate
+import sentry_sdk
+from sentry_sdk.integrations.flask import FlaskIntegration
 
 import config
 import helpers
@@ -16,6 +18,15 @@ from hbb.routes import hbb
 from models import db, login
 from scheduler import scheduler, socketio
 from setup.routes import setup
+
+if config.SENTRY_DSN:
+    sentry_sdk.init(
+        dsn=config.SENTRY_DSN,
+        integrations=[
+            FlaskIntegration(),
+        ],
+        traces_sample_rate=config.SENTRY_TRACES_SAMPLE_RATE
+    )
 
 app = Flask(__name__)
 socketio.init_app(app, cors_allowed_origins=config.SOCKETIO_CORS_ALLOWED_ORIGINS)
