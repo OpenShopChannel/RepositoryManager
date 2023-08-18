@@ -153,6 +153,7 @@ def index_app_manifests(repo_index, log):
         if file.endswith('.oscmeta'):
             log.log_status(f'Loading Manifest \"{file}\" for processing ({i}/{len(files)})')
             process_oscmeta(file, repo_index, log)
+    log.log_status(f'Finished indexing application manifests')
 
 
 def process_oscmeta(file, repo_index, log):
@@ -463,13 +464,15 @@ def update_application(oscmeta, log=logger.Log("application_update")):
     # create the zip file
     zip_up_application(app_directory, os.path.join("data", "contents", oscmeta["information"]["slug"] + ".zip"))
 
+    log.log_status(f'- Reading application metadata')
+
     # open the metadata file
     with open(os.path.join(app_directory, 'apps', oscmeta["information"]["slug"], "meta.xml")) as f:
         # convert the metadata to JSON
         metadata = json.loads(json.dumps(xmltodict.parse(f.read())))
 
     # time for determining some extra information needed by API and Homebrew Browser, and adding to index
-    log.log_status(f'- Retrieving Extra Information')
+    log.log_status(f'- Computing information')
 
     # determine release date timestamp and add it to the oscmeta file
     if ("release_date" in metadata["app"]) and (metadata["app"]["release_date"] is not None):
