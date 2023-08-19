@@ -15,6 +15,8 @@ def get_contents():
         # Ensure all required fields are present
         if "long_description" not in content["metaxml"]["app"]:
             content["metaxml"]["app"]["long_description"] = "No description provided."
+        if "short_description" not in content["metaxml"]["app"]:
+            content["metaxml"]["app"]["short_description"] = "No description provided."
         if "coder" not in content["metaxml"]["app"]:
             content["metaxml"]["app"]["coder"] = content["information"]["author"]
 

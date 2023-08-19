@@ -81,7 +81,11 @@ def apps_list():
         # Extracted Size
         content.add_line(str(app["index_computed_info"]["uncompressed_size"]))
         # Short Description
-        content.add_line(app["metaxml"]["app"]["short_description"])
+        if "short_description" in app["metaxml"]["app"]:
+            content.add_line(app["metaxml"]["app"]["short_description"])
+        else:
+            content.add_line("No description provided.")
+
         # Long Description
         if ("long_description" in app["metaxml"]["app"]) and (app["metaxml"]["app"]["long_description"] is not None):
             if len(app["metaxml"]["app"]["long_description"]) > 128:
@@ -89,7 +93,10 @@ def apps_list():
             else:
                 content.add_line(app["metaxml"]["app"]["long_description"].replace('\n', ' '))
         else:
-            content.add_line(app["metaxml"]["app"]["short_description"])
+            if "short_description" in app["metaxml"]["app"]:
+                content.add_line(app["metaxml"]["app"]["short_description"])
+            else:
+                content.add_line("No description provided.")
     content.add_line(f"={current_category.capitalize()}=")
 
     return content.response
