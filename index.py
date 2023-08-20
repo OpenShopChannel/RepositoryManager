@@ -554,7 +554,7 @@ def zip_up_application(source, destination):
     # Create the destination directory if it doesn't exist
     os.makedirs(os.path.dirname(destination), exist_ok=True)
 
-    with zipfile.ZipFile(destination, 'w', compression=zipfile.ZIP_DEFLATED, compresslevel=9) as zip_ref:
+    with zipfile.ZipFile(destination, 'w', compression=zipfile.ZIP_DEFLATED, compresslevel=6) as zip_ref:
         # iterate through the files starting at the app directory
         for root, dirs, files in os.walk(source):
             # iterate through the files
