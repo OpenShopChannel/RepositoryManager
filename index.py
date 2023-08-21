@@ -116,7 +116,7 @@ def print_index_summary(repo_index, log):
     }
 
     webhook_message = ""
-    log.log_status("** INDEX SUMMARY **")
+    log.log_status("** INDEX SUMMARY **", status="title")
     for key, value in index_summary.items():
         log.log_status(f"{key}: {value}")
         webhook_message = webhook_message + f"**{key}:** {value}\n"
@@ -151,9 +151,9 @@ def index_app_manifests(repo_index, log):
     for file in files:
         i += 1
         if file.endswith('.oscmeta'):
-            log.log_status(f'Loading Manifest \"{file}\" for processing ({i}/{len(files)})')
+            log.log_status(f'Loading Manifest \"{file}\" for processing ({i}/{len(files)})', status='title')
             process_oscmeta(file, repo_index, log)
-    log.log_status(f'Finished indexing application manifests')
+    log.log_status(f'Finished indexing application manifests', status='success')
 
 
 def process_oscmeta(file, repo_index, log):

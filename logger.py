@@ -25,8 +25,13 @@ class Log:
             self.log_lines[timestamp] = log_entry
             print(log_entry)
 
+            line = {
+                "message": message,
+                "status": status
+            }
+
             if not silent:
-                log_signal.send(message)
+                log_signal.send(line)
         except Exception as e:
             print(f"Failed writing a log line: {e}")
 
