@@ -17,3 +17,4 @@ gevent-websocket~=0.10.1
 eventlet~=0.33.3
 unrar~=0.4
 sentry-sdk[flask]~=1.29.2
+Pillow~=9.5.0

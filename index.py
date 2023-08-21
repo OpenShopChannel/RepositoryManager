@@ -9,6 +9,7 @@ import traceback
 import zipfile
 import tempfile
 from datetime import datetime
+from PIL import Image
 
 import eventlet
 import xmltodict
@@ -391,6 +392,12 @@ def update_application(oscmeta, log=logger.Log("application_update")):
 
         if not os.path.exists(os.path.join(temp_dir, 'apps', oscmeta["information"]["slug"], "meta.xml")):
             raise Exception("Couldn't find meta.xml file.")
+
+        # Re-encode icon.png to ensure consistent format and encoding
+        log.log_status("- Re-encoding icon.png")
+        img = Image.open(os.path.join(temp_dir, 'apps', oscmeta["information"]["slug"], "icon.png"))
+        img.save(os.path.join(temp_dir, 'apps', oscmeta["information"]["slug"], "icon.png"))
+        img.close()
 
         # create a dictionary for extra stuff
         oscmeta["index_computed_info"] = {}
