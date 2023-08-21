@@ -1,7 +1,9 @@
 import os
 
 from flask import Blueprint, request, abort, send_file
+from urllib.parse import urlparse
 
+import config
 import helpers
 import index
 from hbb.normalize import Normalize
@@ -159,27 +161,30 @@ def register_download():
     return ""
 
 
-#@hbb.route('/hbb/repo_list.txt')
-#def repo_list():
-#    """
-#    Returns a list of all the repos in the homebrew browser repos list format.
-#    """
-#    repos: [ReposModel] = ReposModel.query.all()
-#
-#    # Add our version, "1", to the response.
-#    content = Normalize()
-#    content.add_line("1")
-#
-#    for repo in repos:
-#        # Repo's name
-#        content.add_line(repo.name)
-#        # Repo's host
-#        content.add_line(repo.host)
-#        # Repo's contents
-#        content.add_line("/hbb/homebrew_browser/listv036.txt")
-#        # Repo's subdirectory
-#        content.add_line("/hbb/")
-#
-#    return content.response
-#
-#
+@hbb.route('/hbb/repo_list.txt')
+def repo_list():
+    """
+        Returns a list of all the repos in the homebrew browser repos list format.
+    """
+    if config.SERVE_REPO_LIST_FILE:
+        #repos: [ReposModel] = ReposModel.query.all()
+
+        # Add our version, "1", to the response.
+        content = Normalize()
+        content.add_line("1")
+
+        #for repo in repos:
+        # Repo's name
+        content.add_line(index.get()["repository"]["name"])
+        # Repo's host
+        content.add_line(urlparse(request.base_url).hostname)
+        # Repo's contents
+        content.add_line("/hbb/homebrew_browser/listv036.txt")
+        # Repo's subdirectory
+        content.add_line("/hbb/")
+
+        return content.response
+    else:
+        return abort(404)
+
+

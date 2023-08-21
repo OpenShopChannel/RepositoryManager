@@ -15,6 +15,9 @@ REPO_DIR = "repository"
 GITHUB_TOKEN = ""
 ITCHIO_KEY = ""
 
+# Homebrw Browser Support
+SERVE_REPO_LIST_FILE = True  # Enable this only if the Homebrew Browser is expected to *directly* connect to this repository. If enabled, repositories must be set on admin page.
+
 # Discord webhooks
 ENABLE_DISCORD_WEBHOOKS = False
 DISCORD_MOD_WEBHOOK_URL = ""
