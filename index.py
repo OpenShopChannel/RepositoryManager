@@ -486,15 +486,10 @@ def update_application(oscmeta, log=logger.Log("application_update")):
             except ValueError:
                 continue
         else:
-            # We will obtain the timestamp from the boot.dol creation date
-            boot_path = os.path.join(app_directory, 'apps', oscmeta["information"]["slug"],
-                                     "boot." + oscmeta["index_computed_info"]["package_type"])
-            timestamp = datetime.fromtimestamp(os.path.getmtime(boot_path))
+            # Replace the boot.dol creation date with a fixed timestamp of 0
+            timestamp = datetime.utcfromtimestamp(0)  # Set timestamp to January 1, 1970
     else:
-        # We will obtain the timestamp from the boot.dol creation date
-        boot_path = os.path.join(app_directory, 'apps', oscmeta["information"]["slug"],
-                                 "boot." + oscmeta["index_computed_info"]["package_type"])
-        timestamp = datetime.fromtimestamp(os.path.getmtime(boot_path))
+        timestamp = datetime.utcfromtimestamp(0)
 
     timestamp = int(time.mktime(timestamp.timetuple()))
 
