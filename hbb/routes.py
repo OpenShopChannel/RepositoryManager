@@ -158,7 +158,9 @@ def get_content_zip(slug, _slug):
 def get_content_xml(slug, _slug):
     xml_path = os.path.join(helpers.app_index_directory_location(slug), "apps", slug, "meta.xml")
     if os.path.exists(xml_path):
-        return send_file(xml_path, download_name="meta.xml")
+        response = send_file(xml_path, download_name="meta.xml")
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        return response
     else:
         abort(404)
 
