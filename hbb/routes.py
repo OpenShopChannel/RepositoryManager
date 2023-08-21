@@ -127,6 +127,14 @@ def update_rating():
     return "5"
 
 
+@hbb.route('/hbb/apps_check_new.php')
+def apps_check_new():
+    """
+    Check for new apps
+    """
+    return "0 0"
+
+
 @hbb.get("/hbb/<slug>/icon.png")
 @hbb.get("/hbb/<slug>.png")
 def get_content_icon(slug):
