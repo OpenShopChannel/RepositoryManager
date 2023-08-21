@@ -165,6 +165,15 @@ def get_content_xml(slug, _slug):
         abort(404)
 
 
+@hbb.get("/unzipped_apps/<slug>/apps/<_slug>/boot.<binary_type>")
+def get_content_binary(slug, _slug, binary_type):
+    if binary_type in ["dol", "elf"]:
+        binary_path = os.path.join(helpers.app_index_directory_location(slug), "apps", slug, "boot." + binary_type)
+        if os.path.exists(binary_path):
+            return send_file(binary_path, download_name="boot." + binary_type)
+    abort(404)
+
+
 @hbb.get("/hbb/homebrew_browser/temp_files.zip")
 def get_icons_zip():
     return send_file(os.path.join("data", "icons.zip"), download_name="icons.zip")
