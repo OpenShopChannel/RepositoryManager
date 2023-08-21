@@ -1,6 +1,6 @@
 import os
 
-from flask import Blueprint, request, abort, send_file
+from flask import Blueprint, request, abort, send_file, jsonify
 from urllib.parse import urlparse
 
 import config
@@ -207,3 +207,14 @@ def repo_list():
         return abort(404)
 
 
+@hbb.route('/metadata.json')
+def metadata_json():
+    """
+        This is a legacy endpoint used by some old versions of OSCDL
+    """
+    metadata = {}
+    for app in index.get()["contents"]:
+        metadata[app["information"]["slug"]] = [app["information"]["category"].capitalize(),
+                                                app['index_computed_info']['peripherals'],
+                                                "", "", "", ""]
+    return jsonify(dict(sorted(metadata.items())))
