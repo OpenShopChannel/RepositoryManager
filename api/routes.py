@@ -1,6 +1,7 @@
 import os
 
 from flask import Blueprint, jsonify, send_file, url_for, abort
+from werkzeug.utils import secure_filename
 
 import helpers
 import index
@@ -68,6 +69,7 @@ def get_information():
 
 @api.get("/v3/contents/<slug>/icon.png")
 def get_content_icon(slug):
+    slug = secure_filename(slug)
     icon_path = os.path.join(helpers.app_index_directory_location(slug), "apps", slug, "icon.png")
     if os.path.exists(icon_path):
         return send_file(icon_path, download_name="icon.png")
@@ -77,6 +79,7 @@ def get_content_icon(slug):
 
 @api.get("/v3/contents/<slug>/<_slug>.zip")
 def get_content_zip(slug, _slug):
+    slug = secure_filename(slug)
     zip_path = os.path.join("data", "contents", slug + ".zip")
     if os.path.exists(zip_path):
         return send_file(zip_path, download_name=slug + ".zip")

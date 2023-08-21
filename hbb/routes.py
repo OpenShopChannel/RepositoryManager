@@ -2,6 +2,7 @@ import os
 
 from flask import Blueprint, request, abort, send_file, jsonify
 from urllib.parse import urlparse
+from werkzeug.utils import secure_filename
 
 import config
 import helpers
@@ -138,6 +139,7 @@ def apps_check_new():
 @hbb.get("/hbb/<slug>/icon.png")
 @hbb.get("/hbb/<slug>.png")
 def get_content_icon(slug):
+    slug = secure_filename(slug)
     icon_path = os.path.join(helpers.app_index_directory_location(slug), "apps", slug, "icon.png")
     if os.path.exists(icon_path):
         return send_file(icon_path, download_name="icon.png")
@@ -147,6 +149,7 @@ def get_content_icon(slug):
 
 @hbb.get("/hbb/<slug>/<_slug>.zip")
 def get_content_zip(slug, _slug):
+    slug = secure_filename(slug)
     zip_path = os.path.join("data", "contents", slug + ".zip")
     if os.path.exists(zip_path):
         return send_file(zip_path, download_name=slug + ".zip")
@@ -156,6 +159,7 @@ def get_content_zip(slug, _slug):
 
 @hbb.get("/unzipped_apps/<slug>/apps/<_slug>/meta.xml")
 def get_content_xml(slug, _slug):
+    slug = secure_filename(slug)
     xml_path = os.path.join(helpers.app_index_directory_location(slug), "apps", slug, "meta.xml")
     if os.path.exists(xml_path):
         response = send_file(xml_path, download_name="meta.xml")
@@ -167,6 +171,8 @@ def get_content_xml(slug, _slug):
 
 @hbb.get("/unzipped_apps/<slug>/apps/<_slug>/boot.<binary_type>")
 def get_content_binary(slug, _slug, binary_type):
+    slug = secure_filename(slug)
+    binary_type = secure_filename(binary_type)
     if binary_type in ["dol", "elf"]:
         binary_path = os.path.join(helpers.app_index_directory_location(slug), "apps", slug, "boot." + binary_type)
         if os.path.exists(binary_path):

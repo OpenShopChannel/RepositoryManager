@@ -1,9 +1,9 @@
 import datetime
 import os
 
-from flask import Blueprint, redirect, url_for, request, render_template, flash, jsonify, copy_current_request_context, \
-    abort, send_file
+from flask import Blueprint, redirect, url_for, request, render_template, flash, abort, send_file
 from flask_login import current_user, login_user, login_required
+from werkzeug.utils import secure_filename
 
 import config
 import helpers
@@ -85,6 +85,7 @@ def sources():
 @admin.route('/moderation/<checksum>/<action>')
 @login_required
 def moderation_action(checksum, action):
+    checksum = secure_filename(checksum)
     moderation_entry = db.session.query(ModeratedBinariesModel).filter_by(checksum=checksum).first()
     match action:
         case "approve":
@@ -118,6 +119,7 @@ def moderation_action(checksum, action):
 @admin.route('/log/<file>')
 @login_required
 def log(file):
+    file = secure_filename(file)
     log_path = os.path.join("logs", file)
     if not os.path.exists(log_path):
         abort(404)  # Log file not found
