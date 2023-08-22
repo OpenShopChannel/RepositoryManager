@@ -187,6 +187,7 @@ def get_icons_zip():
 
 # Stub
 @hbb.route('/hbb/hbb_download.php')
+@hbb.route('/hbb_download.php')
 def register_download():
     """
     Registers that an app was downloaded.
