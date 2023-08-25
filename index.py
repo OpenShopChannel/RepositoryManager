@@ -176,6 +176,9 @@ def process_oscmeta(file, repo_index, log):
                     categories.append(category["name"])
             if oscmeta["information"]["category"] not in categories:
                 raise Exception("Category not supported by repository: " + oscmeta["information"]["category"])
+            # check if there is at least one peripheral
+            if len(oscmeta["information"]["peripherals"]) == 0:
+                raise Exception("App supports zero peripherals. This is unsupported.")
 
             # update application
             oscmeta["metaxml"] = update_application(oscmeta, log)
