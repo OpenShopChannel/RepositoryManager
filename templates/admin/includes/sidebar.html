@@ -1,9 +1,11 @@
-{% macro page(title, icon, endpoint, pill=None, pill_plural="items") %}
-    <a href="{{ url_for(endpoint) }}"
-       class="sidebar-link sidebar-link-with-icon {% if request.endpoint == endpoint %}active{% endif %}">
-        <span class="sidebar-icon"><i class="fa {{ icon }}" aria-hidden="true"></i></span>
-        {{ title }}{% if pill %}<span class="badge badge-pill badge-danger" style="margin-left: 5px;">{{ pill }} {{ pill_plural }}</span>{% endif %}
-    </a>
+{% macro page(title, icon, endpoint, required_role=None, pill=None, pill_plural="items") %}
+    {% if (required_role == None) or (has_access(required_role)) %}
+        <a href="{{ url_for(endpoint) }}"
+           class="sidebar-link sidebar-link-with-icon {% if request.endpoint == endpoint %}active{% endif %}">
+            <span class="sidebar-icon"><i class="fa {{ icon }}" aria-hidden="true"></i></span>
+            {{ title }}{% if pill %}<span class="badge badge-pill badge-danger" style="margin-left: 5px;">{{ pill }} {{ pill_plural }}</span>{% endif %}
+        </a>
+    {% endif %}
 {% endmacro %}
 {% macro category(title) %}
     <h5 class="sidebar-title">{{ title }}</h5>
@@ -18,19 +20,20 @@
             <div class="mt-10 font-size-12">
                 Hello {{ current_user.username }}.
             </div>
+            <span class="badge badge-secondary">{{ current_user.role }}</span>
         </div>
         {{ category('General') }}
         {{ page("Home", "fa-home", "admin.home") }}
-        {{ page("Debug", "fa-bug", "admin.debug") }}
+        {{ page("Debug", "fa-bug", "admin.debug", "Administrator") }}
         {{ category('Moderation') }}
-        {{ page("Moderation", "fa-gavel", "admin.moderation", notifications()["pending_moderation"], "pending") }}
+        {{ page("Moderation", "fa-gavel", "admin.moderation", "Moderator", pill=notifications()["pending_moderation"], pill_plural="pending") }}
         {{ category('Repository') }}
         {{ page("Applications", "fa-rectangle-list", "admin.apps") }}
         {{ category('System') }}
-        {{ page("Users", "fa-users", "admin.users") }}
-        {{ page("Sources", "fa-globe", "admin.sources") }}
-        {{ page("Jobs", "fa-bars-progress", "admin.jobs") }}
-        {{ page("Log Files", "fa-folder-open", "admin.logs") }}
-        {{ page("Settings", "fa-cog", "admin.settings") }}
+        {{ page("Users", "fa-users", "admin.users", "Administrator") }}
+        {{ page("Sources", "fa-globe", "admin.sources", "Moderator") }}
+        {{ page("Jobs", "fa-bars-progress", "admin.jobs", "Moderator") }}
+        {{ page("Log Files", "fa-folder-open", "admin.logs", "Administrator") }}
+        {{ page("Settings", "fa-cog", "admin.settings", "Administrator") }}
     </div>
 </div>

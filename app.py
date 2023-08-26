@@ -15,6 +15,7 @@ import repository
 from admin.routes import admin
 from api.routes import api
 from hbb.routes import hbb
+from admin.roles import has_access
 from models import db, login
 from scheduler import scheduler, socketio
 from setup.routes import setup
@@ -76,6 +77,7 @@ with app.app_context():
 
 app.jinja_env.globals.update(index=index.get)
 app.jinja_env.globals.update(notifications=helpers.notifications)
+app.jinja_env.globals.update(has_access=has_access)
 
 
 @app.route('/')

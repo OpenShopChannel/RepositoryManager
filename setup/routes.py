@@ -30,7 +30,7 @@ def configure():
             helpers.update_setting("setup_complete", "true")
             helpers.update_setting("git_url", form.git_url.data)
 
-            user = UserModel(email=form.admin_email.data, username=form.admin_username.data)
+            user = UserModel(email=form.admin_email.data, username=form.admin_username.data, role="Administrator")
             user.set_password(form.admin_password.data)
             db.session.add(user)
             db.session.commit()

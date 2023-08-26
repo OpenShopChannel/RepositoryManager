@@ -9,6 +9,7 @@ import config
 import helpers
 import index
 import repository
+from admin.roles import role_required
 from integrations.discord import send_webhook_message
 from models import UserModel, db, SettingsModel, ModeratedBinariesModel
 from scheduler import scheduler
@@ -29,18 +30,21 @@ def apps():
 
 @admin.route('/debug')
 @login_required
+@role_required('Administrator')
 def debug():
     return render_template('admin/debug.html')
 
 
 @admin.route('/status')
 @login_required
+@role_required('Administrator')
 def status():
     return render_template('admin/task_status.html')
 
 
 @admin.route('/logs')
 @login_required
+@role_required('Administrator')
 def logs():
     log_files = []
     if os.path.exists("logs"):
@@ -60,24 +64,28 @@ def logs():
 
 @admin.route('/moderation')
 @login_required
+@role_required('Moderator')
 def moderation():
     return render_template('admin/moderation.html', mod_entries=ModeratedBinariesModel.query.all()[::-1])
 
 
 @admin.route('/users')
 @login_required
+@role_required('Administrator')
 def users():
     return render_template('admin/users.html', users=UserModel.query.all())
 
 
 @admin.route('/jobs')
 @login_required
+@role_required('Moderator')
 def jobs():
     return render_template('admin/jobs.html', jobs=scheduler.get_jobs())
 
 
 @admin.route('/sources')
 @login_required
+@role_required('Moderator')
 def sources():
     return render_template('admin/sources.html', sources=helpers.get_available_source_downloader_details())
 
@@ -118,6 +126,7 @@ def moderation_action(checksum, action):
 
 @admin.route('/log/<file>')
 @login_required
+@role_required('Administrator')
 def log(file):
     file = secure_filename(file)
     log_path = os.path.join("logs", file)
@@ -129,6 +138,7 @@ def log(file):
 
 @admin.route('/debug/<action>')
 @login_required
+@role_required('Administrator')
 def debug_action(action):
     if action == 'init_repo':
         repository.initialize(helpers.get_settings()['git_url'])
@@ -147,6 +157,7 @@ def debug_action(action):
 
 @admin.route('/action/<action>')
 @login_required
+@role_required('Administrator')
 def action(action):
     match action:
         case 'update':
@@ -158,6 +169,7 @@ def action(action):
 
 @admin.route('/settings', methods=['GET', 'POST'])
 @login_required
+@role_required('Administrator')
 def settings():
     settings = {}
     for setting in SettingsModel.query.all():
