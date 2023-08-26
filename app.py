@@ -68,7 +68,6 @@ with app.app_context():
     scheduler.start()
 
     # Prepare flask app
-    db.create_all()
     flask_migrate.upgrade("migrations")
 
     # check if an index file exists
