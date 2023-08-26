@@ -11,6 +11,7 @@
         </h1>
         You are logged in as <strong>{{ current_user.username }}</strong>.
     </div>
+    {% if has_access("Administrator") %}
     <div class="card">
         <div class="row row-eq-spacing justify-content-center" style="margin-top: unset; margin-bottom: unset;">
             <div class="btn-group btn-group-lg" role="group" aria-label="Basic example">
@@ -19,6 +20,7 @@
             </div>
         </div>
     </div>
+    {% endif %}
     <div class="card">
         <h2 class="card-title">
             {{ index()["repository"]["name"] }} (Provider: {{ index()["repository"]["provider"] }})
@@ -32,6 +34,12 @@
             <div class="card">
                 <h2 class="card-title">Applications</h2>
                 {{ index()["contents"]|length }}
+            </div>
+        </div>
+        <div class="col-6 col-xl-3">
+            <div class="card">
+                <h2 class="card-title">Pending Moderation</h2>
+                {{ notifications()["pending_moderation"] }}
             </div>
         </div>
         <div class="col-6 col-xl-3">
