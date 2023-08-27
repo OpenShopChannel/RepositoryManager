@@ -132,10 +132,9 @@ def get_available_source_downloader_details():
 
 
 def generate_title_id():
-    # Generate a random value in the range 0x4E000000 - 0x4EFFFFFF
-    random_value = random.randint(0x000000, 0x4EFFFF)
+    random_value = random.randint(0x000000, 0xFFFFFF)
 
-    # Convert the random value to hexadecimal and format it as a string
+    # Convert to hexadecimal and format it as a string
     random_hex = format(random_value, 'X')
 
     # Ensure the hexadecimal value is represented with 6 characters by adding leading zeros if necessary
