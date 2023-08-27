@@ -1,5 +1,6 @@
 import importlib
 import os
+import random
 import stat
 import sys
 
@@ -128,3 +129,19 @@ def get_available_source_downloader_details():
         })
 
     return source_details
+
+
+def generate_title_id():
+    # Generate a random value in the range 0x4E000000 - 0x4EFFFFFF
+    random_value = random.randint(0x000000, 0x4EFFFF)
+
+    # Convert the random value to hexadecimal and format it as a string
+    random_hex = format(random_value, 'X')
+
+    # Ensure the hexadecimal value is represented with 6 characters by adding leading zeros if necessary
+    random_hex = random_hex.zfill(6)
+
+    id_prefix = "000100014E"
+    final_id = f"{id_prefix}{random_hex}"
+
+    return final_id

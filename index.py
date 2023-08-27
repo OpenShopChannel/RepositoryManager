@@ -18,7 +18,7 @@ import helpers
 import logger
 import treatments
 from integrations.discord import send_webhook_message
-from models import db, ModeratedBinariesModel
+from models import db, ModeratedBinariesModel, PersistentAppInformationModel
 from scheduler import scheduler
 
 
@@ -542,6 +542,43 @@ def update_application(oscmeta, log=logger.Log("application_update")):
             # example format: /apps/slug/subdirectory1/subdirectory2
             oscmeta["index_computed_info"]["subdirectories"].append(os.path.relpath(os.path.join(root, dir), os.path.join(app_directory, 'apps', oscmeta["information"]["slug"])))
             oscmeta["index_computed_info"]["subdirectories"][-1] = "/apps/" + oscmeta["information"]["slug"] + "/" + oscmeta["index_computed_info"]["subdirectories"][-1].replace("\\", "/")
+
+    # Persistent information setup
+    log.log_status("- Configuring persistent information")
+
+    # check if persistent information entry exists for app, if not create one
+    persistent_information_entry = db.session.query(PersistentAppInformationModel).filter_by(
+        app_slug=oscmeta["information"]["slug"]).first()
+    if not persistent_information_entry:
+        # Create a new entry for app
+        new_entry = PersistentAppInformationModel(
+            app_slug=oscmeta["information"]["slug"]
+        )
+        db.session.add(new_entry)
+        db.session.commit()
+        log.log_status(f'  - Created new persistent app information entry')
+
+    # check if title ID is assigned
+    persistent_information_entry = db.session.query(PersistentAppInformationModel).filter_by(
+        app_slug=oscmeta["information"]["slug"]).first()
+    if not persistent_information_entry.title_id:
+        # Assign a random available title ID
+        found_title_id = False
+        title_id = None
+        while not found_title_id:
+            title_id = helpers.generate_title_id()
+            if not db.session.query(PersistentAppInformationModel).filter_by(title_id=title_id).first():
+                found_title_id = True
+
+        persistent_information_entry.title_id = title_id
+        db.session.commit()
+
+        log.log_status(f'  - Assigned new title ID: {title_id}')
+
+    # Add persistent information to index
+    persistent_information_entry = db.session.query(PersistentAppInformationModel).filter_by(
+        app_slug=oscmeta["information"]["slug"]).first()
+    oscmeta["index_computed_info"]["title_id"] = persistent_information_entry.title_id
 
     log.log_status(f'- Adding to Index')
 

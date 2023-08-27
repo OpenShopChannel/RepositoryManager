@@ -39,6 +39,9 @@ def get_contents():
             "package_type": content["index_computed_info"]["package_type"],
             "peripherals": content["information"]["peripherals"],
             "release_date": content["index_computed_info"]["release_date"],
+            "shop": {
+                "title_id": content["index_computed_info"]["title_id"]
+            },
             "slug": content["information"]["slug"],
             "subdirectories": content["index_computed_info"]["subdirectories"],
             "url": {

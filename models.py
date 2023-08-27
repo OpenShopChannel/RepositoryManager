@@ -46,3 +46,10 @@ class ModeratedBinariesModel(UserMixin, db.Model):
     discovery_date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow())
     modified_date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow())
     moderated_by = db.Column(db.Integer, db.ForeignKey('users.id'))
+
+
+class PersistentAppInformationModel(UserMixin, db.Model):
+    __tablename__ = 'persistent_app_information'
+
+    app_slug = db.Column(db.String, primary_key=True)
+    title_id = db.Column(db.String)
