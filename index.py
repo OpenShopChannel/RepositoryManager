@@ -230,6 +230,9 @@ def determine_update_level(oscmeta, repo_index, log):
             log.log_status("  - First Index")
         case "modified":
             log.log_status("  - Modified Archive")
+            send_webhook_message(config.DISCORD_CATALOG_WEBHOOK_URL, "New Update!",
+                                 f"{oscmeta['metaxml']['app']['name']} has been updated",
+                                 webhook_username)
         case "new_binary":
             log.log_status("  - New Binary")
             send_webhook_message(config.DISCORD_CATALOG_WEBHOOK_URL, "New Update!",
