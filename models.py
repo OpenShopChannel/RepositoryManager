@@ -53,3 +53,4 @@ class PersistentAppInformationModel(UserMixin, db.Model):
 
     app_slug = db.Column(db.String, primary_key=True)
     title_id = db.Column(db.String)
+    version = db.Column(db.Integer, server_default="1", nullable=False)

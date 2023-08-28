@@ -184,7 +184,7 @@ def process_oscmeta(file, repo_index, log):
             oscmeta["metaxml"] = update_application(oscmeta, log)
 
             # announce update to catalog webhook if relevant
-            announce_to_catalog(oscmeta, repo_index, log)
+            determine_update_level(oscmeta, repo_index, log)
 
         except (Exception, eventlet.timeout.Timeout) as e:
             handle_application_update_failure(oscmeta, e, log, repo_index)
@@ -193,8 +193,8 @@ def process_oscmeta(file, repo_index, log):
             repo_index['contents'].append(oscmeta)
 
 
-def announce_to_catalog(oscmeta, repo_index, log):
-    log.log_status("- Announcing application update to catalog")
+def determine_update_level(oscmeta, repo_index, log):
+    log.log_status("- Checking if application was updated")
     # Load the existing index file
     old_oscmeta = None
     with open(os.path.join('data', 'index.json')) as f:
@@ -205,6 +205,8 @@ def announce_to_catalog(oscmeta, repo_index, log):
 
     difference = "same"
     if old_oscmeta is not None:
+        if old_oscmeta["index_computed_info"]["uncompressed_size"] != oscmeta["index_computed_info"]["uncompressed_size"]:
+            difference = "modified"
         if old_oscmeta["index_computed_info"]["md5_hash"] != oscmeta["index_computed_info"]["md5_hash"]:
             difference = "new_binary"
         if old_oscmeta["metaxml"]["app"]["version"] != oscmeta["metaxml"]["app"]["version"]:
@@ -217,11 +219,17 @@ def announce_to_catalog(oscmeta, repo_index, log):
 
     webhook_username = repo_index["repository"]["name"]
 
+    updated = True
+
     match difference:
         case "same":
+            updated = False
             log.log_status("  - No Change")
         case "first_run":
+            updated = False
             log.log_status("  - First Index")
+        case "modified":
+            log.log_status("  - Modified Archive")
         case "new_binary":
             log.log_status("  - New Binary")
             send_webhook_message(config.DISCORD_CATALOG_WEBHOOK_URL, "New Update!",
@@ -239,6 +247,16 @@ def announce_to_catalog(oscmeta, repo_index, log):
             send_webhook_message(config.DISCORD_CATALOG_WEBHOOK_URL, "New Application!",
                                  f"{oscmeta['metaxml']['app']['name']} has been added to the repository",
                                  webhook_username)
+
+    # Bump shop title version if needed and add to index
+    persistent_information_entry = db.session.query(PersistentAppInformationModel).filter_by(
+        app_slug=oscmeta["information"]["slug"]).first()
+    if updated:
+        persistent_information_entry.version += 1
+        db.session.commit()
+        log.log_status(f"  - Bumped title version to {persistent_information_entry.version}")
+
+    oscmeta["index_computed_info"]["title_version"] = persistent_information_entry.version
 
 
 def handle_application_update_failure(oscmeta, error, log, repo_index):
