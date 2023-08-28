@@ -40,7 +40,8 @@ def get_contents():
             "peripherals": content["information"]["peripherals"],
             "release_date": content["index_computed_info"]["release_date"],
             "shop": {
-                "title_id": content["index_computed_info"]["title_id"]
+                "title_id": content["index_computed_info"]["title_id"],
+                "title_version": content["index_computed_info"]["title_version"]
             },
             "slug": content["information"]["slug"],
             "subdirectories": content["index_computed_info"]["subdirectories"],
