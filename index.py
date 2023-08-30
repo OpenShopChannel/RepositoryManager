@@ -486,7 +486,11 @@ def update_application(oscmeta, log=logger.Log("application_update")):
 
     # we will create a zip for homebrew browser and the API to use
     # create the zip file
-    zip_up_application(app_directory, os.path.join("data", "contents", oscmeta["information"]["slug"] + ".zip"))
+    try:
+        zip_up_application(app_directory, os.path.join("data", "contents", oscmeta["information"]["slug"] + ".zip"))
+    except:
+        log.log_status(f'Failure in zipping up application', 'debug')
+        log.save_log()
 
     log.log_status(f'- Reading application metadata')
 
