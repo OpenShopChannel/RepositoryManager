@@ -13,21 +13,13 @@ api = Blueprint('api', __name__, template_folder='templates', url_prefix='/api')
 def get_contents():
     contents = []
     for content in index.get()["contents"]:
-        # Ensure all required fields are present
-        if "long_description" not in content["metaxml"]["app"]:
-            content["metaxml"]["app"]["long_description"] = "No description provided."
-        if "short_description" not in content["metaxml"]["app"]:
-            content["metaxml"]["app"]["short_description"] = "No description provided."
-        if "coder" not in content["metaxml"]["app"]:
-            content["metaxml"]["app"]["coder"] = content["information"]["author"]
-
         # Append to contents
         contents.append({
-            "author": content["metaxml"]["app"]["coder"],
+            "author": content["metaxml"]["app"].get("coder", content["information"]["author"]),
             "category": content["information"]["category"],
             "description": {
-                "long": content["metaxml"]["app"]["long_description"],
-                "short": content["metaxml"]["app"]["short_description"]
+                "long": content["metaxml"]["app"].get("long_description", "No description provided."),
+                "short": content["metaxml"]["app"].get("short_description", "No description provided.")
             },
             "file_size": {
                 "binary": content["index_computed_info"]["binary_size"],
@@ -35,13 +27,13 @@ def get_contents():
                 "zip_compressed": content["index_computed_info"]["compressed_size"],
                 "zip_uncompressed": content["index_computed_info"]["uncompressed_size"]
             },
-            "name": content["metaxml"]["app"]["name"],
+            "name": content["metaxml"]["app"].get("name", content["information"]["name"]),
             "package_type": content["index_computed_info"]["package_type"],
             "peripherals": content["information"]["peripherals"],
-            "release_date": content["index_computed_info"]["release_date"],
+            "release_date": content["index_computed_info"].get("release_date", 0),
             "shop": {
-                "title_id": content["index_computed_info"]["title_id"],
-                "title_version": content["index_computed_info"]["title_version"]
+                "title_id": content["index_computed_info"].get("title_id"),
+                "title_version": content["index_computed_info"].get("title_version")
             },
             "slug": content["information"]["slug"],
             "subdirectories": content["index_computed_info"]["subdirectories"],
@@ -49,7 +41,7 @@ def get_contents():
                 "icon": url_for('api.get_content_icon', slug=content["information"]["slug"], _external=True),
                 "zip": url_for('api.get_content_zip', slug=content["information"]["slug"], _slug=content["information"]["slug"], _external=True),
             },
-            "version": content["metaxml"]["app"]["version"]
+            "version": content["metaxml"]["app"].get("version", "Unknown")
         })
 
     return jsonify(contents)
