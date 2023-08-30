@@ -491,6 +491,7 @@ def update_application(oscmeta, log=logger.Log("application_update")):
     except:
         log.log_status(f'Failure in zipping up application', 'debug')
         log.save_log()
+        raise Exception(":(")
 
     log.log_status(f'- Reading application metadata')
 
