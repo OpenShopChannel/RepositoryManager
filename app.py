@@ -3,7 +3,7 @@ import shutil
 
 import flask_migrate
 import py7zr
-from flask import Flask
+from flask import Flask, url_for, render_template
 from flask_migrate import Migrate
 import sentry_sdk
 from sentry_sdk.integrations.flask import FlaskIntegration
@@ -81,8 +81,17 @@ app.jinja_env.globals.update(has_access=has_access)
 
 
 @app.route('/')
-def hello_world():  # put application's code here
-    return 'Open Shop Channel Repository Manager'
+def hello_world():
+    app_count = len(index.get()["contents"])
+    repository_name = index.get()["repository"]["name"]
+    repository_provider = index.get()["repository"]["provider"]
+    git_url = helpers.get_settings()["git_url"]
+    api_url = url_for("hello_world", _external=True)
+
+    return render_template('hello_world.html', app_count=app_count,
+                           repository_name=repository_name,
+                           repository_provider=repository_provider,
+                           git_url=git_url, api_url=api_url)
 
 
 if __name__ == '__main__':
