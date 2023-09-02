@@ -153,7 +153,6 @@ class Meta(Treatment):
 
         # write meta.xml
         with open(meta_xml_path, "w") as f:
-            f.write('<?xml version="1.0" encoding="utf-8"?>\n')
             f.write(xml)
 
         self.log.log_status(f'  - Removed comments from meta.xml', 'success')
