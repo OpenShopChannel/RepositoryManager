@@ -88,7 +88,7 @@ class Meta(Treatment):
         meta_xml = et.ElementTree(root)
 
         # write meta.xml
-        meta_xml.write(meta_xml_path, encoding="UTF-8", xml_declaration=True)
+        meta_xml.write(meta_xml_path, encoding="utf-8", xml_declaration=True)
 
         self.log.log_status(f'  - Created new meta.xml file', 'success')
 
@@ -115,27 +115,29 @@ class Meta(Treatment):
             new_element.text = value
 
         # write meta.xml
-        meta_xml.write(meta_xml_path)
+        et.ElementTree(root).write(meta_xml_path, encoding="utf-8", xml_declaration=True)
 
         self.log.log_status(f'  - Set {key} to {value} in meta.xml', 'success')
 
     def remove_declaration(self):
-        # Remove the unicode declaration from meta.xml, can help with some broken meta.xml files
+        # Remove the broken unicode declaration from meta.xml, and add a correct one
 
         meta_xml_path = os.path.join(self.directory, "apps", self.slug, "meta.xml")
 
-        # read meta.xml as file
+        # Read meta.xml as file
         with open(meta_xml_path, "r") as f:
             xml = f.read()
 
-            # Remove unicode declaration
+            # Remove the broken unicode declaration
             xml = xml.split("\n", 1)[1]
 
-        # write meta.xml
+        # Write meta.xml with a correct XML declaration
         with open(meta_xml_path, "w") as f:
+            f.write('<?xml version="1.0" encoding="utf-8"?>\n')
             f.write(xml)
 
-        self.log.log_status(f'  - Removed unicode declaration from meta.xml', 'success')
+        self.log.log_status(f'  - Removed potentially broken unicode declaration and added correct '
+                            f'XML declaration to meta.xml', 'success')
 
     def remove_comments(self):
         # Remove comments from meta.xml, can help with some broken meta.xml files
@@ -151,6 +153,7 @@ class Meta(Treatment):
 
         # write meta.xml
         with open(meta_xml_path, "w") as f:
+            f.write('<?xml version="1.0" encoding="utf-8"?>\n')
             f.write(xml)
 
         self.log.log_status(f'  - Removed comments from meta.xml', 'success')
