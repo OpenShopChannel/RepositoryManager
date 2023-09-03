@@ -246,6 +246,7 @@ def determine_update_level(oscmeta, repo_index, log):
                                  f"to {oscmeta['metaxml']['app']['version']}",
                                  webhook_username)
         case "new_app":
+            updated = False
             log.log_status("  - New Application")
             send_webhook_message(config.DISCORD_CATALOG_WEBHOOK_URL, "New Application!",
                                  f"{oscmeta['metaxml']['app']['name']} has been added to the repository",
