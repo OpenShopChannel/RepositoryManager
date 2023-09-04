@@ -489,8 +489,8 @@ def update_application(oscmeta, log=logger.Log("application_update")):
     # create the zip file
     try:
         zip_up_application(app_directory, os.path.join("data", "contents", oscmeta["information"]["slug"] + ".zip"))
-    except:
-        log.log_status(f'Failure in zipping up application', 'debug')
+    except Exception as e:
+        log.log_status(f'Failure in zipping up application: {e}', 'debug')
         log.save_log()
         raise Exception(":(")
 
