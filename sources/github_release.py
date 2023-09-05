@@ -55,11 +55,21 @@ class SourceDownloader(BaseSourceDownloader):
                         if file == self.oscmeta["source"]["file"]:
                             # download the file
                             with open(self.archive_path, "wb") as f:
-                                f.write(requests.get(url).content)
+                                downloaded_file = requests.get(url)
+                                if downloaded_file.status_code == 200:
+                                    f.write(downloaded_file.content)
+                                else:
+                                    raise Exception(f"Status code {downloaded_file.status_code} during GitHub Release download.")
                         else:
                             # download the file
                             with open(os.path.join(self.temp_dir, file), "wb") as f:
-                                f.write(requests.get(url).content)
+                                downloaded_file = requests.get(url)
+                                if downloaded_file.status_code == 200:
+                                    f.write(downloaded_file.content)
+                                else:
+                                    raise Exception(f"Status code {downloaded_file.status_code} during GitHub Release download.")
 
                         self.log.log_status(f'  - Downloaded asset {asset["name"]}')
                         break
+        else:
+            raise Exception(f"Status code {downloaded_file.status_code} during GitHub Release download.")
