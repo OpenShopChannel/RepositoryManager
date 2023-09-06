@@ -65,7 +65,7 @@ shutil.register_unpack_format("7z", [".7z"], py7zr.unpack_7zarchive)
 # before first request
 with app.app_context():
     # Register scheduler jobs
-    scheduler.add_job(pull_repo_and_update_index, 'interval', hours=12, replace_existing=True, id='update', args=[])
+    scheduler.add_job(pull_repo_and_update_index, 'interval', hours=6, replace_existing=True, id='update', args=[])
     scheduler.start()
 
     # Prepare flask app
