@@ -3,6 +3,7 @@ import io
 import json
 import os
 import pathlib
+import re
 import shutil
 import time
 import traceback
@@ -498,8 +499,11 @@ def update_application(oscmeta, log=logger.Log("application_update")):
 
     # open the metadata file
     with open(os.path.join(app_directory, 'apps', oscmeta["information"]["slug"], "meta.xml")) as f:
+        # Remove double hyphens inside comments before parsing, to avoid potential trouble
+        xml_data = re.sub(r'<!--[\s\S\n]*?-->', lambda match: '<!--' + match.group(0).replace('--', '') + '-->', f.read())
+
         # convert the metadata to JSON
-        metadata = json.loads(json.dumps(xmltodict.parse(f.read())))
+        metadata = json.loads(json.dumps(xmltodict.parse(xml_data)))
 
     # time for determining some extra information needed by API and Homebrew Browser, and adding to index
     log.log_status(f'- Computing information')
