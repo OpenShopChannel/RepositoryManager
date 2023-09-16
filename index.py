@@ -567,15 +567,12 @@ def update_application(oscmeta, log=logger.Log("application_update")):
 
     # Create subdirectories list
     oscmeta["index_computed_info"]["subdirectories"] = []
-    for root, dirs, files in os.walk(app_directory):
+    for root, dirs, files in os.walk(os.path.join(app_directory, 'apps', oscmeta["information"]["slug"])):
         for dir in dirs:
-            # We need to make sure that these strings are in the right format for the HBB.
-            # Example format: /apps/slug/subdirectory1/subdirectory2
-            subdirectory_path = os.path.relpath(os.path.join(root, dir), app_directory)
-            oscmeta["index_computed_info"]["subdirectories"].append("/" + subdirectory_path.replace("\\", "/"))
-    # Remove unneeded directories
-    oscmeta["index_computed_info"]["subdirectories"].remove("/apps")
-    oscmeta["index_computed_info"]["subdirectories"].remove("/apps/" + oscmeta["information"]["slug"])
+            # we need to make sure that these strings are in the right format for the HBB.
+            # example format: /apps/slug/subdirectory1/subdirectory2
+            oscmeta["index_computed_info"]["subdirectories"].append(os.path.relpath(os.path.join(root, dir), os.path.join(app_directory, 'apps', oscmeta["information"]["slug"])))
+            oscmeta["index_computed_info"]["subdirectories"][-1] = "/apps/" + oscmeta["information"]["slug"] + "/" + oscmeta["index_computed_info"]["subdirectories"][-1].replace("\\", "/")
 
     # Persistent information setup
     log.log_status("- Configuring persistent information")
