@@ -27,6 +27,7 @@ def get_contents():
                 "zip_compressed": content["index_computed_info"]["compressed_size"],
                 "zip_uncompressed": content["index_computed_info"]["uncompressed_size"]
             },
+            "flags": content["information"].get("flags", []),
             "name": content["metaxml"]["app"].get("name", content["information"]["name"]),
             "package_type": content["index_computed_info"]["package_type"],
             "peripherals": content["information"]["peripherals"],

@@ -38,6 +38,12 @@ def apps_list():
             content.add_line(f"={current_category.capitalize()}=")
             current_category = app["information"]["category"]
 
+        # if "writes_to_nand" flag is specified, prepend warning to long description
+        flags = app["information"].get("flags", [])
+        long_description_prefix = ""
+        if "writes_to_nand" in flags:
+            long_description_prefix += "[CAUTION! Writes to NAND!] "
+
         # The following app metadata should all be on one line.
         # -----
         # Internal name
@@ -91,15 +97,15 @@ def apps_list():
 
         # Long Description
         if ("long_description" in app["metaxml"]["app"]) and (app["metaxml"]["app"]["long_description"] is not None):
-            if len(app["metaxml"]["app"]["long_description"]) > 128:
-                content.add_line(app["metaxml"]["app"]["long_description"].replace('\n', ' ')[:128] + "...")
+            if len(long_description_prefix + app["metaxml"]["app"]["long_description"]) > 128:
+                content.add_line(long_description_prefix + app["metaxml"]["app"]["long_description"].replace('\n', ' ')[:128] + "...")
             else:
-                content.add_line(app["metaxml"]["app"]["long_description"].replace('\n', ' '))
+                content.add_line(long_description_prefix + app["metaxml"]["app"]["long_description"].replace('\n', ' '))
         else:
             if "short_description" in app["metaxml"]["app"]:
-                content.add_line(app["metaxml"]["app"]["short_description"])
+                content.add_line(long_description_prefix + app["metaxml"]["app"]["short_description"])
             else:
-                content.add_line("No description provided.")
+                content.add_line(long_description_prefix + "No description provided.")
     content.add_line(f"={current_category.capitalize()}=")
 
     return content.response
