@@ -33,79 +33,81 @@ def apps_list():
 
     current_category = apps[0]["information"]["category"]
     for app in apps:
-        # append "=Category=" if reached last item in category
-        if current_category != app["information"]["category"]:
-            content.add_line(f"={current_category.capitalize()}=")
-            current_category = app["information"]["category"]
+        if app["information"]["slug"] != "homebrew_browser":
+            # append "=Category=" if reached last item in category
+            if current_category != app["information"]["category"]:
+                content.add_line(f"={current_category.capitalize()}=")
+                current_category = app["information"]["category"]
 
-        # if "writes_to_nand" flag is specified, prepend warning to long description
-        flags = app["information"].get("flags", [])
-        long_description_prefix = ""
-        if "writes_to_nand" in flags:
-            long_description_prefix += "[CAUTION! Writes to NAND!] "
+            # if "writes_to_nand" flag is specified, prepend warning to long description
+            flags = app["information"].get("flags", [])
+            long_description_prefix = ""
+            if "writes_to_nand" in flags:
+                long_description_prefix += "[CAUTION! Writes to NAND!] "
 
-        # The following app metadata should all be on one line.
-        # -----
-        # Internal name
-        content.add(app["information"]["slug"])
-        # Date added to repo
-        content.add(app["index_computed_info"]["release_date"])
-        # Size of icon.png
-        content.add(app["index_computed_info"]["icon_size"])
-        # Size of package
-        content.add(app["index_computed_info"]["binary_size"])
-        # Type of package (dol/elf/etc)
-        content.add(app["index_computed_info"]["package_type"])
-        # Size of total zip
-        content.add(app["index_computed_info"]["compressed_size"])
-        # Download count
-        # TODO: support download count
-        content.add(0)
-        # Ratings count
-        content.add(0)
-        # Peripherals
-        content.add(app["index_computed_info"]["peripherals"])
+            # The following app metadata should all be on one line.
+            # -----
+            # Internal name
+            content.add(app["information"]["slug"])
+            # Date added to repo
+            content.add(app["index_computed_info"]["release_date"])
+            # Size of icon.png
+            content.add(app["index_computed_info"]["icon_size"])
+            # Size of package
+            content.add(app["index_computed_info"]["binary_size"])
+            # Type of package (dol/elf/etc)
+            content.add(app["index_computed_info"]["package_type"])
+            # Size of total zip
+            content.add(app["index_computed_info"]["compressed_size"])
+            # Download count
+            # TODO: support download count
+            content.add(0)
+            # Ratings count
+            content.add(0)
+            # Peripherals
+            content.add(app["index_computed_info"]["peripherals"])
 
-        # Folders to create
-        subdirectories = ""
-        for directory in app["index_computed_info"]["subdirectories"]:
-            subdirectories += f"{directory};"
-        content.add(subdirectories[:-1])
+            # Folders to create
+            subdirectories = ""
+            for directory in app["index_computed_info"]["subdirectories"]:
+                subdirectories += f"{directory};"
+            content.add(subdirectories[:-1])
 
-        # Folders to not delete
-        content.add(".")
-        # Files to not extract
-        content.add_line(".")
-        # -----
+            # Folders to not delete
+            content.add(".")
+            # Files to not extract
+            content.add_line(".")
+            # -----
 
-        # Name
-        content.add_line(app["metaxml"]["app"]["name"])
-        # Author
-        if "coder" in app["metaxml"]["app"]:
-            content.add_line(app["metaxml"]["app"]["coder"])
-        else:
-            content.add_line(app["information"]["author"])
-        # Version
-        content.add_line(app["metaxml"]["app"]["version"])
-        # Extracted Size
-        content.add_line(str(app["index_computed_info"]["uncompressed_size"]))
-        # Short Description
-        if "short_description" in app["metaxml"]["app"]:
-            content.add_line(app["metaxml"]["app"]["short_description"])
-        else:
-            content.add_line("No description provided.")
-
-        # Long Description
-        if ("long_description" in app["metaxml"]["app"]) and (app["metaxml"]["app"]["long_description"] is not None):
-            if len(long_description_prefix + app["metaxml"]["app"]["long_description"]) > 128:
-                content.add_line((long_description_prefix + app["metaxml"]["app"]["long_description"]).replace('\n', ' ')[:128] + "...")
+            # Name
+            content.add_line(app["metaxml"]["app"]["name"])
+            # Author
+            if "coder" in app["metaxml"]["app"]:
+                content.add_line(app["metaxml"]["app"]["coder"])
             else:
-                content.add_line((long_description_prefix + app["metaxml"]["app"]["long_description"]).replace('\n', ' '))
-        else:
+                content.add_line(app["information"]["author"])
+            # Version
+            content.add_line(app["metaxml"]["app"]["version"])
+            # Extracted Size
+            content.add_line(str(app["index_computed_info"]["uncompressed_size"]))
+            # Short Description
             if "short_description" in app["metaxml"]["app"]:
-                content.add_line(long_description_prefix + app["metaxml"]["app"]["short_description"])
+                content.add_line(app["metaxml"]["app"]["short_description"])
             else:
-                content.add_line(long_description_prefix + "No description provided.")
+                content.add_line("No description provided.")
+
+            # Long Description
+            if ("long_description" in app["metaxml"]["app"]) and (app["metaxml"]["app"]["long_description"] is not None):
+                if len(long_description_prefix + app["metaxml"]["app"]["long_description"]) > 128:
+                    content.add_line((long_description_prefix + app["metaxml"]["app"]["long_description"]).replace('\n', ' ')[:128] + "...")
+                else:
+                    content.add_line((long_description_prefix + app["metaxml"]["app"]["long_description"]).replace('\n', ' '))
+            else:
+                if "short_description" in app["metaxml"]["app"]:
+                    content.add_line(long_description_prefix + app["metaxml"]["app"]["short_description"])
+                else:
+                    content.add_line(long_description_prefix + "No description provided.")
+
     content.add_line(f"={current_category.capitalize()}=")
 
     return content.response
