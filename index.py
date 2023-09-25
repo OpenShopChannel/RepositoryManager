@@ -276,16 +276,16 @@ def handle_application_update_failure(oscmeta, error, log, repo_index):
     relative_file_path = os.path.relpath(file_name, current_directory)
 
     # Construct a detailed error message with titles
-    error_message = f'[FAILED TO PROCESS {oscmeta["information"]["slug"]}.oscmeta]: '
-    error_message += f'[ERROR TYPE]: {type(error).__name__}, '
-    error_message += f'[ERROR MESSAGE]: {error}, '
-    error_message += f'[FILE]: {relative_file_path}, '
-    error_message += f'[FUNCTION]: {func_name}, '
-    error_message += f'[LINE]: {line_num}, '
-    error_message += '** [MOVING ON]. **'
+    error_message = f'FAILED TO PROCESS {oscmeta["information"]["slug"]}.oscmeta: \n'
+    error_message += f'ERROR TYPE: {type(error).__name__}, \n'
+    error_message += f'ERROR MESSAGE: {error}, \n'
+    error_message += f'FILE: {relative_file_path}, \n'
+    error_message += f'FUNCTION: {func_name}, \n'
+    error_message += f'LINE: {line_num}, \n'
+    error_message += '** MOVING ON. **'
 
     # Log the error message
-    log.log_status(error_message, 'error')
+    log.log_status(error_message.replace("\n", ""), 'error')
 
     send_webhook_message(config.DISCORD_ERROR_WEBHOOK_URL, "App index failure", error_message)
 
