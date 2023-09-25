@@ -18,6 +18,5 @@ class SourceDownloader(BaseSourceDownloader):
 
     def process_files(self):
         # download the archive
-        with open(self.archive_path, "wb") as f:
-            f.write(requests.get(self.best_release["platform_releases"]["windows"]["url"]).content)
+        self.download_from_url_to_file(self.best_release["platform_releases"]["windows"]["url"], self.archive_path)
         self.log.log_status(f"  - Downloaded file \"{self.best_release['release']['filename']}\"")

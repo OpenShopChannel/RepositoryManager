@@ -33,8 +33,7 @@ class SourceDownloader(BaseSourceDownloader):
                         f"https://itch.io/api/1/{config.ITCHIO_KEY}/upload/{upload['id']}/download").json()
 
                     # download the archive
-                    with open(self.archive_path, "wb") as f:
-                        f.write(requests.get(download['url']).content)
+                    self.download_from_url_to_file(download['url'], self.archive_path)
                     self.log.log_status(f"  - Downloaded upload \"{upload['filename']}\"")
         if not found:
             raise Exception("Could not find itch.io upload")

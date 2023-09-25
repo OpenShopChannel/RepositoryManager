@@ -54,22 +54,12 @@ class SourceDownloader(BaseSourceDownloader):
                         # check if archive
                         if file == self.oscmeta["source"]["file"]:
                             # download the file
-                            with open(self.archive_path, "wb") as f:
-                                downloaded_file = requests.get(url)
-                                if downloaded_file.status_code == 200:
-                                    f.write(downloaded_file.content)
-                                else:
-                                    raise Exception(f"Status code {downloaded_file.status_code} during GitHub Release download.")
+                            self.download_from_url_to_file(url, self.archive_path)
                         else:
                             # download the file
-                            with open(os.path.join(self.temp_dir, file), "wb") as f:
-                                downloaded_file = requests.get(url)
-                                if downloaded_file.status_code == 200:
-                                    f.write(downloaded_file.content)
-                                else:
-                                    raise Exception(f"Status code {downloaded_file.status_code} during GitHub Release download.")
+                            self.download_from_url_to_file(url, os.path.join(self.temp_dir, file))
 
                         self.log.log_status(f'  - Downloaded asset {asset["name"]}')
                         break
         else:
-            raise Exception(f"Status code {downloaded_file.status_code} during GitHub Release download.")
+            raise Exception(f"Status code {self.response.status_code} during GitHub Release download.")

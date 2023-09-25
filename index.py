@@ -265,7 +265,26 @@ def determine_update_level(oscmeta, repo_index, log):
 
 
 def handle_application_update_failure(oscmeta, error, log, repo_index):
-    error_message = f'Failed to process {oscmeta["information"]["slug"]}, moving on. ({type(error).__name__}: {error})'
+    # Get the traceback information to determine the source of the error
+    tb_info = traceback.extract_tb(error.__traceback__)
+
+    # Get the last traceback item to identify the file and line number
+    file_name, line_num, func_name, _ = tb_info[-1]
+
+    # Calculate the relative file path
+    current_directory = os.getcwd()
+    relative_file_path = os.path.relpath(file_name, current_directory)
+
+    # Construct a detailed error message with titles
+    error_message = f'[FAILED TO PROCESS {oscmeta["information"]["slug"]}.oscmeta]: '
+    error_message += f'[ERROR TYPE]: {type(error).__name__}, '
+    error_message += f'[ERROR MESSAGE]: {error}, '
+    error_message += f'[FILE]: {relative_file_path}, '
+    error_message += f'[FUNCTION]: {func_name}, '
+    error_message += f'[LINE]: {line_num}, '
+    error_message += '** [MOVING ON]. **'
+
+    # Log the error message
     log.log_status(error_message, 'error')
 
     send_webhook_message(config.DISCORD_ERROR_WEBHOOK_URL, "App index failure", error_message)

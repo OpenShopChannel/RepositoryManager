@@ -1,5 +1,7 @@
 import os
 
+import requests
+
 import logger
 
 
@@ -28,3 +30,12 @@ class BaseSourceDownloader:
     def process_files(self):
         # Common logic to process files
         pass
+
+    def download_from_url_to_file(self, url, destination_path):
+        # download the file
+        with open(destination_path, "wb") as f:
+            downloaded_file = requests.get(url)
+            if downloaded_file.status_code == 200:
+                f.write(downloaded_file.content)
+            else:
+                raise Exception(f"Status code {downloaded_file.status_code} during \"{self.name}\" download.")
