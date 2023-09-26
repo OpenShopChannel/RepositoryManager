@@ -148,7 +148,7 @@ def index_app_manifests(repo_index, log):
     repo_index['contents'] = []
 
     i = 0
-    files = os.listdir(os.path.join(config.REPO_DIR, 'contents'))
+    files = sorted(os.listdir(os.path.join(config.REPO_DIR, 'contents')))
     for file in files:
         i += 1
         if file.endswith('.oscmeta'):
