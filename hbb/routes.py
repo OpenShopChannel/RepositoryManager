@@ -52,7 +52,7 @@ def apps_list():
                 long_description_prefix += "[CAUTION! Compatible just with the vWii!] "
             # and if "wii_mini_only" flag is specified, prepend warning to long description
             if "wii_mini_only" in flags:
-                long_description_prefix += "[CAUTION! Compatible just with the mini!] "
+                long_description_prefix += "[CAUTION! Compatible just with the Wii mini!] "
 
             # The following app metadata should all be on one line.
             # -----
