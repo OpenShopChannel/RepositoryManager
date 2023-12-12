@@ -46,7 +46,7 @@ def apps_list():
                 long_description_prefix += "[CAUTION! Writes to NAND!] "
             # if "wii_only" flag is specified, prepend warning to long description
             if "wii_only" in flags:
-                long_description_prefix += "[Wii only app!] "
+                long_description_prefix += "[Wii only] "
             # if "vwii_only" flag is specified, prepend warning to long description
             if "vwii_only" in flags:
                 long_description_prefix += "[vWii only app!] "
