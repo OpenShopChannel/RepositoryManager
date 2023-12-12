@@ -67,9 +67,10 @@ def update():
     # Print available source downloaders
     print_available_source_downloaders(log)
 
-    # Index repository and categories
+    # Index repository, categories and supported platforms
     index_repository(repo_index)
     index_categories(repo_index)
+    index_platforms(repo_index)
 
     # Index application manifests
     index_app_manifests(repo_index, log)
@@ -144,6 +145,12 @@ def index_categories(repo_index):
         repo_index['categories'] = repo_categories
 
 
+def index_platforms(repo_index):
+    with open(os.path.join(config.REPO_DIR, 'platforms.json')) as f:
+        repo_platforms = json.load(f)
+        repo_index['platforms'] = repo_platforms
+
+
 def index_app_manifests(repo_index, log):
     repo_index['contents'] = []
 
@@ -180,6 +187,16 @@ def process_oscmeta(file, repo_index, log):
             # check if there is at least one peripheral
             if len(oscmeta["information"]["peripherals"]) == 0:
                 raise Exception("App supports zero peripherals. This is unsupported.")
+            # check supported platforms
+            if len(oscmeta["information"]["supported_platforms"]) == 0:
+                oscmeta["information"]["supported_platforms"] = [config.DEFAULT_PLATFORM]
+            supported_repo_platforms = []
+            for platform in repo_index["platforms"]:
+                if platform["name"] not in supported_repo_platforms:
+                    supported_repo_platforms.append(platform["name"])
+            for platform in oscmeta["information"]["supported_platforms"]:
+                if platform not in supported_repo_platforms:
+                    raise Exception("Platform not supported by repository: " + platform)
 
             # update application
             oscmeta["metaxml"] = update_application(oscmeta, log)

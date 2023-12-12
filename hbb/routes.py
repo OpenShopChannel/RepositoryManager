@@ -43,16 +43,13 @@ def apps_list():
             flags = app["information"].get("flags", [])
             long_description_prefix = ""
             if "writes_to_nand" in flags:
-                long_description_prefix += "[CAUTION! Writes to NAND!] "
-            # if "wii_only" flag is specified, prepend warning to long description
-            if "wii_only" in flags:
-                long_description_prefix += "[Wii only] "
-            # if "vwii_only" flag is specified, prepend warning to long description
-            if "vwii_only" in flags:
-                long_description_prefix += "[vWii only] "
-            # if "wii_mini_only" flag is specified, prepend warning to long description
-            if "wii_mini_only" in flags:
-                long_description_prefix += "[Wii mini only] "
+                long_description_prefix += "[CAUTION! Writes to NAND!]\n"
+
+            # prepend supported platforms
+            platform_display = []
+            for platform in app["information"]["supported_platforms"]:
+                platform_display.append(index.get()["platforms"][platform]["display"])
+            long_description_prefix += "Supported platforms: " + ", ".join(platform_display) + "\n"
 
             # The following app metadata should all be on one line.
             # -----
