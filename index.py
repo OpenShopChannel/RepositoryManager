@@ -185,10 +185,10 @@ def process_oscmeta(file, repo_index, log):
             if oscmeta["information"]["category"] not in categories:
                 raise Exception("Category not supported by repository: " + oscmeta["information"]["category"])
             # check if there is at least one peripheral
-            if len(oscmeta["information"]["peripherals"]) == 0:
+            if len(oscmeta["information"].get("peripherals", [])) == 0:
                 raise Exception("App supports zero peripherals. This is unsupported.")
             # check supported platforms
-            if len(oscmeta["information"]["supported_platforms"]) == 0:
+            if len(oscmeta["information"].get("supported_platforms", [])) == 0:
                 oscmeta["information"]["supported_platforms"] = [config.DEFAULT_PLATFORM]
             supported_repo_platforms = []
             for platform in repo_index["platforms"]:
