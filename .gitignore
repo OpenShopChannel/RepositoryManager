@@ -230,3 +230,8 @@ pip-selfcheck.json
 
 # macOS
 .DS_Store
+
+config.py
+data/
+work/
+.idea/
