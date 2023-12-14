@@ -47,7 +47,7 @@ def apps_list():
 
             # prepend supported platforms
             platform_display = []
-            for platform in app["information"]["supported_platforms"]:
+            for platform in app["information"].get("supported_platforms", []):
                 for index_platform in index.get()["platforms"]:
                     if index_platform["name"] == platform:
                         platform_display.append(index_platform["display_name"])

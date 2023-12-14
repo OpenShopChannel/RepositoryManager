@@ -38,7 +38,7 @@ def get_contents():
             },
             "slug": content["information"]["slug"],
             "subdirectories": content["index_computed_info"]["subdirectories"],
-            "supported_platforms": content["information"]["supported_platforms"],
+            "supported_platforms": content["information"].get("supported_platforms", []),
             "url": {
                 "icon": url_for('api.get_content_icon', slug=content["information"]["slug"], _external=True),
                 "zip": url_for('api.get_content_zip', slug=content["information"]["slug"], _slug=content["information"]["slug"], _external=True),
