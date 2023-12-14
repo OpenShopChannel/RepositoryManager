@@ -51,7 +51,8 @@ def apps_list():
                 for index_platform in index.get()["platforms"]:
                     if index_platform["name"] == platform:
                         platform_display.append(index_platform["display_name"])
-            long_description_prefix += "Supported platforms: " + ", ".join(platform_display) + "\n"
+            # TODO figure out what to do with this
+            #long_description_prefix += "Supported platforms: " + ", ".join(platform_display) + "\n"
 
             # The following app metadata should all be on one line.
             # -----
