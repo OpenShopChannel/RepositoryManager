@@ -532,12 +532,13 @@ def update_application(oscmeta, log=logger.Log("application_update")):
         log.save_log()
         raise Exception(":(")
 
-    log.log_status(f'- Creating banner for Wii Shop Channel')
-    out = subprocess.run(["BannerGenerator", "data/contents/", oscmeta["information"]["slug"]])
-    if out.returncode != 0:
-        log.log_status(f'Failure in creating banner: {out.stderr}', 'debug')
-        log.save_log()
-        raise Exception("Banner creation failed")
+    if config.GENERATE_WSC_BANNER:
+        log.log_status(f'- Creating banner for Wii Shop Channel')
+        out = subprocess.run(["BannerGenerator", "data/contents/", oscmeta["information"]["slug"]])
+        if out.returncode != 0:
+            log.log_status(f'Failure in creating banner: {out.stderr}', 'debug')
+            log.save_log()
+            raise Exception("Banner creation failed")
 
     log.log_status(f'- Reading application metadata')
 

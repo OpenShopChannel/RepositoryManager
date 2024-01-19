@@ -31,6 +31,7 @@ SENTRY_TRACES_SAMPLE_RATE = 1.0  # Recommended to lower from default of 1.0 on p
 
 # Other settings
 DEFAULT_PLATFORM = "wii"
+GENERATE_WSC_BANNER = False
 SOCKETIO_CORS_ALLOWED_ORIGINS = "*"
 URL_DOWNLOAD_TIMEOUT = 60
 USER_AGENT = "This is a user agent string"
