@@ -19,6 +19,7 @@ from admin.roles import has_access
 from models import db, login
 from scheduler import scheduler, socketio
 from setup.routes import setup
+from models import SettingsModel
 
 if config.SENTRY_DSN:
     sentry_sdk.init(
@@ -82,6 +83,12 @@ app.jinja_env.globals.update(has_access=has_access)
 
 @app.route('/')
 def hello_world():
+    if not SettingsModel.query.filter_by(key='setup_complete').first():
+        return """
+        This RepositoryManager instance has not been installed. 
+        <a href='/setup'>Click here to go to the setup.</a>
+        """
+
     app_count = len(index.get()["contents"])
     repository_name = index.get()["repository"]["name"]
     repository_provider = index.get()["repository"]["provider"]
