@@ -1,3 +1,5 @@
+import random
+
 from datetime import datetime
 
 from flask_sqlalchemy import SQLAlchemy
@@ -54,3 +56,26 @@ class PersistentAppInformationModel(UserMixin, db.Model):
     app_slug = db.Column(db.String, primary_key=True)
     title_id = db.Column(db.String)
     version = db.Column(db.Integer, server_default="1", nullable=False)
+
+
+class AppOfTheDay:
+    package_of_the_day = None
+
+    def set_package_of_the_day(self, index):
+        # some quality assurance, some of the apps have covid
+        while True:
+            package = random.choice(index.get()["contents"])
+            # they do not have covid, just did not specify a description
+            if package["metaxml"]["app"].get("short_description", "") == "":
+                continue
+            # they do not have covid, just simply a demo and we can't have that
+            if package["information"]["category"] == "demos":
+                continue
+            # they do not have covid, but don't support wii remotes
+            if "Wii Remote" not in package["information"]["peripherals"]:
+                continue
+            # they do not have covid, but the developer is Danbo
+            if package["information"]["author"] == "Danbo":
+                continue
+            break
+        self.package_of_the_day = package

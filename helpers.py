@@ -6,8 +6,8 @@ import sys
 
 import pygit2
 
+from flask import url_for
 from models import SettingsModel, db, ModeratedBinariesModel
-
 
 def get_settings():
     settings = {}
@@ -144,3 +144,38 @@ def generate_title_id():
     final_id = f"{id_prefix}{random_hex}"
 
     return final_id
+
+
+def describe_app(package):
+    return {
+        "author": package["metaxml"]["app"].get("coder", package["information"]["author"]),
+        "category": package["information"]["category"],
+        "description": {
+            "long": package["metaxml"]["app"].get("long_description", "No description provided."),
+            "short": package["metaxml"]["app"].get("short_description", "No description provided.")
+        },
+        "file_size": {
+            "binary": package["index_computed_info"]["binary_size"],
+            "icon": package["index_computed_info"]["icon_size"],
+            "zip_compressed": package["index_computed_info"]["compressed_size"],
+            "zip_uncompressed": package["index_computed_info"]["uncompressed_size"]
+        },
+        "flags": package["information"].get("flags", []),
+        "name": package["metaxml"]["app"].get("name", package["information"]["name"]),
+        "package_type": package["index_computed_info"]["package_type"],
+        "peripherals": package["information"]["peripherals"],
+        "release_date": package["index_computed_info"].get("release_date", 0),
+        "shop": {
+            "title_id": package["index_computed_info"].get("title_id"),
+            "title_version": package["index_computed_info"].get("title_version")
+        },
+        "slug": package["information"]["slug"],
+        "subdirectories": package["index_computed_info"]["subdirectories"],
+        "supported_platforms": package["information"].get("supported_platforms", []),
+        "url": {
+            "icon": url_for('api.get_content_icon', slug=package["information"]["slug"], _external=True),
+            "zip": url_for('api.get_content_zip', slug=package["information"]["slug"],
+                           _slug=package["information"]["slug"], _external=True),
+        },
+        "version": package["metaxml"]["app"].get("version", "Unknown")
+    }

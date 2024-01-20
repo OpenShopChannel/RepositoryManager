@@ -13,7 +13,7 @@ import helpers
 import index
 import repository
 from admin.routes import admin
-from api.routes import api
+from api.routes import api, featured_app
 from hbb.routes import hbb
 from admin.roles import has_access
 from models import db, login
@@ -59,6 +59,11 @@ def pull_repo_and_update_index():
         index.update()
 
 
+def refresh_app_of_the_day():
+    with app.app_context():
+        featured_app.set_package_of_the_day(index)
+
+
 # Register additional unpack formats
 shutil.register_unpack_format("7z", [".7z"], py7zr.unpack_7zarchive)
 
@@ -67,6 +72,8 @@ shutil.register_unpack_format("7z", [".7z"], py7zr.unpack_7zarchive)
 with app.app_context():
     # Register scheduler jobs
     scheduler.add_job(pull_repo_and_update_index, 'interval', hours=6, replace_existing=True, id='update', args=[])
+    # Schedule app of the day for refresh once per day at 2:00
+    scheduler.add_job(refresh_app_of_the_day, 'cron', hour='2', minute='00', replace_existing=True, id='app-of-the-day')
     scheduler.start()
 
     # Prepare flask app
@@ -79,7 +86,6 @@ with app.app_context():
 app.jinja_env.globals.update(index=index.get)
 app.jinja_env.globals.update(notifications=helpers.notifications)
 app.jinja_env.globals.update(has_access=has_access)
-
 
 @app.route('/')
 def hello_world():

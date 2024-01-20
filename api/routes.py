@@ -1,6 +1,7 @@
 import os
 
-from flask import Blueprint, jsonify, send_file, url_for, abort
+from flask import Blueprint, jsonify, send_file, abort
+from models import AppOfTheDay
 from werkzeug.utils import secure_filename
 
 import helpers
@@ -8,43 +9,16 @@ import index
 
 api = Blueprint('api', __name__, template_folder='templates', url_prefix='/api')
 
+featured_app = AppOfTheDay()
+featured_app.set_package_of_the_day(index)
+
 
 @api.get("/v3/contents")
 def get_contents():
     contents = []
     for content in index.get()["contents"]:
         # Append to contents
-        contents.append({
-            "author": content["metaxml"]["app"].get("coder", content["information"]["author"]),
-            "category": content["information"]["category"],
-            "description": {
-                "long": content["metaxml"]["app"].get("long_description", "No description provided."),
-                "short": content["metaxml"]["app"].get("short_description", "No description provided.")
-            },
-            "file_size": {
-                "binary": content["index_computed_info"]["binary_size"],
-                "icon": content["index_computed_info"]["icon_size"],
-                "zip_compressed": content["index_computed_info"]["compressed_size"],
-                "zip_uncompressed": content["index_computed_info"]["uncompressed_size"]
-            },
-            "flags": content["information"].get("flags", []),
-            "name": content["metaxml"]["app"].get("name", content["information"]["name"]),
-            "package_type": content["index_computed_info"]["package_type"],
-            "peripherals": content["information"]["peripherals"],
-            "release_date": content["index_computed_info"].get("release_date", 0),
-            "shop": {
-                "title_id": content["index_computed_info"].get("title_id"),
-                "title_version": content["index_computed_info"].get("title_version")
-            },
-            "slug": content["information"]["slug"],
-            "subdirectories": content["index_computed_info"]["subdirectories"],
-            "supported_platforms": content["information"].get("supported_platforms", []),
-            "url": {
-                "icon": url_for('api.get_content_icon', slug=content["information"]["slug"], _external=True),
-                "zip": url_for('api.get_content_zip', slug=content["information"]["slug"], _slug=content["information"]["slug"], _external=True),
-            },
-            "version": content["metaxml"]["app"].get("version", "Unknown")
-        })
+        contents.append(helpers.describe_app(content))
 
     return jsonify(contents)
 
@@ -83,6 +57,12 @@ def get_content_zip(slug, _slug):
         return send_file(zip_path, download_name=slug + ".zip")
     else:
         abort(404)
+
+
+@api.get("/v3/featured-app")
+def get_featured_app():
+    app = featured_app.package_of_the_day
+    return jsonify(helpers.describe_app(app))
 
 
 @api.after_request
