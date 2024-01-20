@@ -235,3 +235,5 @@ config.py
 data/
 work/
 .idea/
+repository/
+*.db
