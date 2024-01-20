@@ -30,6 +30,7 @@ SENTRY_DSN = ""  # Keep empty to disable use of Sentry, otherwise specify DSN.
 SENTRY_TRACES_SAMPLE_RATE = 1.0  # Recommended to lower from default of 1.0 on production
 
 # Other settings
+BANNER_GENERATOR_PATH = ""  # If empty will attempt to use "BannerGenerator" in the working folder
 DEFAULT_PLATFORM = "wii"
 GENERATE_WSC_BANNER = False
 SOCKETIO_CORS_ALLOWED_ORIGINS = "*"

@@ -534,7 +534,9 @@ def update_application(oscmeta, log=logger.Log("application_update")):
 
     if config.GENERATE_WSC_BANNER:
         log.log_status(f'- Creating banner for Wii Shop Channel')
-        out = subprocess.run(["BannerGenerator", "data/contents/", oscmeta["information"]["slug"]])
+        tmp = config.BANNER_GENERATOR_PATH
+        generator = "BannerGenerator" if tmp == "" else tmp
+        out = subprocess.run([generator, "data/contents/", oscmeta["information"]["slug"]])
         if out.returncode != 0:
             log.log_status(f'Failure in creating banner: {out.stderr}', 'debug')
             log.save_log()
