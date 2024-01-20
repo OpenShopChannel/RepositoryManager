@@ -43,7 +43,7 @@ def apps_list():
             flags = app["information"].get("flags", [])
             long_description_prefix = ""
             if "writes_to_nand" in flags:
-                long_description_prefix += "[CAUTION! Writes to NAND!]\n"
+                long_description_prefix += "[CAUTION! Writes to NAND!] "
 
             # prepend supported platforms
             platform_display = []
