@@ -7,7 +7,7 @@
         </button>
     </div>
     <!-- Navbar brand -->
-    <a href="{{ url_for('admin.home') }}" class="navbar-brand">
+    <a href="[[${ url_for('admin.home') }]]" class="navbar-brand">
         <img src="/static/assets/images/logo.png" alt="Repository Manager">
         Repository Manager
     </a>
@@ -23,7 +23,7 @@
             <div class="dropdown-menu dropdown-menu-right w-200" aria-labelledby="navbar-dropdown-toggle-btn-1">
                 <div class="dropdown-divider"></div>
                 <div class="dropdown-content">
-                    Logged in as {{ current_user.email }}
+                    Logged in as [[${ current_user.email }]]
                 </div>
             </div>
         </div>

@@ -16,19 +16,19 @@
             {% if mod_entry.status == status %}
                 <tr>
                     <th style="text-align: center"><i class="fa-solid fa-gavel"></i></th>
-                    <th>{{ mod_entry.app_slug }}-{{ mod_entry.checksum | truncate(24) }}</th>
-                    <th>{{ mod_entry.discovery_date }}</th>
+                    <th>[[${ mod_entry.app_slug }]]-[[${ mod_entry.checksum | truncate(24) }]]</th>
+                    <th>[[${ mod_entry.discovery_date }]]</th>
                     <td>
                         <div class="btn-group" role="group">
                             {% if mod_entry.status != "approved" %}
-                                <a href="{{ url_for("admin.moderation_action", checksum=mod_entry.checksum, action="approve") }}" class="btn btn-success" type="button">Approve</a>
+                                <a href="[[${ url_for("admin.moderation_action", checksum=mod_entry.checksum, action="approve") }]]" class="btn btn-success" type="button">Approve</a>
                             {% endif %}
                             {% if mod_entry.status != "rejected" %}
-                                <a href="{{ url_for("admin.moderation_action", checksum=mod_entry.checksum, action="reject") }}" class="btn btn-danger" type="button">Reject</a>
+                                <a href="[[${ url_for("admin.moderation_action", checksum=mod_entry.checksum, action="reject") }]]" class="btn btn-danger" type="button">Reject</a>
                             {% endif %}
                         </div>
                     </td>
-                    <td><a href="{{ url_for("admin.moderation_action", checksum=mod_entry.checksum, action="download") }}" class="btn" type="button">Download .ZIP</a></td>
+                    <td><a href="[[${ url_for("admin.moderation_action", checksum=mod_entry.checksum, action="download") }]]" class="btn" type="button">Download .ZIP</a></td>
                 </tr>
             {% endif %}
         {% endfor %}
@@ -48,7 +48,7 @@
                     Pending
                 </summary>
                 <div class="collapse-content">
-                    {{ table(mod_entries, "pending") }}
+                    [[${ table(mod_entries, "pending") }]]
                 </div>
             </details>
 
@@ -57,7 +57,7 @@
                     Approved
                 </summary>
                 <div class="collapse-content">
-                    {{ table(mod_entries, "approved") }}
+                    [[${ table(mod_entries, "approved") }]]
                 </div>
             </details>
 
@@ -66,7 +66,7 @@
                     Rejected
                 </summary>
                 <div class="collapse-content">
-                    {{ table(mod_entries, "rejected") }}
+                    [[${ table(mod_entries, "rejected") }]]
                 </div>
             </details>
         </div>

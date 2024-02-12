@@ -19,10 +19,10 @@
             {% for user in users %}
                 <tr>
                     <th style="text-align: center"><i class="fa-solid fa-user"></i></th>
-                    <th>{{ user.id }}</th>
-                    <th>{{ user.username }}</th>
-                    <th>{{ user.email }}</th>
-                    <th>{{ user.role }}</th>
+                    <th>[[${ user.id }]]</th>
+                    <th>[[${ user.username }]]</th>
+                    <th>[[${ user.email }]]</th>
+                    <th>[[${ user.role }]]</th>
                     <td></td>
                 </tr>
             {% endfor %}

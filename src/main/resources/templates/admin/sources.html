@@ -17,9 +17,9 @@
             {% for source in sources %}
                 <tr>
                     <th style="text-align: center"><i class="fa-solid fa-cloud"></i></th>
-                    <th>{{ source["type"] }}</th>
-                    <th>{{ source["name"] }}</th>
-                    <th>{{ source["description"] }}</th>
+                    <th>[[${ source["type"] }]]</th>
+                    <th>[[${ source["name"] }]]</th>
+                    <th>[[${ source["description"] }]]</th>
                 </tr>
             {% endfor %}
             </tbody>

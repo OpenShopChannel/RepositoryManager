@@ -9,37 +9,37 @@
         <h1 class="content-title font-size-22">
             Repository Administration Panel
         </h1>
-        You are logged in as <strong>{{ current_user.username }}</strong>.
+        You are logged in as <strong>[[${ current_user.username }]]</strong>.
     </div>
     {% if has_access("Administrator") %}
     <div class="card">
         <div class="row row-eq-spacing justify-content-center" style="margin-top: unset; margin-bottom: unset;">
             <div class="btn-group btn-group-lg" role="group" aria-label="Basic example">
-                <a href="{{ url_for("admin.action", action="update") }}" class="btn btn-success" type="button">Update</a>
-                <a href="{{ url_for("admin.settings") }}" class="btn" type="button">Settings</a>
+                <a href="[[${ url_for("admin.action", action="update") }]]" class="btn btn-success" type="button">Update</a>
+                <a href="[[${ url_for("admin.settings") }]]" class="btn" type="button">Settings</a>
             </div>
         </div>
     </div>
     {% endif %}
     <div class="card">
         <h2 class="card-title">
-            {{ index()["repository"]["name"] }} (Provider: {{ index()["repository"]["provider"] }})
+            [[${ index()["repository"]["name"] }]] (Provider: [[${ index()["repository"]["provider"] }]])
         </h2>
         <p>
-            {{ index()["repository"]["description"] }}
+            [[${ index()["repository"]["description"] }]]
         </p>
     </div>
     <div class="row row-eq-spacing">
         <div class="col-6 col-xl-3">
             <div class="card">
                 <h2 class="card-title">Applications</h2>
-                {{ index()["contents"]|length }}
+                [[${ index()["contents"]|length }]]
             </div>
         </div>
         <div class="col-6 col-xl-3">
             <div class="card">
                 <h2 class="card-title">Pending Moderation</h2>
-                {{ notifications()["pending_moderation"] }}
+                [[${ notifications()["pending_moderation"] }]]
             </div>
         </div>
         <div class="col-6 col-xl-3">

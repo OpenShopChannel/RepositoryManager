@@ -18,10 +18,10 @@
             {% for job in jobs %}
                 <tr>
                     <th style="text-align: center"><i class="fa-solid fa-clock"></i></th>
-                    <th>{{ job.id }}</th>
-                    <th>{{ job.next_run_time }}</th>
-                    <th>{{ job.func_ref }}</th>
-                    <th>{{ job.trigger }}</th>
+                    <th>[[${ job.id }]]</th>
+                    <th>[[${ job.next_run_time }]]</th>
+                    <th>[[${ job.func_ref }]]</th>
+                    <th>[[${ job.trigger }]]</th>
                 </tr>
             {% endfor %}
             </tbody>

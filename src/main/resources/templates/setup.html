@@ -13,33 +13,33 @@
         {% if form.errors %}
             {% for error in form.errors %}
                 <div class="notification is-danger">
-                    Error in field {{ error }}
+                    Error in field [[${ error }]]
                 </div>
             {% endfor %}
         {% endif %}
         <div class="box">
             <form method="POST" action="/setup">
                 <h1 class="title has-text-centered">
-                    Welcome to Open Shop Channel's Repository Manager! <small>{{ version }}</small>
+                    Welcome to Open Shop Channel's Repository Manager! <small>[[${ version }]]</small>
                 </h1>
                 <h2 class="subtitle has-text-centered">First time set-up</h2>
-                {{ form.csrf_token }}
+                [[${ form.csrf_token }]]
 
                 <div class="divider">Repository Configuration</div>
-                {{ form.git_url.label(class_="label") }}
-                {{ form.git_url(size=20, class_="input") }}
+                [[${ form.git_url.label(class_="label") }]]
+                [[${ form.git_url(size=20, class_="input") }]]
 
                 <div class="divider">Initial Admin User</div>
-                {{ form.admin_email.label(class_="label") }}
-                {{ form.admin_email(class_="input") }}
+                [[${ form.admin_email.label(class_="label") }]]
+                [[${ form.admin_email(class_="input") }]]
 
-                {{ form.admin_username.label(class_="label") }}
-                {{ form.admin_username(class_="input") }}
+                [[${ form.admin_username.label(class_="label") }]]
+                [[${ form.admin_username(class_="input") }]]
 
-                {{ form.admin_password.label(class_="label") }}
-                {{ form.admin_password(class_="input") }}
+                [[${ form.admin_password.label(class_="label") }]]
+                [[${ form.admin_password(class_="input") }]]
 
-                {{ form.submit(class_="button is-link") }}
+                [[${ form.submit(class_="button is-link") }]]
             </form>
         </div>
     </div>
