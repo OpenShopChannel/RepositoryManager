@@ -1,0 +1,34 @@
+{% extends "admin/base.html" %}
+{% block content %}
+    <div class="content">
+        <h1 class="content-title font-size-22"> <!-- font-size-22 = font-size: 2.2rem (22px) -->
+            Applications
+        </h1>
+        <table class="table table-bordered table-hover table-striped">
+            <thead>
+            <tr>
+                <th>File</th>
+                <th>Name</th>
+                <th>Author</th>
+                <th>Category</th>
+                <th>Generated Index Entry (Debug)</th>
+                <th>Links</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for app in index()["contents"] %}
+                <tr>
+                    <th>{{ app["information"]["slug"] }}.oscmeta</th>
+                    <th>{{ app["metaxml"]["app"]["name"] }}</th>
+                    <td>{{ app["metaxml"]["app"]["coder"] }}</td>
+                    <td>{{ app["information"]["category"] }}</td>
+                    <td class="text-right">
+                        {{ app }}
+                    </td>
+                    <td><a href="{{ url_for('api.get_content_zip', slug=app["information"]["slug"], _slug=app["information"]["slug"]) }}" class="btn" type="button">Download</a></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

@@ -1,0 +1,49 @@
+{% extends "admin/base.html" %}
+{% block content %}
+    <div class="content">
+        <h1 class="content-title font-size-22"> <!-- font-size-22 = font-size: 2.2rem (22px) -->
+            Task Status
+        </h1>
+        <div class="row">
+            <div id="terminal" style="height: 600px; font-size: 16px;"></div>
+        </div>
+    </div>
+    <link rel="stylesheet" href="/static/xterm/css/xterm.css" />
+    <script src="/static/xterm/lib/xterm.js"></script>
+    <script src="/static/socketio/socket.io.js"></script>
+    <script type="text/javascript" charset="utf-8">
+        var term = new Terminal({
+            rows: 40,
+            cols: 160,
+        });
+        term.open(document.getElementById('terminal'));
+        var socket = io();
+
+        socket.on('logUpdate', function(line) {
+            let now = new Date();
+            let timestamp = '[' + now.toUTCString() + '] ';
+
+            let prefix;
+            switch (line["status"]) {
+                case "info":
+                    // reset
+                    prefix = '\x1b[0m'
+                    break;
+                case "error":
+                    // red
+                    prefix = '\x1b[1;31m'
+                    break;
+                case "success":
+                    // green
+                    prefix = '\x1b[1;32m'
+                    break;
+                case "title":
+                    // cyan
+                    prefix = '\x1b[1;36m'
+                    break;
+            }
+
+            term.writeln(prefix + timestamp + line["message"]);
+        });
+    </script>
+{% endblock %}
