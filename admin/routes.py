@@ -92,6 +92,7 @@ def sources():
 
 @admin.route('/moderation/<checksum>/<action>')
 @login_required
+@role_required('Moderator')
 def moderation_action(checksum, action):
     checksum = secure_filename(checksum)
     moderation_entry = db.session.query(ModeratedBinariesModel).filter_by(checksum=checksum).first()
