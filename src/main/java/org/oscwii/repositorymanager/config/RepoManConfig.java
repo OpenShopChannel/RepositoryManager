@@ -9,7 +9,13 @@ import java.nio.file.Path;
 @ConfigurationProperties(prefix = "repository-manager")
 public class RepoManConfig
 {
+    private String defaultPlatform;
     private Path repoDir;
+
+    public String getDefaultPlatform()
+    {
+        return defaultPlatform;
+    }
 
     public Path getRepoDir()
     {

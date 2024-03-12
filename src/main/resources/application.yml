@@ -11,4 +11,5 @@ spring:
     password: danbo
 
 repository-manager:
+  default-platform: "wii"
   repo-dir: "repository"

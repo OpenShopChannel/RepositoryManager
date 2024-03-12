@@ -1,13 +1,12 @@
 package org.oscwii.repositorymanager.model.app;
 
-import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
-public record OSCMeta(String name, String author, Category category,
-                      String authorContact, List<Platform> supportedPlatforms,
-                      EnumMap<Peripheral, Integer> peripherals,
+public record OSCMeta(String name, String author, String category,
+                      String authorContact, List<String> supportedPlatforms,
+                      List<String> peripherals,
                       String version, EnumSet<Flag> flags)
 {
     public record Source(String type, Format format, String url, String file,
