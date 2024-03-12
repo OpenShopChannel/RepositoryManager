@@ -1,6 +1,6 @@
 package org.oscwii.repositorymanager.model.app;
 
-public enum Peripherals
+public enum Peripheral
 {
     WII_REMOTE         ("Wii Remote", "w"),
     NUNCHUK            ("Nunchuk", "n"),
@@ -13,7 +13,7 @@ public enum Peripherals
 
     private final String displayName, hbbKey;
 
-    Peripherals(String displayName, String hbbKey)
+    Peripheral(String displayName, String hbbKey)
     {
         this.displayName = displayName;
         this.hbbKey = hbbKey;

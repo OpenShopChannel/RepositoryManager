@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.Set;
 
 public record OSCMeta(String name, String author, Category category,
-                      String authorContact, List<String> supportedPlatforms,
-                      EnumMap<Peripherals, Integer> peripherals,
-                      String version, EnumSet<Flags> flags)
+                      String authorContact, List<Platform> supportedPlatforms,
+                      EnumMap<Peripheral, Integer> peripherals,
+                      String version, EnumSet<Flag> flags)
 {
     public record Source(String type, Format format, String url, String file,
                          String userAgent, Set<String> additionalFiles)
@@ -35,5 +35,10 @@ public record OSCMeta(String name, String author, Category category,
                 return extensions;
             }
         }
+    }
+
+    public enum Flag
+    {
+        WRITES_TO_NAND
     }
 }
