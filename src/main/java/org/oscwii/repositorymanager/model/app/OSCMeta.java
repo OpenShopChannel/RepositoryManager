@@ -5,10 +5,10 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
-public record PackageManifest(String name, String author, Category category,
-                              String authorContact, List<String> supportedPlatforms,
-                              EnumMap<Peripherals, Integer> peripherals,
-                              String version, EnumSet<Flags> flags)
+public record OSCMeta(String name, String author, Category category,
+                      String authorContact, List<String> supportedPlatforms,
+                      EnumMap<Peripherals, Integer> peripherals,
+                      String version, EnumSet<Flags> flags)
 {
     public record Source(String type, Format format, String url, String file,
                          String userAgent, Set<String> additionalFiles)
