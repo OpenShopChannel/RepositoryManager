@@ -9,12 +9,14 @@ import org.oscwii.repositorymanager.model.RepositoryInfo;
 import org.oscwii.repositorymanager.model.app.Category;
 import org.oscwii.repositorymanager.model.app.OSCMeta;
 import org.oscwii.repositorymanager.model.app.Platform;
+import org.oscwii.repositorymanager.utils.FileUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
-import java.io.FileReader;
-import java.io.Reader;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -61,47 +63,30 @@ public class RepositoryIndex
     private void loadRepositoryInfo()
     {
         File file = config.getRepoDir().resolve("repository.json").toFile();
-        try(Reader reader = new FileReader(file))
-        {
-            this.info = gson.fromJson(reader, RepositoryInfo.class);
-        }
-        catch(Exception ignored)
+        this.info = FileUtil.loadJson(file, RepositoryInfo.class, gson, e ->
         {
             logger.warn("Unable to load repository info! Has the repository been initialized yet?");
             logger.warn("Falling back to no-op empty repository.");
-        }
+            logger.warn(e);
+        });
     }
 
     private void indexCategories()
     {
         File file = config.getRepoDir().resolve("categories.json").toFile();
-        try(Reader reader = new FileReader(file))
-        {
-            //noinspection Convert2Diamond
-            this.categories = gson.fromJson(reader, new TypeToken<List<Category>>(){});
-        }
-        catch(Exception e)
-        {
-            throw new RuntimeException("Failed to load categories", e);
-        }
-    }
-
-    private void indexContents()
-    {
-
+        this.categories = FileUtil.loadJson(file, new TypeToken<List<Category>>(){},
+                gson, e -> handleFatalException(e, "Failed to load categories:"));
     }
 
     private void indexPlatforms()
     {
         File file = config.getRepoDir().resolve("platforms.json").toFile();
-        try(Reader reader = new FileReader(file))
-        {
-            //noinspection Convert2Diamond
-            this.platforms = gson.fromJson(reader, new TypeToken<List<Platform>>(){});
-        }
-        catch(Exception e)
-        {
-            throw new RuntimeException("Failed to load platforms", e);
-        }
+        this.platforms = FileUtil.loadJson(file, new TypeToken<List<Platform>>(){}, gson,
+                e -> handleFatalException(e, "Failed to load platforms:"));
+    }
+
+    private void handleFatalException(Exception e, String msg)
+    {
+        throw new RuntimeException(msg, e);
     }
 }
