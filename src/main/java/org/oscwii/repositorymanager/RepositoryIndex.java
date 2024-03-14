@@ -12,6 +12,7 @@ import org.oscwii.repositorymanager.model.app.OSCMeta;
 import org.oscwii.repositorymanager.model.app.Peripheral;
 import org.oscwii.repositorymanager.model.app.Platform;
 import org.oscwii.repositorymanager.utils.FileUtil;
+import org.oscwii.repositorymanager.utils.QuietException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -195,6 +196,6 @@ public class RepositoryIndex
 
     private void handleFatalException(Exception e, String msg)
     {
-        throw new RuntimeException(msg, e);
+        throw new QuietException(msg, e);
     }
 }
