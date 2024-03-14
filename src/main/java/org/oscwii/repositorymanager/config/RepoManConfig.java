@@ -17,8 +17,18 @@ public class RepoManConfig
         return defaultPlatform;
     }
 
+    public void setDefaultPlatform(String defaultPlatform)
+    {
+        this.defaultPlatform = defaultPlatform;
+    }
+
     public Path getRepoDir()
     {
         return repoDir;
+    }
+
+    public void setRepoDir(Path repoDir)
+    {
+        this.repoDir = repoDir;
     }
 }
