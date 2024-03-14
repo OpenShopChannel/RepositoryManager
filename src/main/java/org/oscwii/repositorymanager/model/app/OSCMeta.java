@@ -1,5 +1,7 @@
 package org.oscwii.repositorymanager.model.app;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
@@ -38,6 +40,7 @@ public record OSCMeta(String name, String author, String category,
 
     public enum Flag
     {
+        @SerializedName("writes_to_nand")
         WRITES_TO_NAND
     }
 }
