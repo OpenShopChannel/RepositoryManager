@@ -22,10 +22,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
@@ -50,9 +52,9 @@ public class RepositoryIndex
         this.config = config;
 
         this.info = RepositoryInfo.DEFAULT;
-        this.categories = new ArrayList<>();
-        this.contents = new ArrayList<>();
-        this.platforms = new HashMap<>();
+        this.categories = Collections.emptyList();
+        this.contents = Collections.emptyList();
+        this.platforms = Collections.emptyMap();
     }
 
     public void update(boolean updateApps)
@@ -76,9 +78,9 @@ public class RepositoryIndex
         File file = config.getRepoDir().resolve("repository.json").toFile();
         this.info = FileUtil.loadJson(file, RepositoryInfo.class, gson, e ->
         {
-            logger.warn("Unable to load repository info! Has the repository been initialized yet?");
-            logger.warn("Falling back to no-op empty repository.");
-            logger.warn(e);
+            logger.error("Unable to load repository info! Has the repository been initialized yet?");
+            logger.error("Falling back to no-op empty repository. Cannot continue.");
+            handleFatalException(e, "Failed to load repository info:");
         });
     }
 
@@ -94,12 +96,14 @@ public class RepositoryIndex
         File file = config.getRepoDir().resolve("platforms.json").toFile();
         List<Platform> platformList = FileUtil.loadJson(file, new TypeToken<List<Platform>>(){}, gson,
                 e -> handleFatalException(e, "Failed to load platforms:"));
+        Map<String, Platform> platforms = new HashMap<>();
         if(platformList == null)
             return;
 
         for(Platform platform : platformList)
             platforms.put(platform.name(), platform);
 
+        this.platforms = platforms;
         this.defaultPlatform = platforms.get(config.getDefaultPlatform());
         Assert.notNull(defaultPlatform, "Unknown default platform: " + config.getDefaultPlatform());
     }
@@ -108,6 +112,7 @@ public class RepositoryIndex
     {
         AtomicInteger i = new AtomicInteger();
         List<File> manifests;
+        List<InstalledApp> contents = new ArrayList<>();
         Path folder = config.getRepoDir().resolve("contents");
 
         try(Stream<Path> walk = Files.walk(folder, 1))
@@ -129,7 +134,8 @@ public class RepositoryIndex
 
             try
             {
-                processMeta(meta, updateApps);
+                InstalledApp app = processMeta(meta, updateApps);
+                contents.add(Objects.requireNonNull(app));
             }
             catch(Exception e)
             {
@@ -137,17 +143,18 @@ public class RepositoryIndex
             }
         }
 
+        this.contents = contents;
         logger.info("Finished indexing application manifests");
     }
 
-    private void processMeta(File meta, boolean updateApps)
+    private InstalledApp processMeta(File meta, boolean updateApp)
     {
         OSCMeta oscMeta = FileUtil.loadJson(meta, OSCMeta.class, gson,
                 e -> handleFatalException(e, "Failed to process meta \"" + meta.getName() + "\":"));
 
         // this means the JSON parsing failed
         if(oscMeta == null)
-            return;
+            return null;
 
         Category category = null;
         List<Platform> supportedPlatforms = new ArrayList<>();
@@ -189,9 +196,8 @@ public class RepositoryIndex
             supportedPlatforms.add(defaultPlatform);
         }
 
-        InstalledApp app = new InstalledApp(meta.getName().replace(".oscmeta", ""), oscMeta,
+        return new InstalledApp(meta.getName().replace(".oscmeta", ""), oscMeta,
                 category, peripherals, supportedPlatforms);
-        contents.add(app);
     }
 
     private void handleFatalException(Exception e, String msg)
