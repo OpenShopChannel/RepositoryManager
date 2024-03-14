@@ -31,7 +31,9 @@ import java.util.stream.Stream;
 @Service
 public class RepositoryIndex
 {
+    private final Gson gson;
     private final Logger logger;
+    private final RepoManConfig config;
 
     private List<Category> categories;
     private List<InstalledApp> contents;
@@ -40,13 +42,11 @@ public class RepositoryIndex
     private RepositoryInfo info;
 
     @Autowired
-    private Gson gson;
-    @Autowired
-    private RepoManConfig config;
-
-    public RepositoryIndex()
+    public RepositoryIndex(Gson gson, RepoManConfig config)
     {
-        this.logger = LogManager.getLogger("Repository");
+        this.gson = gson;
+        this.logger = LogManager.getLogger(RepositoryIndex.class);
+        this.config = config;
 
         this.info = RepositoryInfo.DEFAULT;
         this.categories = new ArrayList<>();
@@ -54,7 +54,7 @@ public class RepositoryIndex
         this.platforms = new HashMap<>();
     }
 
-    public void update()
+    public void update(boolean updateApps)
     {
         logger.info("Updating repository index");
         // TODO discord log
@@ -66,7 +66,8 @@ public class RepositoryIndex
         indexCategories();
         indexPlatforms();
 
-
+        // Index applications
+        indexContents(updateApps);
     }
 
     private void loadRepositoryInfo()
@@ -102,43 +103,46 @@ public class RepositoryIndex
         Assert.notNull(defaultPlatform, "Unknown default platform: " + config.getDefaultPlatform());
     }
 
-    private void indexContents()
+    private void indexContents(boolean updateApps)
     {
         AtomicInteger i = new AtomicInteger();
+        List<File> manifests;
         Path folder = config.getRepoDir().resolve("contents");
 
         try(Stream<Path> walk = Files.walk(folder, 1))
         {
-            walk.map(Path::toFile)
+            manifests = walk.map(Path::toFile)
                     .filter(File::isFile)
                     .filter(file -> file.getName().endsWith(".oscmeta"))
-                    .forEach(meta ->
-                    {
-                        logger.info("Loading manifest \"{}\" for processing ({}/{})",
-                                meta, i.incrementAndGet(), walk.count());
-
-                        try
-                        {
-                            processMeta(meta);
-                        }
-                        catch(Exception e)
-                        {
-                            logger.error("Failed to process oscmeta {}:", meta, e);
-                        }
-                    });
+                    .toList();
         }
         catch(IOException e)
         {
             throw new RuntimeException("Failed to access repository contents:", e);
         }
 
+        for(File meta : manifests)
+        {
+            logger.info("Loading manifest \"{}\" for processing ({}/{})",
+                    meta.getName(), i.incrementAndGet(), manifests.size());
+
+            try
+            {
+                processMeta(meta, updateApps);
+            }
+            catch(Exception e)
+            {
+                logger.error("Failed to process oscmeta {}:", meta.getName(), e);
+            }
+        }
+
         logger.info("Finished indexing application manifests");
     }
 
-    private void processMeta(File meta)
+    private void processMeta(File meta, boolean updateApps)
     {
         OSCMeta oscMeta = FileUtil.loadJson(meta, OSCMeta.class, gson,
-                e -> handleFatalException(e, "Failed to process meta \"" + meta + "\":"));
+                e -> handleFatalException(e, "Failed to process meta \"" + meta.getName() + "\":"));
 
         // this means the JSON parsing failed
         if(oscMeta == null)
@@ -186,6 +190,7 @@ public class RepositoryIndex
 
         InstalledApp app = new InstalledApp(meta.getName().replace(".oscmeta", ""), oscMeta,
                 category, peripherals, supportedPlatforms);
+        contents.add(app);
     }
 
     private void handleFatalException(Exception e, String msg)
