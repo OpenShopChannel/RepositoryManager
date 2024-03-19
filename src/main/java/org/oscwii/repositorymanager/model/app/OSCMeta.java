@@ -8,8 +8,8 @@ import java.util.Set;
 
 public record OSCMeta(String name, String author, String category,
                       String authorContact, List<String> supportedPlatforms,
-                      List<String> peripherals,
-                      String version, EnumSet<Flag> flags)
+                      List<String> peripherals, String version, EnumSet<Flag> flags,
+                      Source source)
 {
     public record Source(String type, Format format, String url, String file,
                          String userAgent, Set<String> additionalFiles)

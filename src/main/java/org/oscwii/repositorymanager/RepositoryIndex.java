@@ -4,13 +4,15 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.oscwii.repositorymanager.config.RepoManConfig;
+import org.oscwii.repositorymanager.config.repoman.RepoManConfig;
 import org.oscwii.repositorymanager.model.RepositoryInfo;
 import org.oscwii.repositorymanager.model.app.Category;
 import org.oscwii.repositorymanager.model.app.InstalledApp;
 import org.oscwii.repositorymanager.model.app.OSCMeta;
 import org.oscwii.repositorymanager.model.app.Peripheral;
 import org.oscwii.repositorymanager.model.app.Platform;
+import org.oscwii.repositorymanager.sources.SourceDownloader;
+import org.oscwii.repositorymanager.sources.SourceRegistry;
 import org.oscwii.repositorymanager.utils.FileUtil;
 import org.oscwii.repositorymanager.utils.QuietException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +39,7 @@ public class RepositoryIndex
     private final Gson gson;
     private final Logger logger;
     private final RepoManConfig config;
+    private final SourceRegistry sources;
 
     private List<Category> categories;
     private List<InstalledApp> contents;
@@ -45,11 +48,12 @@ public class RepositoryIndex
     private RepositoryInfo info;
 
     @Autowired
-    public RepositoryIndex(Gson gson, RepoManConfig config)
+    public RepositoryIndex(Gson gson, RepoManConfig config, SourceRegistry sources)
     {
         this.gson = gson;
         this.logger = LogManager.getLogger(RepositoryIndex.class);
         this.config = config;
+        this.sources = sources;
 
         this.info = RepositoryInfo.DEFAULT;
         this.categories = Collections.emptyList();
@@ -196,8 +200,44 @@ public class RepositoryIndex
             supportedPlatforms.add(defaultPlatform);
         }
 
-        return new InstalledApp(meta.getName().replace(".oscmeta", ""), oscMeta,
+        InstalledApp app = new InstalledApp(meta.getName().replace(".oscmeta", ""), oscMeta,
                 category, peripherals, supportedPlatforms);
+
+        // Attempt to update the app
+        if(updateApp)
+            updateApp(app);
+
+        return app;
+    }
+
+    private void updateApp(InstalledApp app)
+    {
+        logger.info("Updating app {}...", app);
+        Path appDir = app.getDataPath();
+        
+        // Create if it doesn't exist
+        //noinspection ResultOfMethodCallIgnored
+        appDir.getParent().toFile().mkdirs();
+
+        try
+        {
+            Path tmpDir = Files.createTempDirectory("RepoMan-" + app.getSlug());
+            File downloaded = downloadApp(app, tmpDir);
+        }
+        catch(IOException e)
+        {
+            handleFatalException(e, "Failed to update app " + app);
+        }
+    }
+
+    private File downloadApp(InstalledApp app, Path tmpDir) throws IOException
+    {
+        logger.info("- Downloading application files...");
+        OSCMeta.Source source = app.getMeta().source();
+        SourceDownloader downloader = sources.getDownloader(source.type());
+        Assert.notNull(downloader, "Unsupported source type: " + source.type());
+
+        Path downloadedFile = downloader.downloadFile(app, tmpDir);
     }
 
     private void handleFatalException(Exception e, String msg)

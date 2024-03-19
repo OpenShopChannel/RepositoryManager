@@ -2,6 +2,8 @@ package org.oscwii.repositorymanager.model.app;
 
 import org.springframework.util.Assert;
 
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
@@ -51,5 +53,16 @@ public class InstalledApp
     public List<Platform> getSupportedPlatforms()
     {
         return supportedPlatforms;
+    }
+
+    public Path getDataPath()
+    {
+        return FileSystems.getDefault().getPath("data", "contents", slug);
+    }
+
+    @Override
+    public String toString()
+    {
+        return slug;
     }
 }

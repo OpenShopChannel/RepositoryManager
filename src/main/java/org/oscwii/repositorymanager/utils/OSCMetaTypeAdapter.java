@@ -43,6 +43,7 @@ public class OSCMetaTypeAdapter implements JsonDeserializer<OSCMeta>
                 info.has("author_preferred_contact") ? info.get("author_preferred_contact").getAsString() : null,
                 platforms, peripherals,
                 Objects.requireNonNull(info.getAsJsonPrimitive("version")).getAsString(),
-                flags);
+                flags,
+                context.deserialize(obj.getAsJsonObject("source"), OSCMeta.Source.class));
     }
 }

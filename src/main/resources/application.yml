@@ -13,3 +13,8 @@ spring:
 repository-manager:
   default-platform: "wii"
   repo-dir: "repository"
+  fetch:
+    user-agent: "RepositoryManager-DEV"
+    secret-user-agents: {}
+    github-token: ""
+    itchio-token: ""
