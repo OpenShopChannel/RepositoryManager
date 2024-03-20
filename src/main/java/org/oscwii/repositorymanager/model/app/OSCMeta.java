@@ -16,12 +16,19 @@ public record OSCMeta(String name, String author, String category,
     {
         public enum Format
         {
+            @SerializedName("7z")
             SEVEN_ZIP(".7z"),
+            @SerializedName("zip")
             ZIP      (".zip"),
+            @SerializedName("bztar")
             BZTAR    (".tar.bz2", ".tbz2"),
+            @SerializedName("gztar")
             GZTAR    (".tar.gz", ".tgz"),
+            @SerializedName("tar")
             TAR      (".tar"),
+            @SerializedName("xztar")
             XZTAR    (".tar.xz", ".txz"),
+            @SerializedName("rar")
             RAR      (".rar");
 
             private final String[] extensions;

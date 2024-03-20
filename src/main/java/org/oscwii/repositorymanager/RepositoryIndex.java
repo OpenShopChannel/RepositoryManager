@@ -223,6 +223,9 @@ public class RepositoryIndex
         {
             Path tmpDir = Files.createTempDirectory("RepoMan-" + app.getSlug());
             File downloaded = downloadApp(app, tmpDir);
+
+            // Extract the application files
+            extractApp(app.getMeta().source(), downloaded, tmpDir);
         }
         catch(IOException e)
         {
@@ -236,8 +239,18 @@ public class RepositoryIndex
         OSCMeta.Source source = app.getMeta().source();
         SourceDownloader downloader = sources.getDownloader(source.type());
         Assert.notNull(downloader, "Unsupported source type: " + source.type());
+        return downloader.downloadFile(app, tmpDir).toFile();
+    }
 
-        Path downloadedFile = downloader.downloadFile(app, tmpDir);
+    private void extractApp(OSCMeta.Source source, File downloaded, Path tmpDir) throws IOException
+    {
+        if(!source.type().equals("manual"))
+        {
+            logger.info("- Extracting application files...");
+            FileUtil.extractArchive(downloaded, source.format(), tmpDir);
+            // TODO 7zip and rar formats
+            Files.delete(downloaded.toPath());
+        }
     }
 
     private void handleFatalException(Exception e, String msg)
