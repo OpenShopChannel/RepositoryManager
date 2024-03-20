@@ -4,6 +4,7 @@ import org.springframework.util.Assert;
 
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -11,6 +12,7 @@ public class InstalledApp
 {
     private final String slug;
     private final OSCMeta meta;
+    private final IndexComputedInfo computedInfo;
 
     private final Category category;
     private final Map<Peripheral, Integer> peripherals;
@@ -25,6 +27,7 @@ public class InstalledApp
         Assert.notNull(category, "App category cannot be null!");
         this.slug = slug;
         this.meta = meta;
+        this.computedInfo = new IndexComputedInfo();
         this.category = category;
         this.peripherals = peripherals;
         this.supportedPlatforms = supportedPlatforms;
@@ -38,6 +41,11 @@ public class InstalledApp
     public OSCMeta getMeta()
     {
         return meta;
+    }
+
+    public IndexComputedInfo getComputedInfo()
+    {
+        return computedInfo;
     }
 
     public Category getCategory()
@@ -64,5 +72,12 @@ public class InstalledApp
     public String toString()
     {
         return slug;
+    }
+
+    public static class IndexComputedInfo
+    {
+        public long archiveSize, binarySize, iconSize, rawSize;
+        public OffsetDateTime releaseDate;
+        public String packageType, md5Hash, peripherals;
     }
 }

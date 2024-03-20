@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -214,18 +215,42 @@ public class RepositoryIndex
     {
         logger.info("Updating app {}...", app);
         Path appDir = app.getDataPath();
-        
-        // Create if it doesn't exist
-        //noinspection ResultOfMethodCallIgnored
-        appDir.getParent().toFile().mkdirs();
 
         try
         {
+            // Create if it doesn't exist
+            Files.createDirectories(appDir.getParent());
+
             Path tmpDir = Files.createTempDirectory("RepoMan-" + app.getSlug());
             File downloaded = downloadApp(app, tmpDir);
 
             // Extract the application files
             extractApp(app.getMeta().source(), downloaded, tmpDir);
+
+            // Check for required contents
+            checkRequiredContents(app, tmpDir);
+
+            // TODO moderation
+
+            // Cleanup the app directory and move the new files
+            Files.deleteIfExists(appDir);
+            Files.move(tmpDir, appDir, StandardCopyOption.REPLACE_EXISTING);
+
+            // Create a zip archive for HBB and the API
+            Path appArchive = appDir.getParent().resolve(app + ".zip");
+            FileUtil.zipDirectory(appDir, appArchive);
+
+            // TODO generate WSC info
+
+            logger.info("- Computing information");
+            Path appFiles = appDir.resolve("apps").resolve(app.getSlug());
+            Path binary = appFiles.resolve("boot." + app.getComputedInfo().packageType);
+
+            app.getComputedInfo().archiveSize = Files.size(appArchive);
+            app.getComputedInfo().binarySize = Files.size(binary);
+            app.getComputedInfo().iconSize = Files.size(appFiles.resolve("icon.png"));
+            app.getComputedInfo().rawSize = Files.size(appFiles);
+            app.getComputedInfo().md5Hash = FileUtil.md5Hash(binary);
         }
         catch(IOException e)
         {
@@ -251,6 +276,32 @@ public class RepositoryIndex
             // TODO 7zip and rar formats
             Files.delete(downloaded.toPath());
         }
+    }
+
+    public void checkRequiredContents(InstalledApp app, Path tmpDir) throws IOException
+    {
+        Path appDir = tmpDir.resolve("apps").resolve(app.getSlug());
+
+        // Check we have an icon
+        if(Files.notExists(appDir.resolve("icon.png")))
+        {
+            logger.info("- icon.png is missing. Using placeholder instead.");
+            Files.copy(Objects.requireNonNull(
+                    getClass().getResourceAsStream("/static/assets/images/missing.png")),
+                    appDir.resolve("icon.png"));
+        }
+
+        // Check meta.xml exists
+        if(Files.notExists(appDir.resolve("meta.xml")))
+            throw new QuietException("Couldn't find meta.xml file");
+
+        // Check binary file
+        if(Files.exists(appDir.resolve("boot.dol")))
+            app.getComputedInfo().packageType = "dol";
+        else if(Files.exists(appDir.resolve("boot.elf")))
+            app.getComputedInfo().packageType = "elf";
+        else
+            throw new QuietException("Couldn't find boot.dol or boot.elf binary.");
     }
 
     private void handleFatalException(Exception e, String msg)
