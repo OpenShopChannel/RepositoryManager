@@ -19,12 +19,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.util.FileSystemUtils;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -38,6 +46,7 @@ import java.util.stream.Stream;
 @Service
 public class RepositoryIndex
 {
+    private final DocumentBuilderFactory xmlFactory;
     private final Gson gson;
     private final Logger logger;
     private final RepoManConfig config;
@@ -52,6 +61,7 @@ public class RepositoryIndex
     @Autowired
     public RepositoryIndex(Gson gson, RepoManConfig config, SourceRegistry sources)
     {
+        this.xmlFactory = DocumentBuilderFactory.newInstance();
         this.gson = gson;
         this.logger = LogManager.getLogger(RepositoryIndex.class);
         this.config = config;
@@ -245,10 +255,32 @@ public class RepositoryIndex
 
             // TODO generate WSC info
 
-            // TODO Parse meta.xml
+            // Parse meta.xml
+            Path appFiles = appDir.resolve("apps").resolve(app.getSlug());
+            Document metaxml = parseMetaXml(appFiles.resolve("meta.xml"));
 
             logger.info("- Computing information");
-            Path appFiles = appDir.resolve("apps").resolve(app.getSlug());
+
+            // Determine release date
+            Node node = metaxml.getElementsByTagName("release_date").item(0);
+            if(node != null)
+            {
+                String dateText = node.getTextContent();
+                for(SimpleDateFormat format : DATE_FORMATS)
+                {
+                    try
+                    {
+                        // we want this in seconds
+                        app.getComputedInfo().releaseDate = format.parse(dateText).getTime() / 1000;
+                        System.out.println(app.getComputedInfo().releaseDate);
+                        break;
+                    }
+                    catch(ParseException ignored) {}
+                }
+            }
+            else
+                app.getComputedInfo().releaseDate = 0;
+
             Path binary = appFiles.resolve("boot." + app.getComputedInfo().packageType);
 
             app.getComputedInfo().archiveSize = Files.size(appArchive);
@@ -318,6 +350,19 @@ public class RepositoryIndex
             throw new QuietException("Couldn't find boot.dol or boot.elf binary.");
     }
 
+    private Document parseMetaXml(Path file) throws IOException
+    {
+        try
+        {
+            DocumentBuilder db = xmlFactory.newDocumentBuilder();
+            return db.parse(file.toFile());
+        }
+        catch(ParserConfigurationException | SAXException e)
+        {
+            throw new QuietException("Failed to load meta.xml", e);
+        }
+    }
+
     private void createSubdirectoriesList(InstalledApp app, Path appFiles) throws IOException
     {
         List<String> subdirectories = new ArrayList<>();
@@ -342,4 +387,9 @@ public class RepositoryIndex
         return "/" + appFiles.getParent().getParent().relativize(path).toString()
                 .replace(File.separatorChar, '/');
     }
+
+    private static final SimpleDateFormat[] DATE_FORMATS = {
+            new SimpleDateFormat("yyyyMMddHHmmss"),
+            new SimpleDateFormat("yyyyMMddHHmm"),
+            new SimpleDateFormat("yyyyMMdd")};
 }

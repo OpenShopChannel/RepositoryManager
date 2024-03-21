@@ -4,7 +4,6 @@ import org.springframework.util.Assert;
 
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
-import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -78,7 +77,7 @@ public class InstalledApp
     {
         public List<String> subdirectories;
         public long archiveSize, binarySize, iconSize, rawSize;
-        public OffsetDateTime releaseDate;
+        public long releaseDate;
         public String packageType, md5Hash, peripherals;
     }
 }
