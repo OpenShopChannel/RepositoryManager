@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import okhttp3.OkHttpClient;
 import org.oscwii.repositorymanager.model.app.OSCMeta;
 import org.oscwii.repositorymanager.utils.OSCMetaTypeAdapter;
+import org.oscwii.repositorymanager.utils.SourceTypeAdapter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -15,6 +16,7 @@ public class AppConfig
     public Gson gson()
     {
         return new GsonBuilder()
+                .registerTypeAdapter(OSCMeta.Source.class, new SourceTypeAdapter())
                 .registerTypeAdapter(OSCMeta.class, new OSCMetaTypeAdapter())
                 .create();
     }
