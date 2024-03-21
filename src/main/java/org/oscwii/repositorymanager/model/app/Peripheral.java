@@ -1,5 +1,7 @@
 package org.oscwii.repositorymanager.model.app;
 
+import java.util.Map;
+
 public enum Peripheral
 {
     WII_REMOTE("Wii Remote", "w"),
@@ -38,5 +40,17 @@ public enum Peripheral
         }
 
         return UNKNOWN;
+    }
+
+    public static String buildHBBList(Map<Peripheral, Integer> peripherals)
+    {
+        StringBuilder sb = new StringBuilder();
+        for(Map.Entry<Peripheral, Integer> entry : peripherals.entrySet())
+        {
+            Peripheral peripheral = entry.getKey();
+            int amount = entry.getValue();
+            sb.append(peripheral.key().repeat(Math.max(1, amount)));
+        }
+        return sb.toString();
     }
 }

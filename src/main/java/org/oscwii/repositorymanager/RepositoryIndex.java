@@ -256,6 +256,15 @@ public class RepositoryIndex
             app.getComputedInfo().iconSize = Files.size(appFiles.resolve("icon.png"));
             app.getComputedInfo().rawSize = Files.size(appFiles);
             app.getComputedInfo().md5Hash = FileUtil.md5Hash(binary);
+            app.getComputedInfo().peripherals = Peripheral.buildHBBList(app.getPeripherals());
+
+            // Create subdirectories list
+            createSubdirectoriesList(app, appFiles);
+
+            // TODO store persistent information and generate TID
+
+            // Hurrah! we finished!
+            logger.info("{} has been updated.", app.getMeta().name());
         }
         catch(IOException e)
         {
@@ -309,8 +318,28 @@ public class RepositoryIndex
             throw new QuietException("Couldn't find boot.dol or boot.elf binary.");
     }
 
+    private void createSubdirectoriesList(InstalledApp app, Path appFiles) throws IOException
+    {
+        List<String> subdirectories = new ArrayList<>();
+
+        try(Stream<Path> stream = Files.walk(appFiles))
+        {
+            stream.filter(Files::isDirectory)
+                    .filter(path -> !path.equals(appFiles))
+                    .forEach(path -> subdirectories.add(buildSubdirectoryPath(appFiles, path)));
+        }
+
+        app.getComputedInfo().subdirectories = subdirectories;
+    }
+
     private void handleFatalException(Exception e, String msg)
     {
         throw new QuietException(msg, e);
+    }
+
+    private String buildSubdirectoryPath(Path appFiles, Path path)
+    {
+        return "/" + appFiles.getParent().getParent().relativize(path).toString()
+                .replace(File.separatorChar, '/');
     }
 }
