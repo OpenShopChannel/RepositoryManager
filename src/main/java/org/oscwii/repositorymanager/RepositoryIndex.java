@@ -18,6 +18,7 @@ import org.oscwii.repositorymanager.utils.QuietException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
+import org.springframework.util.FileSystemUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -227,13 +228,15 @@ public class RepositoryIndex
             // Extract the application files
             extractApp(app.getMeta().source(), downloaded, tmpDir);
 
+            // TODO treatments
+
             // Check for required contents
             checkRequiredContents(app, tmpDir);
 
             // TODO moderation
 
             // Cleanup the app directory and move the new files
-            Files.deleteIfExists(appDir);
+            FileSystemUtils.deleteRecursively(appDir);
             Files.move(tmpDir, appDir, StandardCopyOption.REPLACE_EXISTING);
 
             // Create a zip archive for HBB and the API
@@ -241,6 +244,8 @@ public class RepositoryIndex
             FileUtil.zipDirectory(appDir, appArchive);
 
             // TODO generate WSC info
+
+            // TODO Parse meta.xml
 
             logger.info("- Computing information");
             Path appFiles = appDir.resolve("apps").resolve(app.getSlug());

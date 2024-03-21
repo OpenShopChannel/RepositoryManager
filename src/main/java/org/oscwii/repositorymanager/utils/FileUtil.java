@@ -73,14 +73,21 @@ public class FileUtil
             List<Path> files = stream.toList();
             for(Path path : files)
             {
-                ZipArchiveEntry entry = zos.createArchiveEntry(path, path.toFile().getName());
-                zos.putArchiveEntry(entry);
                 if(path.toFile().isFile())
+                {
+                    String entryPath = source.relativize(path).toFile().getPath();
+                    ZipArchiveEntry entry = zos.createArchiveEntry(path, entryPath);
+                    zos.putArchiveEntry(entry);
+
                     try(InputStream fis = Files.newInputStream(path))
                     {
                         IOUtils.copy(fis, zos);
                     }
-                zos.closeArchiveEntry();
+                    finally
+                    {
+                        zos.closeArchiveEntry();
+                    }
+                }
             }
             
             zos.finish();
