@@ -28,6 +28,7 @@ public class OSCMetaTypeAdapter implements JsonDeserializer<OSCMeta>
         JsonArray platformsArr = info.getAsJsonArray("supported_platforms");
         JsonArray peripheralsArr = info.getAsJsonArray("peripherals");
         JsonArray flagsArr = info.getAsJsonArray("flags");
+        JsonArray treatmentsArr = obj.getAsJsonArray("treatments");
 
         List<String> platforms = platformsArr == null ? Collections.emptyList() :
                 context.deserialize(platformsArr, new TypeToken<List<String>>(){}.getType());
@@ -35,6 +36,8 @@ public class OSCMetaTypeAdapter implements JsonDeserializer<OSCMeta>
                 context.deserialize(peripheralsArr, new TypeToken<List<String>>(){}.getType());
         EnumSet<OSCMeta.Flag> flags = flagsArr == null ? EnumSet.noneOf(OSCMeta.Flag.class) :
                 context.deserialize(flagsArr, new TypeToken<EnumSet<OSCMeta.Flag>>(){}.getType());
+        List<OSCMeta.Treatment> treatments = treatmentsArr == null ? Collections.emptyList() :
+                context.deserialize(treatmentsArr, new TypeToken<List<OSCMeta.Treatment>>(){}.getType());
 
         return new OSCMeta(
                 Objects.requireNonNull(info.get("name")).getAsString(),
@@ -44,6 +47,7 @@ public class OSCMetaTypeAdapter implements JsonDeserializer<OSCMeta>
                 platforms, peripherals,
                 Objects.requireNonNull(info.getAsJsonPrimitive("version")).getAsString(),
                 flags,
-                context.deserialize(obj.getAsJsonObject("source"), OSCMeta.Source.class));
+                context.deserialize(obj.getAsJsonObject("source"), OSCMeta.Source.class),
+                treatments);
     }
 }

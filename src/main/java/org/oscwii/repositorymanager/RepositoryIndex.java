@@ -13,6 +13,8 @@ import org.oscwii.repositorymanager.model.app.Peripheral;
 import org.oscwii.repositorymanager.model.app.Platform;
 import org.oscwii.repositorymanager.sources.SourceDownloader;
 import org.oscwii.repositorymanager.sources.SourceRegistry;
+import org.oscwii.repositorymanager.treatments.TreatmentRegistry;
+import org.oscwii.repositorymanager.treatments.TreatmentRunnable;
 import org.oscwii.repositorymanager.utils.FileUtil;
 import org.oscwii.repositorymanager.utils.QuietException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,6 +53,7 @@ public class RepositoryIndex
     private final Logger logger;
     private final RepoManConfig config;
     private final SourceRegistry sources;
+    private final TreatmentRegistry treatments;
 
     private List<Category> categories;
     private List<InstalledApp> contents;
@@ -59,13 +62,14 @@ public class RepositoryIndex
     private RepositoryInfo info;
 
     @Autowired
-    public RepositoryIndex(Gson gson, RepoManConfig config, SourceRegistry sources)
+    public RepositoryIndex(Gson gson, RepoManConfig config, SourceRegistry sources, TreatmentRegistry treatments)
     {
         this.xmlFactory = DocumentBuilderFactory.newInstance();
         this.gson = gson;
         this.logger = LogManager.getLogger(RepositoryIndex.class);
         this.config = config;
         this.sources = sources;
+        this.treatments = treatments;
 
         this.info = RepositoryInfo.DEFAULT;
         this.categories = Collections.emptyList();
@@ -238,7 +242,8 @@ public class RepositoryIndex
             // Extract the application files
             extractApp(app.getMeta().source(), downloaded, tmpDir);
 
-            // TODO treatments
+            // Apply treatments
+            applyTreatments(app, tmpDir);
 
             // Check for required contents
             checkRequiredContents(app, tmpDir);
@@ -321,6 +326,18 @@ public class RepositoryIndex
             FileUtil.extractArchive(downloaded, source.format(), tmpDir);
             // TODO 7zip and rar formats
             Files.delete(downloaded.toPath());
+        }
+    }
+
+    private void applyTreatments(InstalledApp app, Path tmpDir) throws IOException
+    {
+        logger.info("- Applying Treatments:");
+        List<OSCMeta.Treatment> treatments = app.getMeta().treatments();
+        for(OSCMeta.Treatment treatment : treatments)
+        {
+            TreatmentRunnable runnable = this.treatments.getTreatment(treatment.id());
+            Assert.notNull(runnable, "Unsupported treatment: " + treatment.id());
+            runnable.run(app, tmpDir, treatment);
         }
     }
 

@@ -9,7 +9,7 @@ import java.util.Set;
 public record OSCMeta(String name, String author, String category,
                       String authorContact, List<String> supportedPlatforms,
                       List<String> peripherals, String version, EnumSet<Flag> flags,
-                      Source source)
+                      Source source, List<Treatment> treatments)
 {
     public record Source(String type, Format format, String url, String file,
                          String userAgent, Set<String> additionalFiles)
@@ -43,6 +43,11 @@ public record OSCMeta(String name, String author, String category,
                 return extensions;
             }
         }
+    }
+
+    public record Treatment(@SerializedName("treatment") String id,
+                            String[] arguments)
+    {
     }
 
     public enum Flag
