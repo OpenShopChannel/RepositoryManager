@@ -47,7 +47,7 @@ public class ContentsTreatment
             else
                 FileUtils.moveDirectory(source.toFile(), destination.toFile());
 
-            logger.info("  - Moved {} to {}", source, destination);
+            logger.info("  - Moved {} to {}", arguments[0], arguments[1]);
         }
     }
 
@@ -72,7 +72,7 @@ public class ContentsTreatment
             else
                 FileSystemUtils.deleteRecursively(target);
 
-            logger.info("  - Deleted {}", target);
+            logger.info("  - Deleted {}", arguments[0]);
         }
     }
 }
