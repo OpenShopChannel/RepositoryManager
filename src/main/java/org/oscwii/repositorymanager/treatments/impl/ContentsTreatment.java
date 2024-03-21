@@ -42,22 +42,10 @@ public class ContentsTreatment
             checkAllowedPath(workingDir, source);
             checkAllowedPath(workingDir, destination);
 
-            //Files.createDirectories(destination);
             if(Files.isRegularFile(source))
                 Files.move(source, destination);
             else
-            {
-//                Files.walkFileTree(source, new SimpleFileVisitor<>()
-//                {
-//                    @Override
-//                    public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
-//                    {
-//                        Files.move(file, destination);
-//                        return FileVisitResult.CONTINUE;
-//                    }
-//                });
                 FileUtils.moveDirectory(source.toFile(), destination.toFile());
-            }
 
             logger.info("  - Moved {} to {}", source, destination);
         }
