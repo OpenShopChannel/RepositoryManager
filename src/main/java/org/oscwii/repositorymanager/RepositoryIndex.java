@@ -277,7 +277,6 @@ public class RepositoryIndex
                     {
                         // we want this in seconds
                         app.getComputedInfo().releaseDate = format.parse(dateText).getTime() / 1000;
-                        System.out.println(app.getComputedInfo().releaseDate);
                         break;
                     }
                     catch(ParseException ignored) {}
