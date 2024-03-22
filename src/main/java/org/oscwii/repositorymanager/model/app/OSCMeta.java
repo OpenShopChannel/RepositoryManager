@@ -1,6 +1,7 @@
 package org.oscwii.repositorymanager.model.app;
 
 import com.google.gson.annotations.SerializedName;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.EnumSet;
 import java.util.List;
@@ -41,6 +42,21 @@ public record OSCMeta(String name, String author, String category,
             public String[] extensions()
             {
                 return extensions;
+            }
+
+            @Nullable
+            public static Format fromExtension(String extension)
+            {
+                for(Format format : values())
+                {
+                    for(String ext : format.extensions)
+                    {
+                        if(ext.equals(extension))
+                            return format;
+                    }
+                }
+
+                return null;
             }
         }
     }
