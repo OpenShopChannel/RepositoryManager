@@ -23,7 +23,9 @@ public class SourceTypeAdapter implements JsonDeserializer<OSCMeta.Source>
         String url;
         String file = obj.has("file") ? obj.get("file").getAsString() : null;
 
-        if(obj.has("location"))
+        if(type.equalsIgnoreCase("manual"))
+            url = null;
+        else if(obj.has("location"))
             url = obj.get("location").getAsString();
         else if(obj.has("repository"))
             url = obj.get("repository").getAsString();
