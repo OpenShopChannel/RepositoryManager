@@ -4,6 +4,10 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.dom4j.Document;
+import org.dom4j.DocumentException;
+import org.dom4j.Element;
+import org.dom4j.io.SAXReader;
 import org.oscwii.repositorymanager.config.repoman.RepoManConfig;
 import org.oscwii.repositorymanager.model.RepositoryInfo;
 import org.oscwii.repositorymanager.model.app.Category;
@@ -21,15 +25,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.util.FileSystemUtils;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.xml.sax.SAXException;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -48,7 +47,6 @@ import java.util.stream.Stream;
 @Service
 public class RepositoryIndex
 {
-    private final DocumentBuilderFactory xmlFactory;
     private final Gson gson;
     private final Logger logger;
     private final RepoManConfig config;
@@ -62,9 +60,9 @@ public class RepositoryIndex
     private RepositoryInfo info;
 
     @Autowired
-    public RepositoryIndex(Gson gson, RepoManConfig config, SourceRegistry sources, TreatmentRegistry treatments)
+    public RepositoryIndex(Gson gson, RepoManConfig config,
+                           SourceRegistry sources, TreatmentRegistry treatments)
     {
-        this.xmlFactory = DocumentBuilderFactory.newInstance();
         this.gson = gson;
         this.logger = LogManager.getLogger(RepositoryIndex.class);
         this.config = config;
@@ -267,10 +265,11 @@ public class RepositoryIndex
             logger.info("- Computing information");
 
             // Determine release date
-            Node node = metaxml.getElementsByTagName("release_date").item(0);
-            if(node != null)
+            Element root = metaxml.getRootElement();
+            Element element = root.element("release_date");
+            if(element != null)
             {
-                String dateText = node.getTextContent();
+                String dateText = element.getText();
                 for(SimpleDateFormat format : DATE_FORMATS)
                 {
                     try
@@ -368,12 +367,12 @@ public class RepositoryIndex
 
     private Document parseMetaXml(Path file) throws IOException
     {
-        try
+        try(InputStream is = Files.newInputStream(file))
         {
-            DocumentBuilder db = xmlFactory.newDocumentBuilder();
-            return db.parse(file.toFile());
+            SAXReader reader = SAXReader.createDefault();
+            return reader.read(is);
         }
-        catch(ParserConfigurationException | SAXException e)
+        catch(DocumentException e)
         {
             throw new QuietException("Failed to load meta.xml", e);
         }
