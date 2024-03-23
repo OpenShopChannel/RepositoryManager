@@ -1,9 +1,12 @@
 package org.oscwii.repositorymanager.sources;
 
+import com.google.gson.Gson;
 import okhttp3.OkHttpClient;
+import okhttp3.Request;
 import org.apache.logging.log4j.Logger;
 import org.oscwii.repositorymanager.config.repoman.FetchConfig;
 import org.oscwii.repositorymanager.model.app.InstalledApp;
+import org.oscwii.repositorymanager.utils.HttpUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
@@ -18,6 +21,8 @@ public abstract class BaseSourceDownloader implements SourceDownloader
     @Autowired
     protected FetchConfig config;
     @Autowired
+    protected Gson gson;
+    @Autowired
     protected OkHttpClient httpClient;
 
     protected BaseSourceDownloader(String type)
@@ -27,22 +32,31 @@ public abstract class BaseSourceDownloader implements SourceDownloader
     }
 
     @Override
-    public Path downloadFile(InstalledApp app, Path tmpDir) throws IOException
+    public Path downloadFiles(InstalledApp app, Path tmpDir) throws IOException
     {
         Path archivePath = tmpDir.resolve(app.getSlug() + ".package");
 
         logger.info("- Fetching source information");
-        fetchFileInformation(app, archivePath, tmpDir);
+        Request request = fetchFileInformation(app, archivePath, tmpDir);
 
         logger.info("- Processing obtained files");
-        processFiles(app, archivePath, tmpDir);
+        processFiles(app, archivePath, tmpDir, request);
 
         return archivePath;
     }
 
-    protected abstract void fetchFileInformation(InstalledApp app, Path archivePath, Path tmpDir);
+    protected abstract Request fetchFileInformation(InstalledApp app, Path archivePath, Path tmpDir);
 
-    protected abstract void processFiles(InstalledApp app, Path archivePath, Path tmpDir) throws IOException;
+    protected abstract void processFiles(InstalledApp app, Path archivePath, Path tmpDir, Request request) throws IOException;
+
+    protected void downloadFileFromUrl(String url, Path destination) throws IOException
+    {
+        Request request = new Request.Builder()
+                .url(url)
+                .addHeader("User-Agent", config.getUserAgent())
+                .build();
+        HttpUtil.downloadFile(httpClient, request, destination);
+    }
 
     @Override
     public String getType()

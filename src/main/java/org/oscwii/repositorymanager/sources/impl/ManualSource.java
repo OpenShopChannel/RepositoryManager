@@ -1,5 +1,6 @@
 package org.oscwii.repositorymanager.sources.impl;
 
+import okhttp3.Request;
 import org.oscwii.repositorymanager.model.app.InstalledApp;
 import org.oscwii.repositorymanager.sources.BaseSourceDownloader;
 import org.oscwii.repositorymanager.sources.SourceRegistry;
@@ -20,13 +21,14 @@ public class ManualSource extends BaseSourceDownloader
     }
 
     @Override
-    protected void fetchFileInformation(InstalledApp app, Path archivePath, Path tmpDir)
+    protected Request fetchFileInformation(InstalledApp app, Path archivePath, Path tmpDir)
     {
         logger.info("  - Manual source type, downloads will be handled by treatments");
+        return null;
     }
 
     @Override
-    protected void processFiles(InstalledApp app, Path archivePath, Path tmpDir) throws IOException
+    protected void processFiles(InstalledApp app, Path archivePath, Path tmpDir, Request request) throws IOException
     {
         // no-op
     }

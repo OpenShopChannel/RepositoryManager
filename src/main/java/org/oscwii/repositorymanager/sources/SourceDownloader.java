@@ -11,7 +11,7 @@ public interface SourceDownloader
 {
     String getType();
 
-    Path downloadFile(InstalledApp app, Path tmpDir) throws IOException;
+    Path downloadFiles(InstalledApp app, Path tmpDir) throws IOException;
 
     Logger LOGGER = LogManager.getLogger(SourceDownloader.class);
 }

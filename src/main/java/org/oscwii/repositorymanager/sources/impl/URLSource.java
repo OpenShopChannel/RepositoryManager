@@ -23,16 +23,14 @@ public class URLSource extends BaseSourceDownloader
     }
 
     @Override
-    protected void fetchFileInformation(InstalledApp app, Path archivePath, Path tmpDir)
+    protected Request fetchFileInformation(InstalledApp app, Path archivePath, Path tmpDir)
     {
-        // no-op
+        return prepareRequest(app.getMeta().source());
     }
 
     @Override
-    protected void processFiles(InstalledApp app, Path archivePath, Path tmpDir) throws IOException
+    protected void processFiles(InstalledApp app, Path archivePath, Path tmpDir, Request request) throws IOException
     {
-        OSCMeta.Source source = app.getMeta().source();
-        Request request = prepareRequest(source);
         HttpUtil.downloadFile(httpClient, request, archivePath);
     }
 
