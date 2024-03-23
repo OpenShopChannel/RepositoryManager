@@ -60,8 +60,7 @@ public class RepositoryIndex
     private RepositoryInfo info;
 
     @Autowired
-    public RepositoryIndex(Gson gson, RepoManConfig config,
-                           SourceRegistry sources, TreatmentRegistry treatments)
+    public RepositoryIndex(Gson gson, RepoManConfig config, SourceRegistry sources, TreatmentRegistry treatments)
     {
         this.gson = gson;
         this.logger = LogManager.getLogger(RepositoryIndex.class);
@@ -313,7 +312,7 @@ public class RepositoryIndex
         OSCMeta.Source source = app.getMeta().source();
         SourceDownloader downloader = sources.getDownloader(source.type());
         Assert.notNull(downloader, "Unsupported source type: " + source.type());
-        return downloader.downloadFile(app, tmpDir).toFile();
+        return downloader.downloadFiles(app, tmpDir).toFile();
     }
 
     private void extractApp(OSCMeta.Source source, File downloaded, Path tmpDir) throws IOException
@@ -339,7 +338,7 @@ public class RepositoryIndex
         }
     }
 
-    public void checkRequiredContents(InstalledApp app, Path tmpDir) throws IOException
+    private void checkRequiredContents(InstalledApp app, Path tmpDir) throws IOException
     {
         Path appDir = tmpDir.resolve("apps").resolve(app.getSlug());
 

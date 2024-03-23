@@ -1,6 +1,7 @@
 package org.oscwii.repositorymanager.treatments.impl;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.file.SimplePathVisitor;
 import org.oscwii.repositorymanager.model.app.InstalledApp;
 import org.oscwii.repositorymanager.model.app.OSCMeta.Treatment;
 import org.oscwii.repositorymanager.treatments.BaseTreatmentRunnable;
@@ -11,8 +12,12 @@ import org.springframework.util.Assert;
 import org.springframework.util.FileSystemUtils;
 
 import java.io.IOException;
+import java.nio.file.FileSystems;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.PathMatcher;
+import java.nio.file.attribute.BasicFileAttributes;
 
 @Component
 public class ContentsTreatment
@@ -42,10 +47,8 @@ public class ContentsTreatment
             checkAllowedPath(workingDir, source);
             checkAllowedPath(workingDir, destination);
 
-            if(Files.isRegularFile(source))
-                Files.move(source, destination);
-            else
-                FileUtils.moveDirectory(source.toFile(), destination.toFile());
+            PathMatcher m = FileSystems.getDefault().getPathMatcher("glob:" + arguments[0]);
+            Files.walkFileTree(workingDir, new Visitor(m, destination));
 
             logger.info("  - Moved {} to {}", arguments[0], arguments[1]);
         }
@@ -73,6 +76,32 @@ public class ContentsTreatment
                 FileSystemUtils.deleteRecursively(target);
 
             logger.info("  - Deleted {}", arguments[0]);
+        }
+    }
+
+    private static class Visitor extends SimplePathVisitor
+    {
+        private final PathMatcher m;
+        private final Path destination;
+
+        private Visitor(PathMatcher m, Path destination)
+        {
+            this.m = m;
+            this.destination = destination;
+        }
+
+        @Override
+        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
+        {
+            if(m.matches(file))
+            {
+                if(Files.isRegularFile(file))
+                    Files.move(file, destination);
+                else
+                    FileUtils.moveDirectory(file.toFile(), destination.toFile());
+            }
+
+            return FileVisitResult.CONTINUE;
         }
     }
 }

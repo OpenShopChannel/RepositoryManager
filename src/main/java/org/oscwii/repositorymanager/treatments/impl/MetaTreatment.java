@@ -137,7 +137,7 @@ public class MetaTreatment
                 SAXReader reader = SAXReader.createDefault();
                 Document doc = reader.read(is);
 
-                Element root = doc.elementByID("app");
+                Element root = doc.getRootElement();
                 Element element = root.element(key);
                 if(element == null)
                     root.addElement(key).addText(value);
