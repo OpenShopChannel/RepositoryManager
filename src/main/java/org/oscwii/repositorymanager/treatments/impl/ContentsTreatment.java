@@ -99,6 +99,10 @@ public class ContentsTreatment
                     Files.move(file, destination);
                 else
                     FileUtils.moveDirectory(file.toFile(), destination.toFile());
+
+                // We have found our file and have moved it, we can't have more than one file
+                // in the same destination, so terminate the search.
+                return FileVisitResult.TERMINATE;
             }
 
             return FileVisitResult.CONTINUE;
