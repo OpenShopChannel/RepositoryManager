@@ -13,10 +13,10 @@ import java.io.IOException;
 import java.nio.file.Path;
 
 @Component
-public class URLSource extends BaseSourceDownloader
+public class URLSourceDownloader extends BaseSourceDownloader
 {
     @Autowired
-    private URLSource(SourceRegistry registry)
+    private URLSourceDownloader(SourceRegistry registry)
     {
         super("url");
         registry.registerDownloader(this);

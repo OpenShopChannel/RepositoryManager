@@ -11,10 +11,10 @@ import java.io.IOException;
 import java.nio.file.Path;
 
 @Component
-public class ManualSource extends BaseSourceDownloader
+public class ManualSourceDownloader extends BaseSourceDownloader
 {
     @Autowired
-    private ManualSource(SourceRegistry registry)
+    private ManualSourceDownloader(SourceRegistry registry)
     {
         super("manual");
         registry.registerDownloader(this);

@@ -45,7 +45,7 @@ public abstract class BaseSourceDownloader implements SourceDownloader
         return archivePath;
     }
 
-    protected abstract Request fetchFileInformation(InstalledApp app, Path archivePath, Path tmpDir);
+    protected abstract Request fetchFileInformation(InstalledApp app, Path archivePath, Path tmpDir) throws IOException;
 
     protected abstract void processFiles(InstalledApp app, Path archivePath, Path tmpDir, Request request) throws IOException;
 
