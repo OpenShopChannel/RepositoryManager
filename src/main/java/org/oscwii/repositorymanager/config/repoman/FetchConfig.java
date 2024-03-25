@@ -7,11 +7,22 @@ import java.util.Map;
 @ConfigurationProperties(prefix = "repository-manager.fetch")
 public class FetchConfig
 {
+    private int timeout;
     private String userAgent;
     private Map<String, String> secretUserAgents;
 
     private String githubToken;
     private String itchioToken;
+
+    public int getTimeout()
+    {
+        return timeout;
+    }
+
+    public void setTimeout(int timeout)
+    {
+        this.timeout = timeout;
+    }
 
     public String getUserAgent()
     {
