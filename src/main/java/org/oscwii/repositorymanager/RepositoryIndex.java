@@ -2,6 +2,7 @@ package org.oscwii.repositorymanager;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.dom4j.Document;
@@ -31,7 +32,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -249,7 +249,7 @@ public class RepositoryIndex
 
             // Cleanup the app directory and move the new files
             FileSystemUtils.deleteRecursively(appDir);
-            Files.move(tmpDir, appDir, StandardCopyOption.REPLACE_EXISTING);
+            FileUtils.moveDirectory(tmpDir.toFile(), appDir.toFile());
 
             // Create a zip archive for HBB and the API
             Path appArchive = appDir.getParent().resolve(app + ".zip");
