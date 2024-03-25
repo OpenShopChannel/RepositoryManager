@@ -3,8 +3,6 @@ package org.oscwii.repositorymanager.sources.impl;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.hrakaroo.glob.GlobPattern;
-import com.hrakaroo.glob.MatchingEngine;
 import okhttp3.Call;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -12,6 +10,7 @@ import org.oscwii.repositorymanager.model.app.InstalledApp;
 import org.oscwii.repositorymanager.model.app.OSCMeta;
 import org.oscwii.repositorymanager.sources.BaseSourceDownloader;
 import org.oscwii.repositorymanager.sources.SourceRegistry;
+import org.oscwii.repositorymanager.utils.FnMatch;
 import org.oscwii.repositorymanager.utils.QuietException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -84,8 +83,7 @@ public class GitHubSourceDownloader extends BaseSourceDownloader
                 JsonObject asset = eAsset.getAsJsonObject();
                 String fileName = asset.get("name").getAsString();
 
-                MatchingEngine m = GlobPattern.compile(file);
-                if(!m.matches(fileName))
+                if(!FnMatch.fnmatch(file, fileName))
                     continue;
 
                 found = true;
