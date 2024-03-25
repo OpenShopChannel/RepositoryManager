@@ -74,7 +74,10 @@ public class ContentsTreatment
             if(matcher.matches(path))
             {
                 if(Files.isRegularFile(file))
+                {
+                    Files.createDirectories(destination.getParent());
                     Files.move(file, destination);
+                }
                 else
                     FileUtils.moveDirectory(file.toFile(), destination.toFile());
 
