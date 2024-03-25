@@ -77,6 +77,8 @@ public class GitHubSourceDownloader extends BaseSourceDownloader
 
         for(String file : files)
         {
+            boolean found = false;
+
             for(JsonElement eAsset : assets)
             {
                 JsonObject asset = eAsset.getAsJsonObject();
@@ -86,6 +88,7 @@ public class GitHubSourceDownloader extends BaseSourceDownloader
                 if(!m.matches(fileName))
                     continue;
 
+                found = true;
                 logger.info("  - Found asset {}", fileName);
                 String url = asset.get("browser_download_url").getAsString();
 
@@ -97,6 +100,9 @@ public class GitHubSourceDownloader extends BaseSourceDownloader
                 logger.info("  - Downloaded asset {}", fileName);
                 break;
             }
+
+            if(!found)
+                throw new QuietException("Could not find asset: " + file);
         }
     }
 
