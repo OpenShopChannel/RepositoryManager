@@ -1,9 +1,13 @@
 package org.oscwii.repositorymanager.utils;
 
+import com.github.junrar.Junrar;
+import com.github.junrar.exception.RarException;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
+import org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry;
+import org.apache.commons.compress.archivers.sevenz.SevenZFile;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
@@ -49,20 +53,12 @@ public class FileUtil
 
     public static void extractArchive(File archive, Format format, Path destination) throws IOException
     {
-        ArchiveEntry entry;
-
-        try(ArchiveInputStream<?> is = createArchiveInputStream(archive, format))
-        {
-            while((entry = is.getNextEntry()) != null)
-            {
-                if(entry.isDirectory())
-                    continue;
-
-                Path extractedPath = destination.resolve(entry.getName());
-                Files.createDirectories(extractedPath.getParent());
-                Files.copy(is, extractedPath);
-            }
-        }
+        if(format == Format.SEVEN_ZIP)
+            extract7z(archive, destination);
+        else if(format == Format.RAR)
+            extractRar(archive, destination);
+        else
+            extractGeneralArchive(archive, format, destination);
     }
 
     public static void zipDirectory(Path source, Path destination) throws IOException
@@ -107,10 +103,65 @@ public class FileUtil
         {
             case ZIP   -> new ZipArchiveInputStream(fis);
             case TAR   -> new TarArchiveInputStream(fis);
+            case BZTAR -> new TarArchiveInputStream(new BZip2CompressorInputStream(fis));
             case GZTAR -> new TarArchiveInputStream(new GzipCompressorInputStream(fis));
             case XZTAR -> new TarArchiveInputStream(new XZCompressorInputStream(fis));
-            case BZTAR -> new TarArchiveInputStream(new BZip2CompressorInputStream(fis));
             default    -> throw new UnsupportedOperationException("Unsupported archive format: " + format);
         };
+    }
+
+    private static void extract7z(File archive, Path destination) throws IOException
+    {
+        SevenZFile sevenZArchive = SevenZFile.builder().setFile(archive).get();
+        SevenZArchiveEntry entry;
+
+        try(sevenZArchive)
+        {
+            while((entry = sevenZArchive.getNextEntry()) != null)
+            {
+                if(entry.isDirectory())
+                    continue;
+
+                extractEntry(sevenZArchive.getInputStream(entry), destination, entry);
+            }
+        }
+    }
+
+    private static void extractRar(File archive, Path destination) throws IOException
+    {
+        try
+        {
+            // Man it should be this easy for all formats...
+            // Ironically, the most obscure and proprietary format is the easiest to work with
+            // TODO silence Junrar verbose logging
+            Junrar.extract(archive, destination.toFile());
+        }
+        catch(RarException e)
+        {
+            throw new QuietException("Failed to unrar archive: " + archive.getName(), e);
+        }
+    }
+
+    private static void extractGeneralArchive(File archive, Format format, Path destination) throws IOException
+    {
+        ArchiveEntry entry;
+
+        try(ArchiveInputStream<?> is = createArchiveInputStream(archive, format))
+        {
+            while((entry = is.getNextEntry()) != null)
+            {
+                if(entry.isDirectory())
+                    continue;
+
+                extractEntry(is, destination, entry);
+            }
+        }
+    }
+
+    private static void extractEntry(InputStream is, Path destination, ArchiveEntry entry) throws IOException
+    {
+        Path extractedPath = destination.resolve(entry.getName());
+        Files.createDirectories(extractedPath.getParent());
+        Files.copy(is, extractedPath);
     }
 }
