@@ -131,6 +131,7 @@
             <version>7.5.5</version>
         </dependency>
 
+        <!-- XML parsing -->
         <dependency>
             <groupId>org.dom4j</groupId>
             <artifactId>dom4j</artifactId>
@@ -141,6 +142,13 @@
             <groupId>com.hrakaroo</groupId>
             <artifactId>glob</artifactId>
             <version>0.9.0</version>
+        </dependency>
+
+        <!-- Web scraping -->
+        <dependency>
+            <groupId>org.jsoup</groupId>
+            <artifactId>jsoup</artifactId>
+            <version>1.17.2</version>
         </dependency>
     </dependencies>
 

@@ -3,21 +3,18 @@ package org.oscwii.repositorymanager.sources.impl;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import okhttp3.Call;
 import okhttp3.Request;
-import okhttp3.Response;
 import org.oscwii.repositorymanager.model.app.InstalledApp;
 import org.oscwii.repositorymanager.model.app.OSCMeta;
 import org.oscwii.repositorymanager.sources.BaseSourceDownloader;
 import org.oscwii.repositorymanager.sources.SourceRegistry;
 import org.oscwii.repositorymanager.utils.FnMatch;
+import org.oscwii.repositorymanager.utils.HttpUtil;
 import org.oscwii.repositorymanager.utils.QuietException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.Assert;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -54,18 +51,8 @@ public class GitHubSourceDownloader extends BaseSourceDownloader
     @Override
     protected void processFiles(InstalledApp app, Path archivePath, Path tmpDir, Request request) throws IOException
     {
-        Call call = httpClient.newCall(request);
-        JsonObject obj;
+        JsonObject obj = HttpUtil.fetchJson(gson, httpClient, request);
         OSCMeta.Source source = app.getMeta().source();
-
-        try(Response response = call.execute())
-        {
-            if(!response.isSuccessful())
-                throw new QuietException("HTTP request failed with status code " + response.code());
-
-            Assert.notNull(response.body(), "Response body is null!");
-            obj = gson.fromJson(new InputStreamReader(response.body().byteStream()), JsonObject.class);
-        }
 
         JsonArray assets = obj.getAsJsonArray("assets");
         List<String> files = new ArrayList<>();

@@ -321,7 +321,6 @@ public class RepositoryIndex
         {
             logger.info("- Extracting application files...");
             FileUtil.extractArchive(downloaded, source.format(), tmpDir);
-            // TODO 7zip and rar formats
             Files.delete(downloaded.toPath());
         }
     }
