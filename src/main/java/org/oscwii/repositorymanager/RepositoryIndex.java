@@ -271,6 +271,7 @@ public class RepositoryIndex
             FileUtils.moveDirectory(tmpDir.toFile(), appDir.toFile());
 
             // Create a zip archive for HBB and the API
+            logger.info("- Creating ZIP file");
             Path appArchive = appDir.getParent().resolve(app + ".zip");
             FileUtil.zipDirectory(appDir, appArchive);
 
@@ -281,13 +282,18 @@ public class RepositoryIndex
             Document metaxml = parseMetaXml(appFiles.resolve("meta.xml"));
 
             logger.info("- Computing information");
+            Element root = metaxml.getRootElement();
+
+            app.getMetaXml().name = root.elementText("name");
+            app.getMetaXml().coder = root.elementText("coder");
+            app.getMetaXml().version = root.elementText("version");
+            app.getMetaXml().shortDesc = root.elementText("short_description");
+            app.getMetaXml().longDesc = root.elementText("long_description");
 
             // Determine release date
-            Element root = metaxml.getRootElement();
-            Element element = root.element("release_date");
-            if(element != null)
+            String dateText = root.elementText("release_date");
+            if(dateText != null)
             {
-                String dateText = element.getText();
                 for(SimpleDateFormat format : DATE_FORMATS)
                 {
                     try

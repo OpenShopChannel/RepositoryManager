@@ -12,10 +12,11 @@ public class InstalledApp
     private final String slug;
     private final OSCMeta meta;
     private final IndexComputedInfo computedInfo;
+    private final MetaXml metaXml;
 
     private final Category category;
-    private final Map<Peripheral, Integer> peripherals;
     private final List<Platform> supportedPlatforms;
+    private final Map<Peripheral, Integer> peripherals;
 
     public InstalledApp(String slug, OSCMeta meta, Category category,
                         Map<Peripheral, Integer> peripherals,
@@ -27,9 +28,10 @@ public class InstalledApp
         this.slug = slug;
         this.meta = meta;
         this.computedInfo = new IndexComputedInfo();
+        this.metaXml = new MetaXml();
         this.category = category;
-        this.peripherals = peripherals;
         this.supportedPlatforms = supportedPlatforms;
+        this.peripherals = peripherals;
     }
 
     public String getSlug()
@@ -52,14 +54,19 @@ public class InstalledApp
         return category;
     }
 
+    public List<Platform> getSupportedPlatforms()
+    {
+        return supportedPlatforms;
+    }
+
     public Map<Peripheral, Integer> getPeripherals()
     {
         return peripherals;
     }
 
-    public List<Platform> getSupportedPlatforms()
+    public MetaXml getMetaXml()
     {
-        return supportedPlatforms;
+        return metaXml;
     }
 
     public Path getDataPath()
@@ -79,5 +86,10 @@ public class InstalledApp
         public long archiveSize, binarySize, iconSize, rawSize;
         public long releaseDate;
         public String packageType, md5Hash, peripherals;
+    }
+
+    public static class MetaXml
+    {
+        public String name, coder, version, shortDesc, longDesc;
     }
 }
