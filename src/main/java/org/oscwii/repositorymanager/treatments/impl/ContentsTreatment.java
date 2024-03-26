@@ -15,6 +15,7 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -76,7 +77,7 @@ public class ContentsTreatment
                 if(Files.isRegularFile(file))
                 {
                     Files.createDirectories(destination.getParent());
-                    Files.move(file, destination);
+                    Files.move(file, destination, StandardCopyOption.REPLACE_EXISTING);
                 }
                 else
                     FileUtils.moveDirectory(file.toFile(), destination.toFile());
