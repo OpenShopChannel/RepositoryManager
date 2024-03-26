@@ -57,6 +57,9 @@ public class ItchioSourceDownloader extends BaseSourceDownloader
         for(JsonElement element : uploads.getAsJsonArray("uploads"))
         {
             JsonObject upload = element.getAsJsonObject();
+            if(!upload.has("display_name"))
+                continue;
+
             if(upload.get("display_name").getAsString().equals(source.file()))
             {
                 found = true;
