@@ -21,6 +21,7 @@ import org.oscwii.repositorymanager.sources.SourceRegistry;
 import org.oscwii.repositorymanager.treatments.TreatmentRegistry;
 import org.oscwii.repositorymanager.treatments.TreatmentRunnable;
 import org.oscwii.repositorymanager.utils.FileUtil;
+import org.oscwii.repositorymanager.utils.FormatUtil;
 import org.oscwii.repositorymanager.utils.QuietException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -41,7 +42,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 @Service
@@ -76,6 +76,7 @@ public class RepositoryIndex
 
     public void update(boolean updateApps)
     {
+        long start = System.currentTimeMillis();
         logger.info("Updating repository index");
         // TODO discord log
 
@@ -87,7 +88,12 @@ public class RepositoryIndex
         indexPlatforms();
 
         // Index applications
-        indexContents(updateApps);
+        int[] info = indexContents(updateApps);
+
+        // Print index summary
+        printIndexSummary(info, start);
+
+        logger.info("Finished updating repository index");
     }
 
     private void loadRepositoryInfo()
@@ -125,9 +131,9 @@ public class RepositoryIndex
         Assert.notNull(defaultPlatform, "Unknown default platform: " + config.getDefaultPlatform());
     }
 
-    private void indexContents(boolean updateApps)
+    private int[] indexContents(boolean updateApps)
     {
-        AtomicInteger i = new AtomicInteger();
+        int index = 0, errors = 0, indexed = 0;
         List<File> manifests;
         List<InstalledApp> contents = new ArrayList<>();
         Path folder = config.getRepoDir().resolve("contents");
@@ -147,21 +153,34 @@ public class RepositoryIndex
         for(File meta : manifests)
         {
             logger.info("Loading manifest \"{}\" for processing ({}/{})",
-                    meta.getName(), i.incrementAndGet(), manifests.size());
+                    meta.getName(), ++index, manifests.size());
 
             try
             {
                 InstalledApp app = processMeta(meta, updateApps);
                 contents.add(Objects.requireNonNull(app));
+                indexed++;
             }
             catch(Exception e)
             {
                 logger.error("Failed to process oscmeta {}:", meta.getName(), e);
+                errors++;
             }
         }
 
         this.contents = contents;
         logger.info("Finished indexing application manifests");
+        return new int[]{index, indexed, errors};
+    }
+
+    private void printIndexSummary(int[] info, long start)
+    {
+        long elapsed = (System.currentTimeMillis() - start) / 1000;
+        logger.info("** INDEX SUMMARY **");
+        logger.info("Installed Manifests: {}", info[0]);
+        logger.info("Indexed Applications: {}", info[1]);
+        logger.info("Indexing errors: {}", info[2]);
+        logger.info("Elapsed time: {}", FormatUtil.secondsToTime(elapsed));
     }
 
     private InstalledApp processMeta(File meta, boolean updateApp)
