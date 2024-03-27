@@ -42,8 +42,9 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Stream;
+
+import static java.util.Objects.requireNonNull;
 
 @Service
 public class RepositoryIndex
@@ -159,7 +160,7 @@ public class RepositoryIndex
             try
             {
                 InstalledApp app = processMeta(meta, updateApps);
-                contents.add(Objects.requireNonNull(app));
+                contents.add(requireNonNull(app));
                 indexed++;
             }
             catch(Exception e)
@@ -280,6 +281,7 @@ public class RepositoryIndex
             generateWSCBanner(app);
 
             // Parse meta.xml
+            logger.info("- Reading application metadata");
             Path appFiles = appDir.resolve("apps").resolve(app.getSlug());
             Document metaxml = parseMetaXml(appFiles.resolve("meta.xml"));
 
@@ -372,9 +374,9 @@ public class RepositoryIndex
         if(Files.notExists(appDir.resolve("icon.png")))
         {
             logger.info("- icon.png is missing. Using placeholder instead.");
-            Files.copy(Objects.requireNonNull(
-                    getClass().getResourceAsStream("/static/assets/images/missing.png")),
-                    appDir.resolve("icon.png"));
+            InputStream placeholder = requireNonNull(getClass().getResourceAsStream(PLACEHOLDER_ICON));
+            Files.copy(placeholder, appDir.resolve("icon.png"));
+            placeholder.close();
         }
 
         // Check meta.xml exists
@@ -437,19 +439,20 @@ public class RepositoryIndex
         app.getComputedInfo().subdirectories = subdirectories;
     }
 
-    private void handleFatalException(Exception e, String msg)
-    {
-        throw new QuietException(msg, e);
-    }
-
     private String buildSubdirectoryPath(Path appFiles, Path path)
     {
         return "/" + appFiles.getParent().getParent().relativize(path).toString()
                 .replace(File.separatorChar, '/');
     }
 
+    private void handleFatalException(Exception e, String msg)
+    {
+        throw new QuietException(msg, e);
+    }
+
     private static final SimpleDateFormat[] DATE_FORMATS = {
             new SimpleDateFormat("yyyyMMddHHmmss"),
             new SimpleDateFormat("yyyyMMddHHmm"),
             new SimpleDateFormat("yyyyMMdd")};
+    private static final String PLACEHOLDER_ICON = "/static/assets/images/missing.png";
 }
