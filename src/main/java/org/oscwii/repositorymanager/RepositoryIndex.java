@@ -28,6 +28,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.util.FileSystemUtils;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -275,7 +276,8 @@ public class RepositoryIndex
             Path appArchive = appDir.getParent().resolve(app + ".zip");
             FileUtil.zipDirectory(appDir, appArchive);
 
-            // TODO generate WSC info
+            // Generate WSC Banner
+            generateWSCBanner(app);
 
             // Parse meta.xml
             Path appFiles = appDir.resolve("apps").resolve(app.getSlug());
@@ -386,6 +388,26 @@ public class RepositoryIndex
             app.getComputedInfo().packageType = "elf";
         else
             throw new QuietException("Couldn't find boot.dol or boot.elf binary.");
+    }
+
+    private void generateWSCBanner(InstalledApp app) throws IOException
+    {
+        if(config.generateWSCBanner())
+        {
+            logger.info("- Creating banner for Wii Shop Channel");
+            Process proc = Runtime.getRuntime().exec(config.getBannerGeneratorPath() +
+                    " data/contents/ " + app.getSlug());
+            try(BufferedReader reader = proc.errorReader())
+            {
+                int exitCode = proc.waitFor();
+                if(exitCode != 0)
+                    throw new QuietException("Failure in creating banner: " + reader.readLine());
+            }
+            catch(InterruptedException e)
+            {
+                throw new QuietException("Banner creation Was interrupted", e);
+            }
+        }
     }
 
     private Document parseMetaXml(Path file) throws IOException

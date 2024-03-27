@@ -13,6 +13,8 @@ spring:
 repository-manager:
   default-platform: "wii"
   repo-dir: "repository"
+  generate-wsc-banner: false
+  banner-generator-path: "BannerGenerator"
   fetch:
     timeout: 60
     user-agent: "RepositoryManager-DEV"

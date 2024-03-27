@@ -14,6 +14,9 @@ public class RepoManConfig
     private String defaultPlatform;
     private Path repoDir;
 
+    private boolean generateWSCBanner;
+    private Path bannerGeneratorPath;
+
     @NestedConfigurationProperty
     public FetchConfig fetchConfig;
 
@@ -41,5 +44,25 @@ public class RepoManConfig
     public void setRepoDir(Path repoDir)
     {
         this.repoDir = repoDir;
+    }
+
+    public boolean generateWSCBanner()
+    {
+        return generateWSCBanner;
+    }
+
+    public void setGenerateWSCBanner(boolean generateWSCBanner)
+    {
+        this.generateWSCBanner = generateWSCBanner;
+    }
+
+    public Path getBannerGeneratorPath()
+    {
+        return bannerGeneratorPath;
+    }
+
+    public void setBannerGeneratorPath(Path bannerGeneratorPath)
+    {
+        this.bannerGeneratorPath = bannerGeneratorPath;
     }
 }
