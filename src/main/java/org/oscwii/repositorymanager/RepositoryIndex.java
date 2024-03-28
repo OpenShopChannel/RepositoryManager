@@ -3,8 +3,10 @@ package org.oscwii.repositorymanager;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.apache.commons.io.FileUtils;
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.config.Configurator;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.Element;
@@ -82,7 +84,9 @@ public class RepositoryIndex
         this.platforms = Collections.emptyMap();
 
         // Load the repository without updating apps
+        Configurator.setLevel(logger, Level.ERROR);
         index(false);
+        Configurator.setLevel(logger, Level.INFO);
     }
 
     public void index(boolean updateApps)
