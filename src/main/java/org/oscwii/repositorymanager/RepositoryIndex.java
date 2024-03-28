@@ -11,14 +11,14 @@ import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 import org.oscwii.repositorymanager.config.repoman.RepoManConfig;
 import org.oscwii.repositorymanager.database.dao.AppDAO;
-import org.oscwii.repositorymanager.model.app.ShopTitle;
 import org.oscwii.repositorymanager.model.RepositoryInfo;
+import org.oscwii.repositorymanager.model.UpdateLevel;
 import org.oscwii.repositorymanager.model.app.Category;
 import org.oscwii.repositorymanager.model.app.InstalledApp;
 import org.oscwii.repositorymanager.model.app.OSCMeta;
 import org.oscwii.repositorymanager.model.app.Peripheral;
 import org.oscwii.repositorymanager.model.app.Platform;
-import org.oscwii.repositorymanager.model.UpdateLevel;
+import org.oscwii.repositorymanager.model.app.ShopTitle;
 import org.oscwii.repositorymanager.sources.SourceDownloader;
 import org.oscwii.repositorymanager.sources.SourceRegistry;
 import org.oscwii.repositorymanager.treatments.TreatmentRegistry;
@@ -80,9 +80,12 @@ public class RepositoryIndex
         this.categories = Collections.emptyList();
         this.contents = Collections.emptyList();
         this.platforms = Collections.emptyMap();
+
+        // Load the repository without updating apps
+        index(false);
     }
 
-    public void update(boolean updateApps)
+    public void index(boolean updateApps)
     {
         long start = System.currentTimeMillis();
         logger.info("Updating repository index");
@@ -194,7 +197,7 @@ public class RepositoryIndex
         logger.info("Elapsed time: {}", FormatUtil.secondsToTime(elapsed));
     }
 
-    private InstalledApp processMeta(File meta, boolean updateApp)
+    private InstalledApp processMeta(File meta, boolean updateApp) throws IOException
     {
         OSCMeta oscMeta = FileUtil.loadJson(meta, OSCMeta.class, gson,
                 e -> handleFatalException(e, "Failed to process meta \"" + meta.getName() + "\":"));
@@ -250,6 +253,9 @@ public class RepositoryIndex
         if(updateApp)
             updateApp(app);
 
+        loadAppInformation(app, app.getDataPath(),
+                Path.of("data", "contents", app.getSlug() + ".zip"));
+
         return app;
     }
 
@@ -289,61 +295,7 @@ public class RepositoryIndex
             // Generate WSC Banner
             generateWSCBanner(app);
 
-            // Parse meta.xml
-            logger.info("- Reading application metadata");
-            Path appFiles = appDir.resolve("apps").resolve(app.getSlug());
-            Document metaxml = parseMetaXml(appFiles.resolve("meta.xml"));
-
-            logger.info("- Computing information");
-            Element root = metaxml.getRootElement();
-
-            app.getMetaXml().name = root.elementText("name");
-            app.getMetaXml().coder = root.elementText("coder");
-            app.getMetaXml().version = root.elementText("version");
-            app.getMetaXml().shortDesc = root.elementText("short_description");
-            app.getMetaXml().longDesc = root.elementText("long_description");
-
-            // Determine release date
-            String dateText = root.elementText("release_date");
-            if(dateText != null)
-            {
-                for(SimpleDateFormat format : DATE_FORMATS)
-                {
-                    try
-                    {
-                        // we want this in seconds
-                        app.getComputedInfo().releaseDate = format.parse(dateText).getTime() / 1000;
-                        break;
-                    }
-                    catch(ParseException ignored) {}
-                }
-            }
-            else
-                app.getComputedInfo().releaseDate = 0;
-
-            Path binary = appFiles.resolve("boot." + app.getComputedInfo().packageType);
-
-            app.getComputedInfo().archiveSize = Files.size(appArchive);
-            app.getComputedInfo().binarySize = Files.size(binary);
-            app.getComputedInfo().iconSize = Files.size(appFiles.resolve("icon.png"));
-            app.getComputedInfo().rawSize = Files.size(appFiles);
-            app.getComputedInfo().md5Hash = FileUtil.md5Hash(binary);
-            app.getComputedInfo().peripherals = Peripheral.buildHBBList(app.getPeripherals());
-
-            // Create subdirectories list
-            createSubdirectoriesList(app, appFiles);
-
-            // Retrieve persistent app information from database and create if it doesn't exist
-            ShopTitle persistentInfo = appDao.getBySlug(app.getSlug());
-            if(persistentInfo == null)
-            {
-                persistentInfo = appDao.insertApp(app.getSlug());
-                logger.info("  - Created new persistent app information entry");
-            }
-
-            // Check the app has a TID assigned
-            assignTID(app, persistentInfo);
-            app.setTitleInfo(persistentInfo);
+            loadAppInformation(app, appDir, appArchive);
 
             // Hurrah! we finished!
             logger.info("{} has been updated.", app.getMeta().name());
@@ -403,6 +355,11 @@ public class RepositoryIndex
             throw new QuietException("Couldn't find meta.xml file");
 
         // Check binary file
+        determineBinary(app, appDir);
+    }
+
+    private void determineBinary(InstalledApp app, Path appDir)
+    {
         if(Files.exists(appDir.resolve("boot.dol")))
             app.getComputedInfo().packageType = "dol";
         else if(Files.exists(appDir.resolve("boot.elf")))
@@ -429,6 +386,67 @@ public class RepositoryIndex
                 throw new QuietException("Banner creation Was interrupted", e);
             }
         }
+    }
+
+    private void loadAppInformation(InstalledApp app, Path appDir, Path appArchive) throws IOException
+    {
+        Path appFiles = appDir.resolve("apps").resolve(app.getSlug());
+        determineBinary(app, appFiles);
+
+        // Parse meta.xml
+        logger.info("- Reading application metadata");
+        Document metaxml = parseMetaXml(appFiles.resolve("meta.xml"));
+
+        logger.info("- Computing information");
+        Element root = metaxml.getRootElement();
+
+        app.getMetaXml().name = root.elementText("name");
+        app.getMetaXml().coder = root.elementText("coder");
+        app.getMetaXml().version = root.elementText("version");
+        app.getMetaXml().shortDesc = root.elementText("short_description");
+        app.getMetaXml().longDesc = root.elementText("long_description");
+
+        // Determine release date
+        String dateText = root.elementText("release_date");
+        if(dateText != null)
+        {
+            for(SimpleDateFormat format : DATE_FORMATS)
+            {
+                try
+                {
+                    // we want this in seconds
+                    app.getComputedInfo().releaseDate = format.parse(dateText).getTime() / 1000;
+                    break;
+                }
+                catch(ParseException ignored) {}
+            }
+        }
+        else
+            app.getComputedInfo().releaseDate = 0;
+
+        Path binary = appFiles.resolve("boot." + app.getComputedInfo().packageType);
+
+        app.getComputedInfo().archiveSize = Files.size(appArchive);
+        app.getComputedInfo().binarySize = Files.size(binary);
+        app.getComputedInfo().iconSize = Files.size(appFiles.resolve("icon.png"));
+        app.getComputedInfo().rawSize = Files.size(appFiles);
+        app.getComputedInfo().md5Hash = FileUtil.md5Hash(binary);
+        app.getComputedInfo().peripherals = Peripheral.buildHBBList(app.getPeripherals());
+
+        // Create subdirectories list
+        createSubdirectoriesList(app, appFiles);
+
+        // Retrieve persistent app information from database and create if it doesn't exist
+        ShopTitle persistentInfo = appDao.getBySlug(app.getSlug());
+        if(persistentInfo == null)
+        {
+            persistentInfo = appDao.insertApp(app.getSlug());
+            logger.info("  - Created new persistent app information entry");
+        }
+
+        // Check the app has a TID assigned
+        assignTID(app, persistentInfo);
+        app.setTitleInfo(persistentInfo);
     }
 
     private Document parseMetaXml(Path file) throws IOException

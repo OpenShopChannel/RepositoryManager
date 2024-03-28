@@ -30,7 +30,7 @@ public class DanboApp
     @ResponseBody
     public String debug()
     {
-        index.update(true);
+        index.index(true);
         return "running";
     }
 
