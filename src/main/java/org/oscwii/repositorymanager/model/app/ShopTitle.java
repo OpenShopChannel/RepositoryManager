@@ -2,15 +2,15 @@ package org.oscwii.repositorymanager.model.app;
 
 import org.jdbi.v3.core.mapper.reflect.ColumnName;
 
-public class PersistentAppInfo
+public class ShopTitle
 {
     private final String slug;
 
     private int version;
     private String titleId;
 
-    public PersistentAppInfo(@ColumnName("app_slug") String slug,
-                             int version, @ColumnName("title_id") String titleId)
+    public ShopTitle(@ColumnName("app_slug") String slug,
+                     int version, @ColumnName("title_id") String titleId)
     {
         this.slug = slug;
         this.version = version;
@@ -45,7 +45,7 @@ public class PersistentAppInfo
     @Override
     public String toString()
     {
-        return "PersistentAppInfo{" +
+        return "ShopTitle{" +
                 "slug='" + slug + '\'' +
                 ", version=" + version +
                 ", titleId='" + titleId + '\'' +

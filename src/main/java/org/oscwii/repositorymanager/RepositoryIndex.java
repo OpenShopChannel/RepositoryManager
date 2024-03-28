@@ -11,13 +11,14 @@ import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 import org.oscwii.repositorymanager.config.repoman.RepoManConfig;
 import org.oscwii.repositorymanager.database.dao.AppDAO;
-import org.oscwii.repositorymanager.model.app.PersistentAppInfo;
+import org.oscwii.repositorymanager.model.app.ShopTitle;
 import org.oscwii.repositorymanager.model.RepositoryInfo;
 import org.oscwii.repositorymanager.model.app.Category;
 import org.oscwii.repositorymanager.model.app.InstalledApp;
 import org.oscwii.repositorymanager.model.app.OSCMeta;
 import org.oscwii.repositorymanager.model.app.Peripheral;
 import org.oscwii.repositorymanager.model.app.Platform;
+import org.oscwii.repositorymanager.model.UpdateLevel;
 import org.oscwii.repositorymanager.sources.SourceDownloader;
 import org.oscwii.repositorymanager.sources.SourceRegistry;
 import org.oscwii.repositorymanager.treatments.TreatmentRegistry;
@@ -167,6 +168,9 @@ public class RepositoryIndex
                 InstalledApp app = processMeta(meta, updateApps);
                 contents.add(requireNonNull(app));
                 indexed++;
+
+                // Notify if necessary
+                determineUpdateLevel(app);
             }
             catch(Exception e)
             {
@@ -330,7 +334,7 @@ public class RepositoryIndex
             createSubdirectoriesList(app, appFiles);
 
             // Retrieve persistent app information from database and create if it doesn't exist
-            PersistentAppInfo persistentInfo = appDao.getBySlug(app.getSlug());
+            ShopTitle persistentInfo = appDao.getBySlug(app.getSlug());
             if(persistentInfo == null)
             {
                 persistentInfo = appDao.insertApp(app.getSlug());
@@ -339,7 +343,7 @@ public class RepositoryIndex
 
             // Check the app has a TID assigned
             assignTID(app, persistentInfo);
-            app.getComputedInfo().titleId = persistentInfo.getTitleId();
+            app.setTitleInfo(persistentInfo);
 
             // Hurrah! we finished!
             logger.info("{} has been updated.", app.getMeta().name());
@@ -454,7 +458,7 @@ public class RepositoryIndex
         app.getComputedInfo().subdirectories = subdirectories;
     }
 
-    private void assignTID(InstalledApp app, PersistentAppInfo persistentInfo)
+    private void assignTID(InstalledApp app, ShopTitle persistentInfo)
     {
         if(persistentInfo.getTitleId() == null)
         {
@@ -471,6 +475,59 @@ public class RepositoryIndex
             appDao.insertTID(app.getSlug(), titleId);
             persistentInfo.setTitleId(requireNonNull(titleId));
             logger.info("  - Assigned new title ID: {}", titleId);
+        }
+    }
+
+    private void determineUpdateLevel(InstalledApp newApp)
+    {
+        logger.info("- Checking if application was updated");
+        InstalledApp oldApp = null;
+
+        for(InstalledApp installedApp : contents)
+        {
+            if(installedApp.getSlug().equals(newApp.getSlug()))
+            {
+                oldApp = installedApp;
+                break;
+            }
+        }
+
+        UpdateLevel level = oldApp != null ? newApp.compare(oldApp) :
+                (contents.isEmpty() ? UpdateLevel.FIRST_RUN : UpdateLevel.NEW_APP);
+        switch(level)
+        {
+            case SAME -> logger.info("  - No Change");
+            case FIRST_RUN -> logger.info("  - First Index");
+            case MODIFIED ->
+            {
+                logger.info("  - Modified Archive");
+                // TODO notify discord catalog
+            }
+            case NEW_BINARY ->
+            {
+                logger.info("  - New Binary");
+                // TODO notify discord catalog
+            }
+            case NEW_VERSION ->
+            {
+                logger.info("  - New Version");
+                // TODO notify discord catalog
+            }
+            case NEW_APP ->
+            {
+                logger.info("  - New Application");
+                // TODO notify discord catalog
+            }
+        }
+
+        // Bump version in database if app was updated
+        if(level.isUpdated())
+        {
+            ShopTitle titleInfo = newApp.getTitleInfo();
+            int version = titleInfo.getVersion() + 1;
+            appDao.setVersion(newApp.getSlug(), version);
+            titleInfo.setVersion(version);
+            logger.info("  - Bumped title version to {}", version);
         }
     }
 

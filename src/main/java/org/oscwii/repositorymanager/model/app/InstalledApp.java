@@ -1,5 +1,6 @@
 package org.oscwii.repositorymanager.model.app;
 
+import org.oscwii.repositorymanager.model.UpdateLevel;
 import org.springframework.util.Assert;
 
 import java.nio.file.FileSystems;
@@ -17,6 +18,8 @@ public class InstalledApp
     private final Category category;
     private final List<Platform> supportedPlatforms;
     private final Map<Peripheral, Integer> peripherals;
+
+    private ShopTitle titleInfo;
 
     public InstalledApp(String slug, OSCMeta meta, Category category,
                         Map<Peripheral, Integer> peripherals,
@@ -69,9 +72,30 @@ public class InstalledApp
         return metaXml;
     }
 
+    public ShopTitle getTitleInfo()
+    {
+        return titleInfo;
+    }
+
+    public void setTitleInfo(ShopTitle titleInfo)
+    {
+        this.titleInfo = titleInfo;
+    }
+
     public Path getDataPath()
     {
         return FileSystems.getDefault().getPath("data", "contents", slug);
+    }
+
+    public UpdateLevel compare(InstalledApp other)
+    {
+        if(other.computedInfo.rawSize != this.computedInfo.rawSize)
+            return UpdateLevel.MODIFIED;
+        else if(!other.computedInfo.md5Hash.equals(this.computedInfo.md5Hash))
+            return UpdateLevel.NEW_BINARY;
+        else if(!other.metaXml.version.equals(this.metaXml.version))
+            return UpdateLevel.NEW_VERSION;
+        return UpdateLevel.SAME;
     }
 
     @Override
@@ -86,7 +110,6 @@ public class InstalledApp
         public long archiveSize, binarySize, iconSize, rawSize;
         public long releaseDate;
         public String packageType, md5Hash, peripherals;
-        public String titleId;
     }
 
     public static class MetaXml
