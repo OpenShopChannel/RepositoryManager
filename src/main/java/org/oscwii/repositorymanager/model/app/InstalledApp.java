@@ -3,7 +3,6 @@ package org.oscwii.repositorymanager.model.app;
 import org.oscwii.repositorymanager.model.UpdateLevel;
 import org.springframework.util.Assert;
 
-import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
@@ -84,7 +83,12 @@ public class InstalledApp
 
     public Path getDataPath()
     {
-        return FileSystems.getDefault().getPath("data", "contents", slug);
+        return Path.of("data", "contents", slug);
+    }
+
+    public Path getAppFilesPath()
+    {
+        return getDataPath().resolve("apps").resolve(slug);
     }
 
     public UpdateLevel compare(InstalledApp other)

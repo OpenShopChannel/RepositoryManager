@@ -105,6 +105,9 @@ public class RepositoryIndex
         // Index applications
         int[] info = indexContents(updateApps);
 
+        // Create icon cache
+        createIconCache();
+
         // Print index summary
         printIndexSummary(info, start);
 
@@ -201,6 +204,29 @@ public class RepositoryIndex
         logger.info("Elapsed time: {}", FormatUtil.secondsToTime(elapsed));
     }
 
+    private void createIconCache()
+    {
+        try
+        {
+            Path iconsDir = Path.of("data", "icons");
+            Files.createDirectories(iconsDir);
+
+            for(InstalledApp app : contents)
+            {
+                Path appIcon = app.getAppFilesPath().resolve("icon.png");
+                Path cachedIcon = iconsDir.resolve(app.getSlug() + ".png");
+                Files.copy(appIcon, cachedIcon);
+            }
+
+            FileUtil.zipDirectory(iconsDir, Path.of("data", "icons.zip"));
+            FileSystemUtils.deleteRecursively(iconsDir);
+        }
+        catch(Exception e)
+        {
+            throw new RuntimeException("Failed to create icon cache:", e);
+        }
+    }
+
     private InstalledApp processMeta(File meta, boolean updateApp) throws IOException
     {
         OSCMeta oscMeta = FileUtil.loadJson(meta, OSCMeta.class, gson,
@@ -257,8 +283,7 @@ public class RepositoryIndex
         if(updateApp)
             updateApp(app);
 
-        loadAppInformation(app, app.getDataPath(),
-                Path.of("data", "contents", app.getSlug() + ".zip"));
+        loadAppInformation(app, Path.of("data", "contents", app.getSlug() + ".zip"));
 
         return app;
     }
@@ -299,7 +324,7 @@ public class RepositoryIndex
             // Generate WSC Banner
             generateWSCBanner(app);
 
-            loadAppInformation(app, appDir, appArchive);
+            loadAppInformation(app, appArchive);
 
             // Hurrah! we finished!
             logger.info("{} has been updated.", app.getMeta().name());
@@ -392,9 +417,9 @@ public class RepositoryIndex
         }
     }
 
-    private void loadAppInformation(InstalledApp app, Path appDir, Path appArchive) throws IOException
+    private void loadAppInformation(InstalledApp app, Path appArchive) throws IOException
     {
-        Path appFiles = appDir.resolve("apps").resolve(app.getSlug());
+        Path appFiles = app.getAppFilesPath();
         determineBinary(app, appFiles);
 
         // Parse meta.xml
