@@ -10,6 +10,8 @@ import org.dom4j.DocumentException;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 import org.oscwii.repositorymanager.config.repoman.RepoManConfig;
+import org.oscwii.repositorymanager.database.dao.AppDAO;
+import org.oscwii.repositorymanager.model.app.PersistentAppInfo;
 import org.oscwii.repositorymanager.model.RepositoryInfo;
 import org.oscwii.repositorymanager.model.app.Category;
 import org.oscwii.repositorymanager.model.app.InstalledApp;
@@ -20,6 +22,7 @@ import org.oscwii.repositorymanager.sources.SourceDownloader;
 import org.oscwii.repositorymanager.sources.SourceRegistry;
 import org.oscwii.repositorymanager.treatments.TreatmentRegistry;
 import org.oscwii.repositorymanager.treatments.TreatmentRunnable;
+import org.oscwii.repositorymanager.utils.AppUtil;
 import org.oscwii.repositorymanager.utils.FileUtil;
 import org.oscwii.repositorymanager.utils.FormatUtil;
 import org.oscwii.repositorymanager.utils.QuietException;
@@ -49,6 +52,7 @@ import static java.util.Objects.requireNonNull;
 @Service
 public class RepositoryIndex
 {
+    private final AppDAO appDao;
     private final Gson gson;
     private final Logger logger;
     private final RepoManConfig config;
@@ -62,8 +66,9 @@ public class RepositoryIndex
     private RepositoryInfo info;
 
     @Autowired
-    public RepositoryIndex(Gson gson, RepoManConfig config, SourceRegistry sources, TreatmentRegistry treatments)
+    public RepositoryIndex(AppDAO appDao, Gson gson, RepoManConfig config, SourceRegistry sources, TreatmentRegistry treatments)
     {
+        this.appDao = appDao;
         this.gson = gson;
         this.logger = LogManager.getLogger(RepositoryIndex.class);
         this.config = config;
@@ -324,7 +329,17 @@ public class RepositoryIndex
             // Create subdirectories list
             createSubdirectoriesList(app, appFiles);
 
-            // TODO store persistent information and generate TID
+            // Retrieve persistent app information from database and create if it doesn't exist
+            PersistentAppInfo persistentInfo = appDao.getBySlug(app.getSlug());
+            if(persistentInfo == null)
+            {
+                persistentInfo = appDao.insertApp(app.getSlug());
+                logger.info("  - Created new persistent app information entry");
+            }
+
+            // Check the app has a TID assigned
+            assignTID(app, persistentInfo);
+            app.getComputedInfo().titleId = persistentInfo.getTitleId();
 
             // Hurrah! we finished!
             logger.info("{} has been updated.", app.getMeta().name());
@@ -437,6 +452,26 @@ public class RepositoryIndex
         }
 
         app.getComputedInfo().subdirectories = subdirectories;
+    }
+
+    private void assignTID(InstalledApp app, PersistentAppInfo persistentInfo)
+    {
+        if(persistentInfo.getTitleId() == null)
+        {
+            // Assign a random TID
+            boolean isInUse = false;
+            String titleId = null;
+
+            while(!isInUse)
+            {
+                titleId = AppUtil.generateTID();
+                isInUse = appDao.isTIDInUse(titleId).isEmpty();
+            }
+
+            appDao.insertTID(app.getSlug(), titleId);
+            persistentInfo.setTitleId(requireNonNull(titleId));
+            logger.info("  - Assigned new title ID: {}", titleId);
+        }
     }
 
     private String buildSubdirectoryPath(Path appFiles, Path path)

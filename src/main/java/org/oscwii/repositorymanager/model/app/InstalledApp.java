@@ -86,6 +86,7 @@ public class InstalledApp
         public long archiveSize, binarySize, iconSize, rawSize;
         public long releaseDate;
         public String packageType, md5Hash, peripherals;
+        public String titleId;
     }
 
     public static class MetaXml
