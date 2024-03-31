@@ -18,11 +18,14 @@ public class RepoManConfig
     private Path bannerGeneratorPath;
 
     @NestedConfigurationProperty
+    public DiscordConfig discordConfig;
+    @NestedConfigurationProperty
     public FetchConfig fetchConfig;
 
     @Autowired
-    public RepoManConfig(FetchConfig fetchConfig)
+    public RepoManConfig(DiscordConfig discordConfig, FetchConfig fetchConfig)
     {
+        this.discordConfig = discordConfig;
         this.fetchConfig = fetchConfig;
     }
 

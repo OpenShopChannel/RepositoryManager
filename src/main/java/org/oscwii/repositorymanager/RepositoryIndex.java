@@ -1,5 +1,10 @@
 package org.oscwii.repositorymanager;
 
+import club.minnced.discord.webhook.WebhookClient;
+import club.minnced.discord.webhook.send.WebhookEmbed;
+import club.minnced.discord.webhook.send.WebhookEmbedBuilder;
+import club.minnced.discord.webhook.send.WebhookMessage;
+import club.minnced.discord.webhook.send.WebhookMessageBuilder;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.apache.commons.io.FileUtils;
@@ -13,6 +18,9 @@ import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 import org.oscwii.repositorymanager.config.repoman.RepoManConfig;
 import org.oscwii.repositorymanager.database.dao.AppDAO;
+import org.oscwii.repositorymanager.factory.DiscordWebhookFactory;
+import org.oscwii.repositorymanager.logging.DiscordAppender;
+import org.oscwii.repositorymanager.logging.DiscordMessage;
 import org.oscwii.repositorymanager.model.RepositoryInfo;
 import org.oscwii.repositorymanager.model.UpdateLevel;
 import org.oscwii.repositorymanager.model.app.Category;
@@ -43,11 +51,13 @@ import java.nio.file.Path;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
@@ -56,6 +66,7 @@ import static java.util.Objects.requireNonNull;
 public class RepositoryIndex
 {
     private final AppDAO appDao;
+    private final DiscordWebhookFactory discordWebhook;
     private final Gson gson;
     private final Logger logger;
     private final RepoManConfig config;
@@ -69,9 +80,10 @@ public class RepositoryIndex
     private RepositoryInfo info;
 
     @Autowired
-    public RepositoryIndex(AppDAO appDao, Gson gson, RepoManConfig config, SourceRegistry sources, TreatmentRegistry treatments)
+    public RepositoryIndex(AppDAO appDao, DiscordWebhookFactory discordWebhook, Gson gson, RepoManConfig config, SourceRegistry sources, TreatmentRegistry treatments)
     {
         this.appDao = appDao;
+        this.discordWebhook = discordWebhook;
         this.gson = gson;
         this.logger = LogManager.getLogger(RepositoryIndex.class);
         this.config = config;
@@ -84,16 +96,25 @@ public class RepositoryIndex
         this.platforms = Collections.emptyMap();
 
         // Load the repository without updating apps
+        // TODO move this down
         Configurator.setLevel(logger, Level.ERROR);
         index(false);
         Configurator.setLevel(logger, Level.INFO);
+
+        // Register the logger appender to notify Discord
+        // if we have a valid webhook configured
+        if(config.discordConfig.isLoggingEnabled())
+        {
+            DiscordAppender appender = new DiscordAppender(discordWebhook);
+            appender.start();
+            ((org.apache.logging.log4j.core.Logger) logger).addAppender(appender);
+        }
     }
 
     public void index(boolean updateApps)
     {
         long start = System.currentTimeMillis();
-        logger.info("Updating repository index");
-        // TODO discord log
+        logger.info(new DiscordMessage("Updating repository index", "Reindexing all applications..."));
 
         // Load repository info
         loadRepositoryInfo();
@@ -184,7 +205,7 @@ public class RepositoryIndex
             }
             catch(Exception e)
             {
-                logger.error("Failed to process oscmeta {}:", meta.getName(), e);
+                handleApplicationUpdateFailure(meta, e);
                 errors++;
             }
         }
@@ -197,11 +218,21 @@ public class RepositoryIndex
     private void printIndexSummary(int[] info, long start)
     {
         long elapsed = (System.currentTimeMillis() - start) / 1000;
+        Map<String, Object> summary = Map.of(
+                "Installed Manifests", info[0],
+                "Indexed Applications", info[1],
+                "Indexing errors", info[2],
+                "Elapsed time", FormatUtil.secondsToTime(elapsed));
+
         logger.info("** INDEX SUMMARY **");
-        logger.info("Installed Manifests: {}", info[0]);
-        logger.info("Indexed Applications: {}", info[1]);
-        logger.info("Indexing errors: {}", info[2]);
-        logger.info("Elapsed time: {}", FormatUtil.secondsToTime(elapsed));
+        StringBuilder discordStr = new StringBuilder();
+        for(Map.Entry<String, Object> entry : summary.entrySet())
+        {
+            logger.info("{}: {}", entry.getKey(), entry.getValue());
+            discordStr.append(String.format("**%s:** %s\n", entry.getKey(), entry.getValue()));
+        }
+
+        logger.info(new DiscordMessage("** INDEX SUMMARY **", "Index Summary", discordStr.toString()));
     }
 
     private void createIconCache()
@@ -541,29 +572,37 @@ public class RepositoryIndex
 
         UpdateLevel level = oldApp != null ? newApp.compare(oldApp) :
                 (contents.isEmpty() ? UpdateLevel.FIRST_RUN : UpdateLevel.NEW_APP);
-        switch(level)
+        try(WebhookClient webhook = discordWebhook.catalogWebhook())
         {
-            case SAME -> logger.info("  - No Change");
-            case FIRST_RUN -> logger.info("  - First Index");
-            case MODIFIED ->
+            switch(level)
             {
-                logger.info("  - Modified Archive");
-                // TODO notify discord catalog
-            }
-            case NEW_BINARY ->
-            {
-                logger.info("  - New Binary");
-                // TODO notify discord catalog
-            }
-            case NEW_VERSION ->
-            {
-                logger.info("  - New Version");
-                // TODO notify discord catalog
-            }
-            case NEW_APP ->
-            {
-                logger.info("  - New Application");
-                // TODO notify discord catalog
+                case SAME -> logger.info("  - No Change");
+                case FIRST_RUN -> logger.info("  - First Index");
+                case MODIFIED ->
+                {
+                    logger.info("  - Modified Archive");
+                    notifyCatalog("New Update!", newApp.getMetaXml().name +
+                            " has been updated.", webhook);
+                }
+                case NEW_BINARY ->
+                {
+                    logger.info("  - New Binary");
+                    notifyCatalog("New Update!", newApp.getMetaXml().name +
+                            " has been updated.", webhook);
+                }
+                case NEW_VERSION ->
+                {
+                    logger.info("  - New Version");
+                    notifyCatalog("New Version!", newApp.getMetaXml().name +
+                            " has been updated from " + oldApp.getMetaXml().version +
+                            "to " +  newApp.getMetaXml().version, webhook);
+                }
+                case NEW_APP ->
+                {
+                    logger.info("  - New Application");
+                    notifyCatalog("New Application!", newApp.getMetaXml().name +
+                            " has been added to the repository.", webhook);
+                }
             }
         }
 
@@ -578,10 +617,45 @@ public class RepositoryIndex
         }
     }
 
+    private void notifyCatalog(String title, String description, WebhookClient webhook)
+    {
+        if(webhook == null)
+            return;
+
+        WebhookEmbed embed = new WebhookEmbedBuilder()
+                .setTitle(new WebhookEmbed.EmbedTitle(title, null))
+                .setDescription(description)
+                .build();
+        WebhookMessage message = new WebhookMessageBuilder()
+                .addEmbeds(embed)
+                .setUsername(info.name())
+                .build();
+        webhook.send(message);
+    }
+
     private String buildSubdirectoryPath(Path appFiles, Path path)
     {
         return "/" + appFiles.getParent().getParent().relativize(path).toString()
                 .replace(File.separatorChar, '/');
+    }
+
+    private void handleApplicationUpdateFailure(File meta, Exception ex)
+    {
+        if(ex instanceof QuietException quiet)
+            ex = (Exception) quiet.getCause();
+
+        String stackTrace = Arrays.stream(ex.getStackTrace())
+                .limit(3)
+                .map(StackTraceElement::toString)
+                .collect(Collectors.joining("\n"));
+
+        String errorMessage = "**FAILED TO PROCESS " + meta.getName() + ":**\n" +
+                "**EXCEPTION:** " + ex.getClass() + "\n" +
+                "**ERROR MESSAGE:** " + ex.getMessage() + "\n" +
+                "**STACK TRACE:** " + stackTrace + "\n" +
+                "** MOVING ON. **";
+        logger.error(new DiscordMessage("Failed to process oscmeta " + meta.getName() + ": ",
+                "App index failure", errorMessage), ex);
     }
 
     private void handleFatalException(Exception e, String msg)

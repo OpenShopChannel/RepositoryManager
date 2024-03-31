@@ -15,6 +15,10 @@ repository-manager:
   repo-dir: "repository"
   generate-wsc-banner: false
   banner-generator-path: "BannerGenerator"
+  discord:
+    enable-logging: false
+    catalog-webhook-url: ""
+    log-webhook-url: ""
   fetch:
     timeout: 60
     user-agent: "RepositoryManager-DEV"
