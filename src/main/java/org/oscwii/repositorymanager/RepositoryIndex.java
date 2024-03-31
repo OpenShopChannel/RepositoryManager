@@ -475,7 +475,7 @@ public class RepositoryIndex
                 try
                 {
                     // we want this in seconds
-                    app.getComputedInfo().releaseDate = format.parse(dateText).getTime() / 1000;
+                    app.getComputedInfo().releaseDate = (int) format.parse(dateText).toInstant().getEpochSecond();
                     break;
                 }
                 catch(ParseException ignored) {}
@@ -489,7 +489,7 @@ public class RepositoryIndex
         app.getComputedInfo().archiveSize = Files.size(appArchive);
         app.getComputedInfo().binarySize = Files.size(binary);
         app.getComputedInfo().iconSize = Files.size(appFiles.resolve("icon.png"));
-        app.getComputedInfo().rawSize = Files.size(appFiles);
+        app.getComputedInfo().rawSize = FileUtils.sizeOfDirectory(appFiles.toFile());
         app.getComputedInfo().md5Hash = FileUtil.md5Hash(binary);
         app.getComputedInfo().peripherals = Peripheral.buildHBBList(app.getPeripherals());
 
