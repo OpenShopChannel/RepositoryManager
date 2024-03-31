@@ -2,6 +2,8 @@ package org.oscwii.repositorymanager.utils;
 
 public class FormatUtil
 {
+    public static String baseUrl = "";
+
     public static String secondsToTime(long timeseconds)
     {
         StringBuilder builder = new StringBuilder();
@@ -52,4 +54,22 @@ public class FormatUtil
 
         return str;
     }
+
+    public static String iconUrl(String slug)
+    {
+        return urlFor(ICON_PATH.formatted(slug));
+    }
+
+    public static String zipUrl(String slug)
+    {
+        return urlFor(ZIP_PATH.formatted(slug, slug));
+    }
+
+    public static String urlFor(String path)
+    {
+        return baseUrl + path;
+    }
+
+    private static final String ICON_PATH = "/api/v3/contents/%s/icon.png";
+    private static final String ZIP_PATH = "/api/v3/contents/%s/%s.zip";
 }

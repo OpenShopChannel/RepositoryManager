@@ -95,12 +95,6 @@ public class RepositoryIndex
         this.contents = Collections.emptyList();
         this.platforms = Collections.emptyMap();
 
-        // Load the repository without updating apps
-        // TODO move this down
-        Configurator.setLevel(logger, Level.ERROR);
-        index(false);
-        Configurator.setLevel(logger, Level.INFO);
-
         // Register the logger appender to notify Discord
         // if we have a valid webhook configured
         if(config.discordConfig.isLoggingEnabled())
@@ -109,6 +103,13 @@ public class RepositoryIndex
             appender.start();
             ((org.apache.logging.log4j.core.Logger) logger).addAppender(appender);
         }
+    }
+
+    public void initialize()
+    {
+        Configurator.setLevel(logger, Level.ERROR);
+        index(false);
+        Configurator.setLevel(logger, Level.INFO);
     }
 
     public void index(boolean updateApps)
@@ -135,6 +136,32 @@ public class RepositoryIndex
         logger.info("Finished updating repository index");
     }
 
+    public List<InstalledApp> getContents()
+    {
+        return contents;
+    }
+
+    public List<Category> getCategories()
+    {
+        return categories;
+    }
+
+    public InstalledApp getApp(String slug)
+    {
+        for(InstalledApp app : contents)
+        {
+            if(app.getSlug().equalsIgnoreCase(slug))
+                return app;
+        }
+
+        return null;
+    }
+
+    public RepositoryInfo getInfo()
+    {
+        return info;
+    }
+
     private void loadRepositoryInfo()
     {
         File file = config.getRepoDir().resolve("repository.json").toFile();
@@ -149,14 +176,14 @@ public class RepositoryIndex
     private void indexCategories()
     {
         File file = config.getRepoDir().resolve("categories.json").toFile();
-        this.categories = FileUtil.loadJson(file, new TypeToken<List<Category>>(){},
+        this.categories = FileUtil.loadJson(file, new TypeToken<>(){},
                 gson, e -> handleFatalException(e, "Failed to load categories:"));
     }
 
     private void indexPlatforms()
     {
         File file = config.getRepoDir().resolve("platforms.json").toFile();
-        List<Platform> platformList = FileUtil.loadJson(file, new TypeToken<List<Platform>>(){}, gson,
+        List<Platform> platformList = FileUtil.loadJson(file, new TypeToken<>(){}, gson,
                 e -> handleFatalException(e, "Failed to load platforms:"));
         Map<String, Platform> platforms = new HashMap<>();
         if(platformList == null)

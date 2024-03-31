@@ -14,6 +14,7 @@ spring:
     password: danbo
 
 repository-manager:
+  base-url: "http://localhost:8080"
   default-platform: "wii"
   repo-dir: "repository"
   generate-wsc-banner: false

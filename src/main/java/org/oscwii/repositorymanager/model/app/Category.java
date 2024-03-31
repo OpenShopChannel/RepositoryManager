@@ -1,6 +1,12 @@
 package org.oscwii.repositorymanager.model.app;
 
-public record Category(String name, String displayName, String singular, String plural)
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import com.google.gson.annotations.SerializedName;
+
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+public record Category(String name, @SerializedName("display_name") String displayName,
+                       String singular, String plural)
 {
     @Override
     public String toString()
