@@ -16,7 +16,7 @@ public class FeaturedApp
     private final Supplier<InstalledApp> featured;
     private final RepositoryIndex index;
 
-    private String slug;
+    private String slug = "";
 
     @Autowired
     public FeaturedApp(RepositoryIndex index)
@@ -34,6 +34,8 @@ public class FeaturedApp
     public void pickFeaturedApp()
     {
         ThreadLocalRandom rand = ThreadLocalRandom.current();
+        if(index.getContents().isEmpty())
+            return;
 
         while(true)
         {

@@ -1,4 +1,4 @@
-package org.oscwii.repositorymanager.utils;
+package org.oscwii.repositorymanager.exceptions;
 
 public class QuietException extends RuntimeException
 {

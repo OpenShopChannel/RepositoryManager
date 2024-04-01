@@ -18,6 +18,8 @@ import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 import org.oscwii.repositorymanager.config.repoman.RepoManConfig;
 import org.oscwii.repositorymanager.database.dao.AppDAO;
+import org.oscwii.repositorymanager.exceptions.AppFilesMissingException;
+import org.oscwii.repositorymanager.exceptions.QuietException;
 import org.oscwii.repositorymanager.factory.DiscordWebhookFactory;
 import org.oscwii.repositorymanager.logging.DiscordAppender;
 import org.oscwii.repositorymanager.logging.DiscordMessage;
@@ -36,7 +38,6 @@ import org.oscwii.repositorymanager.treatments.TreatmentRunnable;
 import org.oscwii.repositorymanager.utils.AppUtil;
 import org.oscwii.repositorymanager.utils.FileUtil;
 import org.oscwii.repositorymanager.utils.FormatUtil;
-import org.oscwii.repositorymanager.utils.QuietException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -107,9 +108,21 @@ public class RepositoryIndex
 
     public void initialize()
     {
-        Configurator.setLevel(logger, Level.ERROR);
-        index(false);
-        Configurator.setLevel(logger, Level.INFO);
+        try
+        {
+            Configurator.setLevel(logger, Level.ERROR);
+            index(false);
+        }
+        catch(AppFilesMissingException ignored)
+        {
+            Configurator.setLevel(logger, Level.INFO);
+            logger.info("You might want to trigger an update from your admin panel.");
+        }
+        finally
+        {
+            // Ensure the logging level is back to normal
+            Configurator.setLevel(logger, Level.INFO);
+        }
     }
 
     public void index(boolean updateApps)
@@ -230,6 +243,12 @@ public class RepositoryIndex
                 // Notify if necessary
                 determineUpdateLevel(app);
             }
+            catch(AppFilesMissingException e)
+            {
+                logger.error("Some app files are missing. New instance?");
+                logger.error("Cancelling initial indexing...");
+                throw e;
+            }
             catch(Exception e)
             {
                 handleApplicationUpdateFailure(meta, e);
@@ -337,12 +356,25 @@ public class RepositoryIndex
         InstalledApp app = new InstalledApp(meta.getName().replace(".oscmeta", ""), oscMeta,
                 category, peripherals, supportedPlatforms);
 
-        // Attempt to update the app
-        if(updateApp)
+        // Check if we have to update the app
+        if(!updateApp)
+        {
+            if(Files.notExists(app.getAppFilesPath()))
+            {
+                logger.error("Application files for {} are missing!", app);
+                throw new AppFilesMissingException();
+            }
+
+            checkRequiredContents(app, app.getDataPath());
+            // TODO moderation
+        }
+        else
             updateApp(app);
 
         loadAppInformation(app, Path.of("data", "contents", app.getSlug() + ".zip"));
 
+        // Hurrah! we finished!
+        logger.info("{} has been updated.", app.getMeta().name());
         return app;
     }
 
@@ -381,11 +413,6 @@ public class RepositoryIndex
 
             // Generate WSC Banner
             generateWSCBanner(app);
-
-            loadAppInformation(app, appArchive);
-
-            // Hurrah! we finished!
-            logger.info("{} has been updated.", app.getMeta().name());
         }
         catch(IOException e)
         {
@@ -478,7 +505,6 @@ public class RepositoryIndex
     private void loadAppInformation(InstalledApp app, Path appArchive) throws IOException
     {
         Path appFiles = app.getAppFilesPath();
-        determineBinary(app, appFiles);
 
         // Parse meta.xml
         logger.info("- Reading application metadata");
@@ -523,17 +549,21 @@ public class RepositoryIndex
         // Create subdirectories list
         createSubdirectoriesList(app, appFiles);
 
-        // Retrieve persistent app information from database and create if it doesn't exist
-        ShopTitle persistentInfo = appDao.getBySlug(app.getSlug());
-        if(persistentInfo == null)
+        // Update app information in the database and register if it doesn't exist
+        ShopTitle shopTitle = appDao.getShopTitle(app.getSlug());
+        if(appDao.appExists(app.getSlug()).isEmpty())
         {
-            persistentInfo = appDao.insertApp(app.getSlug());
-            logger.info("  - Created new persistent app information entry");
+            appDao.insertApp(app);
+            if(shopTitle == null)
+                shopTitle = appDao.insertShopTitle(app.getSlug());
+            logger.info("  - Registered app in database");
         }
+        else
+            appDao.updateApp(app);
 
         // Check the app has a TID assigned
-        assignTID(app, persistentInfo);
-        app.setTitleInfo(persistentInfo);
+        assignTID(app, shopTitle);
+        app.setTitleInfo(shopTitle);
     }
 
     private Document parseMetaXml(Path file) throws IOException
@@ -563,13 +593,13 @@ public class RepositoryIndex
         app.getComputedInfo().subdirectories = subdirectories;
     }
 
-    private void assignTID(InstalledApp app, ShopTitle persistentInfo)
+    private void assignTID(InstalledApp app, ShopTitle shopTitle)
     {
-        if(persistentInfo.getTitleId() == null)
+        if(shopTitle.getTitleId() == null)
         {
             // Assign a random TID
             boolean isInUse = false;
-            String titleId = null;
+            String titleId = "";
 
             while(!isInUse)
             {
@@ -578,7 +608,7 @@ public class RepositoryIndex
             }
 
             appDao.insertTID(app.getSlug(), titleId);
-            persistentInfo.setTitleId(requireNonNull(titleId));
+            shopTitle.setTitleId(titleId);
             logger.info("  - Assigned new title ID: {}", titleId);
         }
     }
@@ -597,8 +627,14 @@ public class RepositoryIndex
             }
         }
 
-        UpdateLevel level = oldApp != null ? newApp.compare(oldApp) :
-                (contents.isEmpty() ? UpdateLevel.FIRST_RUN : UpdateLevel.NEW_APP);
+        boolean exists = oldApp != null;
+        if(!exists)
+        {
+            // Check in the database
+            exists = appDao.appExists(newApp.getSlug()).isPresent();
+        }
+
+        UpdateLevel level = !exists ? UpdateLevel.NEW_APP : newApp.compare(oldApp);
         try(WebhookClient webhook = discordWebhook.catalogWebhook())
         {
             switch(level)
@@ -620,6 +656,7 @@ public class RepositoryIndex
                 case NEW_VERSION ->
                 {
                     logger.info("  - New Version");
+                    //noinspection DataFlowIssue - cannot be null here
                     notifyCatalog("New Version!", newApp.getMetaXml().name +
                             " has been updated from " + oldApp.getMetaXml().version +
                             "to " +  newApp.getMetaXml().version, webhook);
@@ -638,7 +675,7 @@ public class RepositoryIndex
         {
             ShopTitle titleInfo = newApp.getTitleInfo();
             int version = titleInfo.getVersion() + 1;
-            appDao.setVersion(newApp.getSlug(), version);
+            appDao.setTitleVersion(newApp.getSlug(), version);
             titleInfo.setVersion(version);
             logger.info("  - Bumped title version to {}", version);
         }

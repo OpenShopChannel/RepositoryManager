@@ -10,7 +10,7 @@ import org.oscwii.repositorymanager.sources.BaseSourceDownloader;
 import org.oscwii.repositorymanager.sources.SourceRegistry;
 import org.oscwii.repositorymanager.utils.FnMatch;
 import org.oscwii.repositorymanager.utils.HttpUtil;
-import org.oscwii.repositorymanager.utils.QuietException;
+import org.oscwii.repositorymanager.exceptions.QuietException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

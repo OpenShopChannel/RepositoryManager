@@ -93,6 +93,8 @@ public class InstalledApp
 
     public UpdateLevel compare(InstalledApp other)
     {
+        if(other == null)
+            return UpdateLevel.FIRST_RUN;
         if(other.computedInfo.rawSize != this.computedInfo.rawSize)
             return UpdateLevel.MODIFIED;
         else if(!other.computedInfo.md5Hash.equals(this.computedInfo.md5Hash))

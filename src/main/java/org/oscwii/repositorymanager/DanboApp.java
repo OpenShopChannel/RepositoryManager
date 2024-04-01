@@ -28,7 +28,7 @@ public class DanboApp
     public void onStartup()
     {
         // Load the repository without updating apps
-        index.initialize(); // TODO fix this
+        index.initialize();
 
         // Pick a featured app
         featuredApp.pickFeaturedApp();

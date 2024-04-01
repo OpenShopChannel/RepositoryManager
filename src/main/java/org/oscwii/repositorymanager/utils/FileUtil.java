@@ -16,6 +16,7 @@ import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.commons.compress.compressors.xz.XZCompressorInputStream;
 import org.apache.commons.io.IOUtils;
+import org.oscwii.repositorymanager.exceptions.QuietException;
 import org.oscwii.repositorymanager.model.app.OSCMeta.Source.Format;
 import org.springframework.util.DigestUtils;
 

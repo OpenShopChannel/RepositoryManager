@@ -12,7 +12,7 @@ import org.oscwii.repositorymanager.model.app.OSCMeta;
 import org.oscwii.repositorymanager.model.app.OSCMeta.Treatment;
 import org.oscwii.repositorymanager.treatments.BaseTreatmentRunnable;
 import org.oscwii.repositorymanager.treatments.TreatmentRegistry;
-import org.oscwii.repositorymanager.utils.QuietException;
+import org.oscwii.repositorymanager.exceptions.QuietException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;

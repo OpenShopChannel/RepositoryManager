@@ -6,6 +6,7 @@ import okhttp3.Call;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import org.oscwii.repositorymanager.exceptions.QuietException;
 import org.springframework.util.Assert;
 
 import java.io.IOException;
