@@ -5,7 +5,9 @@ import org.oscwii.repositorymanager.services.FeaturedApp;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,15 +19,16 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @ConfigurationPropertiesScan(value = "org.oscwii.repositorymanager.config.repoman")
 public class DanboApp
 {
-    private final RepositoryIndex index;
-
     @Autowired
-    public DanboApp(FeaturedApp featuredApp, RepositoryIndex index)
-    {
-        this.index = index;
+    private RepositoryIndex index;
+    @Autowired
+    private FeaturedApp featuredApp;
 
+    @EventListener(ApplicationReadyEvent.class)
+    public void onStartup()
+    {
         // Load the repository without updating apps
-        index.initialize();
+        index.initialize(); // TODO fix this
 
         // Pick a featured app
         featuredApp.pickFeaturedApp();

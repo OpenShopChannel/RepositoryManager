@@ -668,7 +668,7 @@ public class RepositoryIndex
 
     private void handleApplicationUpdateFailure(File meta, Exception ex)
     {
-        if(ex instanceof QuietException quiet)
+        if(ex instanceof QuietException quiet && quiet.getCause() != null)
             ex = (Exception) quiet.getCause();
 
         String stackTrace = Arrays.stream(ex.getStackTrace())
