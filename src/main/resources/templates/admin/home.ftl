@@ -1,5 +1,6 @@
-{% extends "admin/base.html" %}
-{% block content %}
+<#import "base.ftl" as base>
+
+<@base.content>
     <div class="content">
         <div class="row row-eq-spacing">
             <div class="col-4">
@@ -9,37 +10,37 @@
         <h1 class="content-title font-size-22">
             Repository Administration Panel
         </h1>
-        You are logged in as <strong>[[${ current_user.username }]]</strong>.
+        You are logged in as <strong>${currentUser.username()}</strong>.
     </div>
-    {% if has_access("Administrator") %}
+    <!-- TODO HAS ACCESS - start -->
     <div class="card">
         <div class="row row-eq-spacing justify-content-center" style="margin-top: unset; margin-bottom: unset;">
             <div class="btn-group btn-group-lg" role="group" aria-label="Basic example">
-                <a href="[[${ url_for("admin.action", action="update") }]]" class="btn btn-success" type="button">Update</a>
-                <a href="[[${ url_for("admin.settings") }]]" class="btn" type="button">Settings</a>
+                <a href="/admin/action" class="btn btn-success" type="button">Update</a>
+                <a href="/admin/settings" class="btn" type="button">Settings</a>
             </div>
         </div>
     </div>
-    {% endif %}
+    <!-- TODO HAS ACCESS - end -->
     <div class="card">
         <h2 class="card-title">
-            [[${ index()["repository"]["name"] }]] (Provider: [[${ index()["repository"]["provider"] }]])
+            ${repoInfo.name()} (Provider: ${repoInfo.provider()})
         </h2>
         <p>
-            [[${ index()["repository"]["description"] }]]
+            ${repoInfo.description()}
         </p>
     </div>
     <div class="row row-eq-spacing">
         <div class="col-6 col-xl-3">
             <div class="card">
                 <h2 class="card-title">Applications</h2>
-                [[${ index()["contents"]|length }]]
+                ${applications}
             </div>
         </div>
         <div class="col-6 col-xl-3">
             <div class="card">
                 <h2 class="card-title">Pending Moderation</h2>
-                [[${ notifications()["pending_moderation"] }]]
+                TODO <!--TODO notifications()["pending_moderation"]-->
             </div>
         </div>
         <div class="col-6 col-xl-3">
@@ -49,4 +50,4 @@
             </div>
         </div>
     </div>
-{% endblock %}
+</@base.content>

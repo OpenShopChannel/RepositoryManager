@@ -1,6 +1,7 @@
 package org.oscwii.repositorymanager;
 
 import org.jdbi.v3.spring5.EnableJdbiRepositories;
+import org.oscwii.repositorymanager.config.repoman.RepoManConfig;
 import org.oscwii.repositorymanager.services.FeaturedApp;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -20,6 +21,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class DanboApp
 {
     @Autowired
+    private RepoManConfig config;
+    @Autowired
     private RepositoryIndex index;
     @Autowired
     private FeaturedApp featuredApp;
@@ -37,7 +40,12 @@ public class DanboApp
     @GetMapping("/")
     public String hello(Model model)
     {
-        return "hello_world";
+        model.addAttribute("app_count", index.getContents().size())
+                .addAttribute("repository_name", index.getInfo().name())
+                .addAttribute("repository_provider", index.getInfo().provider())
+                .addAttribute("git_url", "TODO") // TODO
+                .addAttribute("base_url", config.getBaseUrl());
+        return "hello_world.ftl";
     }
 
     // TODO remove debug

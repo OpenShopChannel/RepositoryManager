@@ -5,37 +5,28 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import org.thymeleaf.spring6.SpringTemplateEngine;
-import org.thymeleaf.spring6.templateresolver.SpringResourceTemplateResolver;
-import org.thymeleaf.spring6.view.ThymeleafViewResolver;
+import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
+import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
 
 @Configuration
 @EnableWebMvc
 public class WebConfig implements WebMvcConfigurer
 {
     @Bean
-    public SpringResourceTemplateResolver templateResolver()
+    public FreeMarkerConfigurer freemarkerConfig()
     {
-        var templateResolver = new SpringResourceTemplateResolver();
-        templateResolver.setPrefix("classpath:/templates/");
-        templateResolver.setSuffix(".html");
-        templateResolver.setTemplateMode("HTML");
-        return templateResolver;
+        FreeMarkerConfigurer freeMarkerConfigurer = new FreeMarkerConfigurer();
+        freeMarkerConfigurer.setTemplateLoaderPath("classpath:templates/");
+        return freeMarkerConfigurer;
     }
 
     @Bean
-    public SpringTemplateEngine templateEngine()
+    public FreeMarkerViewResolver freeMarkerViewResolver()
     {
-        SpringTemplateEngine templateEngine = new SpringTemplateEngine();
-        templateEngine.setTemplateResolver(templateResolver());
-        return templateEngine;
-    }
-
-    @Bean
-    public ThymeleafViewResolver viewResolver()
-    {
-        ThymeleafViewResolver viewResolver = new ThymeleafViewResolver();
-        viewResolver.setTemplateEngine(templateEngine());
+        FreeMarkerViewResolver viewResolver = new FreeMarkerViewResolver();
+        viewResolver.setCache(true);
+        viewResolver.setSuffix(".ftl");
+        viewResolver.setContentType("text/html; charset=UTF-8");
         return viewResolver;
     }
 
