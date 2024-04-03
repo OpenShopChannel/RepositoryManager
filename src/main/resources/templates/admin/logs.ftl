@@ -1,5 +1,7 @@
-{% extends "admin/base.html" %}
-{% block content %}
+<#import "base.ftl" as base>
+<#assign FormatUtil=statics['org.oscwii.repositorymanager.utils.FormatUtil']>
+
+<@base.content>
     <div class="content">
         <h1 class="content-title font-size-22"> <!-- font-size-22 = font-size: 2.2rem (22px) -->
             Logs
@@ -16,17 +18,17 @@
             </tr>
             </thead>
             <tbody>
-            {% for log_file in log_files %}
+            <#list logs as log>
                 <tr>
                     <th style="text-align: center"><i class="fa-solid fa-file-lines"></i></th>
-                    <th>[[${ log_file["name"] }]]</th>
-                    <th>[[${ log_file["length"] }]] Lines</th>
-                    <th>[[${ log_file["errors"] }]]</th>
-                    <td>[[${ log_file["created"] }]]</td>
-                    <td><a href="[[${ url_for("admin.log", file=log_file["name"]) }]]" class="btn" type="button">Download</a></td>
+                    <th>${log.name()}</th>
+                    <th>${log.lines()} Lines</th>
+                    <th>${log.errors()}</th>
+                    <td>${log.creationDate()}</td>
+                    <td><a href="${FormatUtil.logUrl(log.name())}" class="btn" type="button">Download</a></td>
                 </tr>
-            {% endfor %}
+            </#list>
             </tbody>
         </table>
     </div>
-{% endblock %}
+</@base.content>

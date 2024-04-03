@@ -45,7 +45,7 @@ public class DanboApp
                 .addAttribute("repository_provider", index.getInfo().provider())
                 .addAttribute("git_url", "TODO") // TODO
                 .addAttribute("base_url", config.getBaseUrl());
-        return "hello_world.ftl";
+        return "hello_world";
     }
 
     // TODO remove debug

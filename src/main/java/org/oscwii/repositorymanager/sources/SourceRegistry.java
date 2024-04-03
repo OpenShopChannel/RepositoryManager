@@ -4,6 +4,8 @@ import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,5 +24,10 @@ public class SourceRegistry
     public SourceDownloader getDownloader(String type)
     {
         return sources.get(type.toLowerCase());
+    }
+
+    public Collection<SourceDownloader> getSources()
+    {
+        return Collections.unmodifiableCollection(sources.values());
     }
 }

@@ -3,6 +3,7 @@ package org.oscwii.repositorymanager.model.app;
 import com.google.gson.annotations.SerializedName;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
@@ -39,11 +40,6 @@ public record OSCMeta(String name, String author, String category,
                 this.extensions = extensions;
             }
 
-            public String[] extensions()
-            {
-                return extensions;
-            }
-
             @Nullable
             public static Format fromExtension(String extension)
             {
@@ -61,9 +57,16 @@ public record OSCMeta(String name, String author, String category,
         }
     }
 
-    public record Treatment(@SerializedName("treatment") String id,
-                            String[] arguments)
+    public record Treatment(@SerializedName("treatment") String id, String[] arguments)
     {
+        @Override
+        public String toString()
+        {
+            return "Treatment{" +
+                    "id='" + id + '\'' +
+                    ", arguments=" + Arrays.toString(arguments) +
+                    '}';
+        }
     }
 
     public enum Flag

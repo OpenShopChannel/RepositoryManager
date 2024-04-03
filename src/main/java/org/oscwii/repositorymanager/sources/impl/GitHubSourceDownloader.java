@@ -25,7 +25,7 @@ public class GitHubSourceDownloader extends BaseSourceDownloader
     @Autowired
     private GitHubSourceDownloader(SourceRegistry registry)
     {
-        super("github_release");
+        super("github_release", "GitHub Release Source Downloader", "Downloads files from a GitHub release.");
         registry.registerDownloader(this);
     }
 

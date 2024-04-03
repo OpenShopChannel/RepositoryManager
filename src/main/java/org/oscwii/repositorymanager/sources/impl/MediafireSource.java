@@ -22,7 +22,7 @@ public class MediafireSource extends BaseSourceDownloader
     @Autowired
     private MediafireSource(SourceRegistry registry)
     {
-        super("mediafire");
+        super("mediafire", "MediaFire Source Downloader", "Downloads files from MediaFire.");
         registry.registerDownloader(this);
     }
 

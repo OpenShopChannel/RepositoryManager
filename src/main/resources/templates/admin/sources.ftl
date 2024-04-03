@@ -1,5 +1,6 @@
-{% extends "admin/base.html" %}
-{% block content %}
+<#import "base.ftl" as base>
+
+<@base.content>
     <div class="content">
         <h1 class="content-title font-size-22">
             Available Sources
@@ -14,15 +15,15 @@
             </tr>
             </thead>
             <tbody>
-            {% for source in sources %}
+            <#list sources as source>
                 <tr>
                     <th style="text-align: center"><i class="fa-solid fa-cloud"></i></th>
-                    <th>[[${ source["type"] }]]</th>
-                    <th>[[${ source["name"] }]]</th>
-                    <th>[[${ source["description"] }]]</th>
+                    <th>${source.getType()}</th>
+                    <th>${source.getName()}</th>
+                    <th>${source.getDescription()}</th>
                 </tr>
-            {% endfor %}
+            </#list>
             </tbody>
         </table>
     </div>
-{% endblock %}
+</@base.content>

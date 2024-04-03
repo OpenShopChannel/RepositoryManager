@@ -1,5 +1,8 @@
 package org.oscwii.repositorymanager.utils;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 public class FormatUtil
 {
     public static String baseUrl = "";
@@ -60,6 +63,11 @@ public class FormatUtil
         return urlFor(ICON_PATH.formatted(slug));
     }
 
+    public static String logUrl(String log)
+    {
+        return urlFor(LOG_PATH.formatted(log));
+    }
+
     public static String zipUrl(String slug)
     {
         return urlFor(ZIP_PATH.formatted(slug, slug));
@@ -70,6 +78,13 @@ public class FormatUtil
         return baseUrl + path;
     }
 
+    public static String formatDate(Date date)
+    {
+        return DATE_FORMAT.format(date);
+    }
+
     private static final String ICON_PATH = "/api/v3/contents/%s/icon.png";
-    private static final String ZIP_PATH = "/api/v3/contents/%s/%s.zip";
+    private static final String LOG_PATH  = "/admin/log/%s";
+    private static final String ZIP_PATH  = "/api/v3/contents/%s/%s.zip";
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 }

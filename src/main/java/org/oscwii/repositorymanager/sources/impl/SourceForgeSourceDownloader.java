@@ -19,7 +19,7 @@ public class SourceForgeSourceDownloader extends BaseSourceDownloader
     @Autowired
     private SourceForgeSourceDownloader(SourceRegistry registry)
     {
-        super("sourceforge_release");
+        super("sourceforge_release", "SourceForge Best Release Source Downloader", "Downloads files from a SourceForge \"best release\".");
         registry.registerDownloader(this);
     }
 

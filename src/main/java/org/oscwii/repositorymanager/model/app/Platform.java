@@ -1,5 +1,7 @@
 package org.oscwii.repositorymanager.model.app;
 
-public record Platform(String name, String displayName)
+import com.google.gson.annotations.SerializedName;
+
+public record Platform(String name, @SerializedName("display_name") String displayName)
 {
 }

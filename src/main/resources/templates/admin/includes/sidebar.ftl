@@ -33,7 +33,6 @@
             <@category title="System"/>
                 <@page title="Users" icon="fa-users" path="/admin/users" required_role="Administrator"/>
                 <@page title="Sources" icon="fa-globe" path="/admin/sources" required_role="Moderator"/>
-                <@page title="Jobs" icon="fa-bars-progress" path="/admin/jobs" required_role="Moderator"/>
                 <@page title="Log Files" icon="fa-folder-open" path="/admin/logs" required_role="Administrator"/>
                 <@page title="Settings" icon="fa-cog" path="/admin/settings" required_role="Administrator"/>
         </div>

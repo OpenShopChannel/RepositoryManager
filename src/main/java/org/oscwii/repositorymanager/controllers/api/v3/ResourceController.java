@@ -3,6 +3,7 @@ package org.oscwii.repositorymanager.controllers.api.v3;
 import org.oscwii.repositorymanager.RepositoryIndex;
 import org.oscwii.repositorymanager.model.app.InstalledApp;
 import org.oscwii.repositorymanager.utils.AppUtil;
+import org.oscwii.repositorymanager.utils.FileUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
@@ -45,6 +46,6 @@ public class ResourceController
         if(app == null)
             return ResponseEntity.notFound().build();
 
-        return AppUtil.getContent(app.getDataPath().getParent().resolve(slug + ".zip"));
+        return FileUtil.getContent(app.getDataPath().getParent().resolve(slug + ".zip"));
     }
 }

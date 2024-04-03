@@ -14,7 +14,7 @@ import java.nio.file.Path;
 
 public abstract class BaseSourceDownloader implements SourceDownloader
 {
-    private final String type;
+    private final String type, name, description;
 
     protected final Logger logger;
 
@@ -25,10 +25,12 @@ public abstract class BaseSourceDownloader implements SourceDownloader
     @Autowired
     protected OkHttpClient httpClient;
 
-    protected BaseSourceDownloader(String type)
+    protected BaseSourceDownloader(String type, String name, String description)
     {
-        this.logger = SourceDownloader.LOGGER;
         this.type = type;
+        this.name = name;
+        this.description = description;
+        this.logger = SourceDownloader.LOGGER;
     }
 
     @Override
@@ -62,5 +64,17 @@ public abstract class BaseSourceDownloader implements SourceDownloader
     public String getType()
     {
         return type;
+    }
+
+    @Override
+    public String getName()
+    {
+        return name;
+    }
+
+    @Override
+    public String getDescription()
+    {
+        return description;
     }
 }

@@ -18,6 +18,10 @@ import org.apache.commons.compress.compressors.xz.XZCompressorInputStream;
 import org.apache.commons.io.IOUtils;
 import org.oscwii.repositorymanager.exceptions.QuietException;
 import org.oscwii.repositorymanager.model.app.OSCMeta.Source.Format;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.DigestUtils;
 
 import java.io.File;
@@ -30,6 +34,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public class FileUtil
@@ -95,6 +100,25 @@ public class FileUtil
     {
         byte[] bytes = Files.readAllBytes(file);
         return DigestUtils.md5DigestAsHex(bytes);
+    }
+
+    public static List<File> getFiles(Path dir, int depth, Predicate<Path> filter) throws IOException
+    {
+        try(Stream<Path> stream = Files.walk(dir, depth))
+        {
+            return stream.filter(filter).map(Path::toFile).toList();
+        }
+    }
+
+    public static ResponseEntity<Resource> getContent(Path path)
+    {
+        if(Files.notExists(path))
+            return ResponseEntity.notFound().build();
+
+        FileSystemResource res = new FileSystemResource(path);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + path.toFile().getName() + "\"")
+                .body(res);
     }
 
     private static ArchiveInputStream<?> createArchiveInputStream(File archive, Format format) throws IOException

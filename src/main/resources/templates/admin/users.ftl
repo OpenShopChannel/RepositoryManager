@@ -1,5 +1,6 @@
-{% extends "admin/base.html" %}
-{% block content %}
+<#import "base.ftl" as base>
+
+<@base.content>
     <div class="content">
         <h1 class="content-title font-size-22"> <!-- font-size-22 = font-size: 2.2rem (22px) -->
             Users
@@ -12,21 +13,19 @@
                 <th>Username</th>
                 <th>Email Address</th>
                 <th>Role</th>
-                <th></th>
             </tr>
             </thead>
             <tbody>
-            {% for user in users %}
+            <#list users as user>
                 <tr>
                     <th style="text-align: center"><i class="fa-solid fa-user"></i></th>
-                    <th>[[${ user.id }]]</th>
-                    <th>[[${ user.username }]]</th>
-                    <th>[[${ user.email }]]</th>
-                    <th>[[${ user.role }]]</th>
-                    <td></td>
+                    <th>${user.id()}</th>
+                    <th>${user.username()}</th>
+                    <th>${user.email()}</th>
+                    <th>${user.role()}</th>
                 </tr>
-            {% endfor %}
+            </#list>
             </tbody>
         </table>
     </div>
-{% endblock %}
+</@base.content>

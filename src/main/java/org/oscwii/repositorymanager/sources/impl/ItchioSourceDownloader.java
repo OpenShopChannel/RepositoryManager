@@ -22,7 +22,7 @@ public class ItchioSourceDownloader extends BaseSourceDownloader
     @Autowired
     private ItchioSourceDownloader(SourceRegistry registry)
     {
-        super("itchio");
+        super("itchio", "itch.io Source Downloader", "Downloads files from itch.io.");
         registry.registerDownloader(this);
     }
 

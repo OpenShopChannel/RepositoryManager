@@ -23,6 +23,7 @@ import org.oscwii.repositorymanager.exceptions.QuietException;
 import org.oscwii.repositorymanager.factory.DiscordWebhookFactory;
 import org.oscwii.repositorymanager.logging.DiscordAppender;
 import org.oscwii.repositorymanager.logging.DiscordMessage;
+import org.oscwii.repositorymanager.logging.IndexTriggeringPolicy;
 import org.oscwii.repositorymanager.model.RepositoryInfo;
 import org.oscwii.repositorymanager.model.UpdateLevel;
 import org.oscwii.repositorymanager.model.app.Category;
@@ -147,6 +148,7 @@ public class RepositoryIndex
         printIndexSummary(info, start);
 
         logger.info("Finished updating repository index");
+        IndexTriggeringPolicy.INSTANCE.trigger();
     }
 
     public List<InstalledApp> getContents()

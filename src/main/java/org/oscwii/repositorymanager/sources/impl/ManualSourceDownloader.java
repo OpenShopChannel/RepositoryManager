@@ -16,7 +16,7 @@ public class ManualSourceDownloader extends BaseSourceDownloader
     @Autowired
     private ManualSourceDownloader(SourceRegistry registry)
     {
-        super("manual");
+        super("manual", "Manual Source Downloader", "Handles manual source type.");
         registry.registerDownloader(this);
     }
 

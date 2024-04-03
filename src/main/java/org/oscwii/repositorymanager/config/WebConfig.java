@@ -1,5 +1,7 @@
 package org.oscwii.repositorymanager.config;
 
+import freemarker.template.TemplateException;
+import no.api.freemarker.java8.Java8ObjectWrapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -8,15 +10,26 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
 
+import java.io.IOException;
+
+import static freemarker.template.Configuration.getVersion;
+
 @Configuration
 @EnableWebMvc
 public class WebConfig implements WebMvcConfigurer
 {
     @Bean
-    public FreeMarkerConfigurer freemarkerConfig()
+    public FreeMarkerConfigurer freemarkerConfig() throws TemplateException, IOException
     {
         FreeMarkerConfigurer freeMarkerConfigurer = new FreeMarkerConfigurer();
         freeMarkerConfigurer.setTemplateLoaderPath("classpath:templates/");
+
+        Java8ObjectWrapper objectWrapper = new Java8ObjectWrapper(getVersion());
+        objectWrapper.setExposeFields(true);
+
+        freeMarkerConfigurer.afterPropertiesSet();
+        freeMarkerConfigurer.getConfiguration().setObjectWrapper(objectWrapper);
+        freeMarkerConfigurer.getConfiguration().setSharedVariable("statics", objectWrapper.getStaticModels());
         return freeMarkerConfigurer;
     }
 

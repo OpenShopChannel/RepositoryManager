@@ -18,7 +18,7 @@ public class URLSourceDownloader extends BaseSourceDownloader
     @Autowired
     private URLSourceDownloader(SourceRegistry registry)
     {
-        super("url");
+        super("url", "URL Source Downloader", "Downloads files from a URL source.");
         registry.registerDownloader(this);
     }
 

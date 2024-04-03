@@ -104,6 +104,20 @@ public class InstalledApp
         return UpdateLevel.SAME;
     }
 
+    public String describe()
+    {
+        return "InstalledApp{" +
+                "slug='" + slug + '\'' +
+                ", meta=" + meta +
+                ", computedInfo=" + computedInfo +
+                ", metaXml=" + metaXml +
+                ", category=" + category +
+                ", supportedPlatforms=" + supportedPlatforms +
+                ", peripherals=" + peripherals +
+                ", titleInfo=" + titleInfo +
+                '}';
+    }
+
     @Override
     public String toString()
     {
@@ -116,10 +130,63 @@ public class InstalledApp
         public List<String> subdirectories;
         public long archiveSize, binarySize, iconSize, rawSize;
         public String packageType, md5Hash, peripherals;
+
+        @Override
+        public String toString()
+        {
+            return "IndexComputedInfo{" +
+                    "releaseDate=" + releaseDate +
+                    ", subdirectories=" + subdirectories +
+                    ", archiveSize=" + archiveSize +
+                    ", binarySize=" + binarySize +
+                    ", iconSize=" + iconSize +
+                    ", rawSize=" + rawSize +
+                    ", packageType='" + packageType + '\'' +
+                    ", md5Hash='" + md5Hash + '\'' +
+                    ", peripherals='" + peripherals + '\'' +
+                    '}';
+        }
     }
 
     public static class MetaXml
     {
         public String name, coder, version, shortDesc, longDesc;
+
+        public String name()
+        {
+            return name;
+        }
+
+        public String coder()
+        {
+            return coder;
+        }
+
+        public String version()
+        {
+            return version;
+        }
+
+        public String shortDesc()
+        {
+            return shortDesc;
+        }
+
+        public String longDesc()
+        {
+            return longDesc;
+        }
+
+        @Override
+        public String toString()
+        {
+            return "MetaXml{" +
+                    "name='" + name + '\'' +
+                    ", coder='" + coder + '\'' +
+                    ", version='" + version + '\'' +
+                    ", shortDesc='" + shortDesc + '\'' +
+                    ", longDesc='" + longDesc + '\'' +
+                    '}';
+        }
     }
 }

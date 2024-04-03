@@ -5,6 +5,7 @@ import org.apache.logging.log4j.Logger;
 import org.oscwii.repositorymanager.RepositoryIndex;
 import org.oscwii.repositorymanager.model.app.InstalledApp;
 import org.oscwii.repositorymanager.utils.AppUtil;
+import org.oscwii.repositorymanager.utils.FileUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
@@ -44,7 +45,7 @@ public class ResourceController
             return ResponseEntity.notFound().build();
         }
 
-        return AppUtil.getContent(archive);
+        return FileUtil.getContent(archive);
     }
 
     @GetMapping(path = {"/hbb/{slug}.png", "/hbb/{slug}/icon.png"}, produces = MediaType.IMAGE_PNG_VALUE)
@@ -64,7 +65,7 @@ public class ResourceController
         if(app == null)
             return ResponseEntity.notFound().build();
 
-        return AppUtil.getContent(app.getDataPath().getParent().resolve(slug + ".zip"));
+        return FileUtil.getContent(app.getDataPath().getParent().resolve(slug + ".zip"));
     }
 
     @GetMapping(path = "/unzipped_apps/{slug}/apps/{_slug}/meta.xml", produces = MediaType.APPLICATION_XML_VALUE)
@@ -74,7 +75,7 @@ public class ResourceController
         if(app == null)
             return ResponseEntity.notFound().build();
 
-        return AppUtil.getContent(app.getAppFilesPath().resolve("meta.xml"));
+        return FileUtil.getContent(app.getAppFilesPath().resolve("meta.xml"));
     }
 
     @GetMapping(path = "/unzipped_apps/{slug}/apps/{_slug}/boot.{type}", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
@@ -84,7 +85,7 @@ public class ResourceController
         if(app == null)
             return ResponseEntity.notFound().build();
 
-        return AppUtil.getContent(app.getAppFilesPath().resolve("boot." + type));
+        return FileUtil.getContent(app.getAppFilesPath().resolve("boot." + type));
     }
 
     @GetMapping({"/hbb/hbb_download.php", "/hbb_download.php"})
