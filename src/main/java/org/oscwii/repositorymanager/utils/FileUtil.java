@@ -158,7 +158,6 @@ public class FileUtil
         {
             // Man it should be this easy for all formats...
             // Ironically, the most obscure and proprietary format is the easiest to work with
-            // TODO silence Junrar verbose logging
             Junrar.extract(archive, destination.toFile());
         }
         catch(RarException e)

@@ -43,5 +43,9 @@
         <Logger name="org.oscwii.repositorymanager.treatments.TreatmentRunnable" level="info">
             <AppenderRef ref="IndexFile" />
         </Logger>
+
+        <Logger name="com.github.junrar.Junrar" level="error" >
+            <AppenderRef ref="Console" />
+        </Logger>
     </Loggers>
 </Configuration>
