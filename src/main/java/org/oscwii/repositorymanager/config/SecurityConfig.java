@@ -34,6 +34,7 @@ public class SecurityConfig
                 .logout(logout -> logout
                         .logoutUrl("/admin/login?logout")
                         .permitAll())
+                .rememberMe(Customizer.withDefaults())
                 // Enable CSRF
                 .csrf(Customizer.withDefaults())
                 // Enable CORS

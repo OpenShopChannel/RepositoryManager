@@ -4,12 +4,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Admin Login</title>
     <meta name="robots" content="noindex">
-
-    <script>
-        if (document.getElementById("remember").checked) {
-            document.getElementById('rememberHidden').disabled = true;
-        }
-    </script>
     <link rel="stylesheet" href="/static/bulma/css/bulma.min.css">
 </head>
 <body>
@@ -47,10 +41,9 @@
                 <!-- Remember Me -->
                 <div class="field">
                     <label class="checkbox">
-                        <input type="checkbox" name="remember">
+                        <input type="checkbox" name="remember-me">
                         Remember me
                     </label>
-                    <input id='rememberHidden' type='hidden' value='No' name='remember'>
                 </div>
 
                 <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>

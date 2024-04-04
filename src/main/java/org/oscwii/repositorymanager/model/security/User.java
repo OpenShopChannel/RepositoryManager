@@ -1,6 +1,5 @@
 package org.oscwii.repositorymanager.model.security;
 
-import org.jdbi.v3.core.mapper.reflect.JdbiConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,12 +14,6 @@ public class User implements UserDetails
     private final Role role;
     private final List<GrantedAuthority> authorities;
 
-    public User(String username, String email, String passwordHash)
-    {
-        this(0, username, Role.GUEST, email, passwordHash);
-    }
-
-    @JdbiConstructor
     public User(int id, String username, Role role, String email, String passwordHash)
     {
         this.id = id;
