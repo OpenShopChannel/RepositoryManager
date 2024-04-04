@@ -9,12 +9,18 @@
 <body>
 <section class="section">
     <div class="container">
+        <#list messages as message>
+            <#list message as msg, class>
+                <div class="notification is-${class}">
+                    ${msg}
+                </div>
+            </#list>
+        </#list>
         <h1 class="title">
             Administrator Sign Up
         </h1>
         <form class="form-horizontal" action="" method="post">
             <fieldset>
-
                 <!-- Email -->
                 <div class="field">
                     <label class="label" for="email">Email</label>
@@ -39,16 +45,16 @@
                     </div>
                 </div>
 
+                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+
                 <!-- Submit Button -->
                 <div class="field">
                     <div class="control">
                         <button id="loginbutton" name="loginbutton" type="submit" class="button is-link">Sign Up</button>
                     </div>
                 </div>
-
             </fieldset>
         </form>
-
     </div>
 </section>
 </body>

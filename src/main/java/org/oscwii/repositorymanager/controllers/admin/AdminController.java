@@ -1,8 +1,7 @@
 package org.oscwii.repositorymanager.controllers.admin;
 
-import jakarta.servlet.http.HttpServletRequest;
 import org.oscwii.repositorymanager.RepositoryIndex;
-import org.oscwii.repositorymanager.model.security.User;
+import org.oscwii.repositorymanager.controllers.BaseController;
 import org.oscwii.repositorymanager.sources.SourceRegistry;
 import org.oscwii.repositorymanager.utils.FileUtil;
 import org.oscwii.repositorymanager.utils.FormatUtil;
@@ -28,7 +27,7 @@ import java.util.List;
 
 @Controller
 @RequestMapping(path = "/admin", method = RequestMethod.GET)
-public class AdminController
+public class AdminController extends BaseController
 {
     @Autowired
     private RepositoryIndex index;
@@ -36,74 +35,57 @@ public class AdminController
     private SourceRegistry sourceRegistry;
 
     @GetMapping
-    public String home(HttpServletRequest request, Model model)
+    public String home(Model model)
     {
-        model.addAttribute("currentUser", new User(1, "admin", "admin", "Administrator"))
-                .addAttribute("repoInfo", index.getInfo())
-                .addAttribute("applications", index.getContents().size())
-                .addAttribute("request", request);
+        model.addAttribute("repoInfo", index.getInfo())
+                .addAttribute("applications", index.getContents().size());
         return "admin/home";
     }
 
     @GetMapping("/debug")
-    public String debug(HttpServletRequest request, Model model)
+    public String debug()
     {
-        model.addAttribute("currentUser", new User(1, "admin", "admin", "Administrator"))
-                .addAttribute("request", request);
         return "admin/debug";
     }
 
     @GetMapping("/moderation")
-    public String moderation(HttpServletRequest request, Model model)
+    public String moderation(Model model)
     {
-        model.addAttribute("currentUser", new User(1, "admin", "admin", "Administrator"))
-                .addAttribute("modEntries", List.of()) // TODO
-                .addAttribute("request", request);
+        model.addAttribute("modEntries", List.of()); // TODO
         return "admin/moderation";
     }
 
     @GetMapping("/apps")
-    public String apps(HttpServletRequest request, Model model)
+    public String apps(Model model)
     {
-        model.addAttribute("currentUser", new User(1, "admin", "admin", "Administrator"))
-                .addAttribute("contents", index.getContents())
-                .addAttribute("request", request);
+        model.addAttribute("contents", index.getContents());
         return "admin/apps";
     }
 
     @GetMapping("/users")
-    public String users(HttpServletRequest request, Model model)
+    public String users(Model model)
     {
-        User user = new User(1, "admin", "admin", "Administrator");
-        model.addAttribute("currentUser", user)
-                .addAttribute("users", List.of(user))
-                .addAttribute("request", request);
+        model.addAttribute("users", authService.getUsers());
         return "admin/users";
     }
 
     @GetMapping("/sources")
-    public String sources(HttpServletRequest request, Model model)
+    public String sources(Model model)
     {
-        model.addAttribute("currentUser", new User(1, "admin", "admin", "Administrator"))
-                .addAttribute("sources", sourceRegistry.getSources())
-                .addAttribute("request", request);
+        model.addAttribute("sources", sourceRegistry.getSources());
         return "admin/sources";
     }
 
     @GetMapping("/logs")
-    public String logs(HttpServletRequest request, Model model) throws IOException
+    public String logs(Model model) throws IOException
     {
-        model.addAttribute("currentUser", new User(1, "admin", "admin", "Administrator"))
-                .addAttribute("logs", getLogFiles())
-                .addAttribute("request", request);
+        model.addAttribute("logs", getLogFiles());
         return "admin/logs";
     }
 
     @GetMapping("/settings")
-    public String settings(HttpServletRequest request, Model model)
+    public String settings()
     {
-        model.addAttribute("currentUser", new User(1, "admin", "admin", "Administrator"))
-                .addAttribute("request", request);
         return "admin/settings";
     }
 

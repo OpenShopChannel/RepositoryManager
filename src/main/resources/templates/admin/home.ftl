@@ -10,7 +10,7 @@
         <h1 class="content-title font-size-22">
             Repository Administration Panel
         </h1>
-        You are logged in as <strong>${currentUser.username()}</strong>.
+        You are logged in as <strong>${currentUser.getUsername()}</strong>.
     </div>
     <!-- TODO HAS ACCESS - start -->
     <div class="card">

@@ -19,9 +19,9 @@
             </a>
             <div class="sidebar-content">
                 <div class="mt-10 font-size-12">
-                    Hello ${currentUser.username()}.
+                    Hello ${currentUser.getUsername()}.
                 </div>
-                <span class="badge badge-secondary">${currentUser.role()}</span>
+                <span class="badge badge-secondary">${currentUser.getRole()}</span>
             </div>
             <@category title="General"/>
                 <@page title="Home" icon="fa-home" path="/admin"/>

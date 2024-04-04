@@ -24,7 +24,7 @@
                 <div class="dropdown-menu dropdown-menu-right w-200" aria-labelledby="navbar-dropdown-toggle-btn-1">
                     <div class="dropdown-divider"></div>
                     <div class="dropdown-content">
-                        Logged in as ${currentUser.email()}
+                        Logged in as ${currentUser.getEmail()}
                     </div>
                 </div>
             </div>

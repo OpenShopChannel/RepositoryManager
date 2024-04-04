@@ -12,6 +12,7 @@ import java.nio.file.Path;
 @ConfigurationProperties(prefix = "repository-manager")
 public class RepoManConfig
 {
+    private boolean allowRegistration;
     private String baseUrl;
     private String defaultPlatform;
     private Path repoDir;
@@ -29,6 +30,16 @@ public class RepoManConfig
     {
         this.discordConfig = discordConfig;
         this.fetchConfig = fetchConfig;
+    }
+
+    public boolean isAllowRegistration()
+    {
+        return allowRegistration;
+    }
+
+    public void setAllowRegistration(boolean allowRegistration)
+    {
+        this.allowRegistration = allowRegistration;
     }
 
     public String getBaseUrl()

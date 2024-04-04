@@ -19,10 +19,10 @@
             <#list users as user>
                 <tr>
                     <th style="text-align: center"><i class="fa-solid fa-user"></i></th>
-                    <th>${user.id()}</th>
-                    <th>${user.username()}</th>
-                    <th>${user.email()}</th>
-                    <th>${user.role()}</th>
+                    <th>${user.getId()}</th>
+                    <th>${user.getUsername()}</th>
+                    <th>${user.getEmail()}</th>
+                    <th>${user.getRole()}</th>
                 </tr>
             </#list>
             </tbody>
