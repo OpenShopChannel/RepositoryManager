@@ -22,9 +22,13 @@
                     <i class="fa fa-angle-down" aria-hidden="true"></i>
                 </button>
                 <div class="dropdown-menu dropdown-menu-right w-200" aria-labelledby="navbar-dropdown-toggle-btn-1">
+                    <div class="dropdown-content">
+                        Logged in as ${currentUser.getUsername()}
+                    </div>
                     <div class="dropdown-divider"></div>
                     <div class="dropdown-content">
-                        Logged in as ${currentUser.getEmail()}
+                        <i class="fa fa-power-off"></i>
+                        <a href="/admin/login?logout">Logout</a>
                     </div>
                 </div>
             </div>
