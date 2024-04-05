@@ -15,7 +15,7 @@
         <!-- Navbar text -->
         <span class="navbar-text text-monospace">by Open Shop Channel</span>
         <!-- Navbar content (with the dropdown menu) -->
-        <div class="navbar-content d-md-none ml-auto">
+        <div class="navbar-content ml-auto">
             <div class="dropdown with-arrow">
                 <button class="btn" data-toggle="dropdown" type="button" id="navbar-dropdown-toggle-btn-1">
                     Menu
