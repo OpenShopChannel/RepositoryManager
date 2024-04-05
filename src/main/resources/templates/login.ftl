@@ -21,10 +21,9 @@
         </h1>
         <form class="form-horizontal" action="" method="post">
             <fieldset>
-
                 <!-- Username -->
                 <div class="field">
-                    <label class="label" for="email">Username</label>
+                    <label class="label" for="username">Username</label>
                     <div class="control">
                         <input id="username" name="username" type="text" class="input">
                     </div>
