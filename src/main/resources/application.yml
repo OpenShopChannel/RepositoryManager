@@ -17,6 +17,7 @@ repository-manager:
   allow-registration: false
   base-url: "http://localhost:8080"
   default-platform: "wii"
+  secret-key: "ChangeMe"
   repo-dir: "repository"
   generate-wsc-banner: false
   banner-generator-path: "BannerGenerator"

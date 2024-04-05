@@ -16,6 +16,7 @@ public class RepoManConfig
     private boolean allowRegistration;
     private String baseUrl;
     private String defaultPlatform;
+    private String secretKey;
     private Path repoDir;
 
     private boolean generateWSCBanner;
@@ -64,6 +65,16 @@ public class RepoManConfig
     public void setDefaultPlatform(String defaultPlatform)
     {
         this.defaultPlatform = defaultPlatform;
+    }
+
+    public String getSecretKey()
+    {
+        return secretKey;
+    }
+
+    public void setSecretKey(String secretKey)
+    {
+        this.secretKey = secretKey;
     }
 
     public Path getRepoDir()

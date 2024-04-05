@@ -1,5 +1,6 @@
 package org.oscwii.repositorymanager.config;
 
+import org.oscwii.repositorymanager.config.repoman.RepoManConfig;
 import org.oscwii.repositorymanager.services.AuthService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,7 +21,7 @@ import org.springframework.web.filter.CorsFilter;
 public class SecurityConfig
 {
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, RepoManConfig config) throws Exception
     {
         http
                 .authorizeHttpRequests(requests -> requests
@@ -34,7 +35,12 @@ public class SecurityConfig
                 .logout(logout -> logout
                         .logoutUrl("/admin/login?logout")
                         .permitAll())
-                .rememberMe(Customizer.withDefaults())
+                .rememberMe(rememberMe -> rememberMe
+                        .key(config.getSecretKey())
+                        .rememberMeParameter("remember-me")
+                        .rememberMeCookieName("remember-me")
+                        .tokenValiditySeconds(365 * 24 * 60 * 60)
+                )
                 // Enable CSRF
                 .csrf(Customizer.withDefaults())
                 // Enable CORS
