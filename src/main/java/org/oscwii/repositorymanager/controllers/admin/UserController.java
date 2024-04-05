@@ -1,7 +1,6 @@
 package org.oscwii.repositorymanager.controllers.admin;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.oscwii.repositorymanager.controllers.BaseController;
 import org.oscwii.repositorymanager.model.security.Role;
 import org.oscwii.repositorymanager.model.security.User;
 import org.oscwii.repositorymanager.model.security.UserForm;
@@ -23,7 +22,7 @@ import java.util.Map;
 
 @Controller
 @RequestMapping(path = "/admin/users")
-public class UserController extends BaseController
+public class UserController extends BaseAdminController
 {
     @GetMapping
     public String users(Model model, @ModelAttribute("message") String message)

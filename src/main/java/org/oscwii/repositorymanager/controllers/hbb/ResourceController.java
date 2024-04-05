@@ -2,11 +2,10 @@ package org.oscwii.repositorymanager.controllers.hbb;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.oscwii.repositorymanager.RepositoryIndex;
+import org.oscwii.repositorymanager.controllers.RepoManController;
 import org.oscwii.repositorymanager.model.app.InstalledApp;
 import org.oscwii.repositorymanager.utils.AppUtil;
 import org.oscwii.repositorymanager.utils.FileUtil;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
@@ -23,16 +22,13 @@ import java.nio.file.Path;
 
 @Controller("hbbResourceController")
 @RequestMapping(produces = MediaType.APPLICATION_OCTET_STREAM_VALUE, method = RequestMethod.GET)
-public class ResourceController
+public class ResourceController extends RepoManController
 {
     private final Logger logger;
-    private final RepositoryIndex index;
 
-    @Autowired
-    public ResourceController(RepositoryIndex index)
+    public ResourceController()
     {
         this.logger = LogManager.getLogger("Homebrew Browser Resources");
-        this.index = index;
     }
 
     @GetMapping("/hbb/homebrew_browser/temp_files.zip")

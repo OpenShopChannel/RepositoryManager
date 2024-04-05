@@ -1,14 +1,13 @@
 package org.oscwii.repositorymanager.controllers.hbb;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.oscwii.repositorymanager.RepositoryIndex;
+import org.oscwii.repositorymanager.controllers.RepoManController;
 import org.oscwii.repositorymanager.model.RepositoryInfo;
 import org.oscwii.repositorymanager.model.app.Category;
 import org.oscwii.repositorymanager.model.app.InstalledApp;
 import org.oscwii.repositorymanager.model.app.InstalledApp.IndexComputedInfo;
 import org.oscwii.repositorymanager.model.app.InstalledApp.MetaXml;
 import org.oscwii.repositorymanager.model.app.OSCMeta;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -25,16 +24,8 @@ import java.util.List;
  */
 @Controller
 @RequestMapping(path = "/hbb", produces = MediaType.TEXT_PLAIN_VALUE, method = RequestMethod.GET)
-public class HBBController
+public class HBBController extends RepoManController
 {
-    private final RepositoryIndex index;
-
-    @Autowired
-    public HBBController(RepositoryIndex index)
-    {
-        this.index = index;
-    }
-
     @GetMapping(value = {"/homebrew_browser/listv036.txt", "/listv036.txt"})
     public ResponseEntity<String> appsList()
     {

@@ -1,7 +1,6 @@
 package org.oscwii.repositorymanager.controllers.admin;
 
 import org.oscwii.repositorymanager.RepositoryIndex;
-import org.oscwii.repositorymanager.controllers.BaseController;
 import org.oscwii.repositorymanager.sources.SourceRegistry;
 import org.oscwii.repositorymanager.utils.FileUtil;
 import org.oscwii.repositorymanager.utils.FormatUtil;
@@ -27,7 +26,7 @@ import java.util.List;
 
 @Controller
 @RequestMapping(path = "/admin", method = RequestMethod.GET)
-public class AdminController extends BaseController
+public class AdminController extends BaseAdminController
 {
     @Autowired
     private RepositoryIndex index;

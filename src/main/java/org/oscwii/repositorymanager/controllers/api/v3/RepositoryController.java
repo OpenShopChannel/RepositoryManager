@@ -1,6 +1,6 @@
 package org.oscwii.repositorymanager.controllers.api.v3;
 
-import org.oscwii.repositorymanager.RepositoryIndex;
+import org.oscwii.repositorymanager.controllers.RepoManController;
 import org.oscwii.repositorymanager.model.RepositoryInfo;
 import org.oscwii.repositorymanager.model.api.App;
 import org.oscwii.repositorymanager.model.app.InstalledApp;
@@ -19,16 +19,14 @@ import java.util.Map;
 
 @Controller
 @RequestMapping(path = "/api/v3", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.GET)
-public class RepositoryController
+public class RepositoryController extends RepoManController
 {
     private final FeaturedApp featuredApp;
-    private final RepositoryIndex index;
 
     @Autowired
-    public RepositoryController(FeaturedApp featuredApp, RepositoryIndex index)
+    public RepositoryController(FeaturedApp featuredApp)
     {
         this.featuredApp = featuredApp;
-        this.index = index;
     }
 
     @GetMapping("/information")

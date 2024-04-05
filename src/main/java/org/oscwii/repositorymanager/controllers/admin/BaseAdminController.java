@@ -1,13 +1,14 @@
-package org.oscwii.repositorymanager.controllers;
+package org.oscwii.repositorymanager.controllers.admin;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.oscwii.repositorymanager.config.repoman.RepoManConfig;
+import org.oscwii.repositorymanager.controllers.RepoManController;
 import org.oscwii.repositorymanager.model.security.User;
 import org.oscwii.repositorymanager.services.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
-public abstract class BaseController
+public abstract class BaseAdminController extends RepoManController
 {
     @Autowired
     protected AuthService authService;

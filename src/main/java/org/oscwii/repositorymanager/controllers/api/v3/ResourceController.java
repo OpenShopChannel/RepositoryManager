@@ -1,10 +1,9 @@
 package org.oscwii.repositorymanager.controllers.api.v3;
 
-import org.oscwii.repositorymanager.RepositoryIndex;
+import org.oscwii.repositorymanager.controllers.RepoManController;
 import org.oscwii.repositorymanager.model.app.InstalledApp;
 import org.oscwii.repositorymanager.utils.AppUtil;
 import org.oscwii.repositorymanager.utils.FileUtil;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
@@ -19,16 +18,8 @@ import java.io.IOException;
 
 @Controller("apiResourceController")
 @RequestMapping(path = "/api/v3", method = RequestMethod.GET)
-public class ResourceController
+public class ResourceController extends RepoManController
 {
-    private final RepositoryIndex index;
-
-    @Autowired
-    public ResourceController(RepositoryIndex index)
-    {
-        this.index = index;
-    }
-
     @GetMapping(value = "/contents/{slug}/icon.png", produces = MediaType.IMAGE_PNG_VALUE)
     public ResponseEntity<ByteArrayResource> getIcon(@PathVariable String slug) throws IOException
     {
