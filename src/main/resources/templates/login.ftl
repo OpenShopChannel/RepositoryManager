@@ -9,12 +9,10 @@
 <body>
 <section class="section">
     <div class="container">
-        <#list messages as message>
-            <#list message as msg, class>
-                <div class="notification is-${class}">
-                    ${msg}
-                </div>
-            </#list>
+        <#list message as msg, class>
+            <div class="notification is-${class}">
+                ${msg}
+            </div>
         </#list>
         <h1 class="title">
             Administrator Login

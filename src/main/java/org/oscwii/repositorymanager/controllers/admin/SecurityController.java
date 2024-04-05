@@ -10,12 +10,15 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 
-import java.util.ArrayList;
-import java.util.List;
+import javax.naming.AuthenticationException;
+import java.util.HashMap;
 import java.util.Map;
+
+import static org.springframework.security.web.WebAttributes.AUTHENTICATION_EXCEPTION;
 
 @Controller
 public class SecurityController
@@ -33,20 +36,20 @@ public class SecurityController
     @GetMapping("/admin/login")
     public String login(HttpServletRequest request, Model model) throws ServletException
     {
-        List<Map<String, String>> messages = new ArrayList<>();
+        Map<String, String> messages = new HashMap<>();
 
         if(request.getParameter("logout") != null)
         {
             request.logout();
-            messages.add(Map.of("Logged out.", "info"));
+            messages.put("Logged out.", "info");
         }
         else if(request.getRemoteUser() != null)
            return "redirect:/admin";
 
         if(request.getParameter("error") != null)
-            messages.add(Map.of("Incorrect username or password.", "danger"));
+            messages.put(getLoginErrorMessage(request), "danger");
 
-        model.addAttribute("messages", messages);
+        model.addAttribute("message", messages);
         return "login";
     }
 
@@ -59,7 +62,7 @@ public class SecurityController
         if(request.getRemoteUser() != null)
             return "redirect:/admin";
 
-        model.addAttribute("messages", List.of());
+        model.addAttribute("message", Map.of());
         return "register";
     }
 
@@ -72,24 +75,38 @@ public class SecurityController
         if(request.getRemoteUser() != null)
             return "redirect:/admin";
 
-        List<Map<String, String>> messages = new ArrayList<>();
+        Map<String, String> messages = new HashMap<>();
         String username = form.getUsername();
         String email = form.getEmail();
         String password = form.getPassword();
 
         if(username == null || email == null || password == null)
-            messages.add(Map.of("All fields are required.", "danger"));
+            messages.put("All fields are required.", "danger");
         else if(authService.userExists(username))
-            messages.add(Map.of("Username already in use.", "danger"));
+            messages.put("Username already in use.", "danger");
         else if(authService.isEmailInUse(email))
-            messages.add(Map.of("Email already in use.", "danger"));
+            messages.put("Email already in use.", "danger");
         else
         {
             authService.createUser(form);
             return "redirect:/admin/login";
         }
 
-        model.addAttribute("messages", messages);
+        model.addAttribute("message", messages);
         return "register";
+    }
+
+    private String getLoginErrorMessage(HttpServletRequest request)
+    {
+        String message = "Incorrect username or password.";
+        Object ex = request.getAttribute(AUTHENTICATION_EXCEPTION);
+
+        if(ex instanceof AuthenticationException authEx)
+        {
+            if(StringUtils.hasText(authEx.getMessage()))
+                message = authEx.getMessage();
+        }
+
+        return message;
     }
 }
