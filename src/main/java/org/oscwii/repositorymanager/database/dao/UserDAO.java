@@ -20,8 +20,23 @@ public interface UserDAO
             """)
     void createUser(String username, String email, String passwordHash, Role role);
 
+    @SqlUpdate("""
+            UPDATE users
+            SET enabled = :enabled,
+                email = :email,
+                role = :role
+            WHERE id = :id
+            """)
+    void updateUser(int id, boolean enabled, String email, Role role);
+
+    @SqlUpdate("DELETE FROM users WHERE username = :username")
+    void deleteUser(String username);
+
     @SqlQuery("SELECT * FROM users WHERE email = :email")
     Optional<User> getByEmail(String email);
+
+    @SqlQuery("SELECT * FROM users WHERE id = :id")
+    Optional<User> getById(int id);
 
     @SqlQuery("SELECT * FROM users WHERE username = :username")
     Optional<User> getByUsername(String username);

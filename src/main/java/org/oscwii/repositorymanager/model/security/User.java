@@ -10,18 +10,21 @@ import java.util.List;
 public class User implements UserDetails
 {
     private final int id;
-    private final String username, email, passwordHash;
-    private final Role role;
-    private final List<GrantedAuthority> authorities;
+    private final String username, passwordHash;
 
-    public User(int id, String username, Role role, String email, String passwordHash)
+    public boolean enabled;
+    private List<GrantedAuthority> authorities;
+    private Role role;
+    public String email;
+
+    public User(boolean enabled, int id, String username, Role role, String email, String passwordHash)
     {
+        this.enabled = enabled;
         this.id = id;
         this.username = username;
         this.email = email;
         this.passwordHash = passwordHash;
-        this.role = role;
-        this.authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
+        setRole(role);
     }
 
     @Override
@@ -52,9 +55,20 @@ public class User implements UserDetails
         return email;
     }
 
+    public void setEmail(String email)
+    {
+        this.email = email;
+    }
+
     public Role getRole()
     {
         return role;
+    }
+
+    public void setRole(Role role)
+    {
+        this.role = role;
+        this.authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
     }
 
     @Override
@@ -78,6 +92,11 @@ public class User implements UserDetails
     @Override
     public boolean isEnabled()
     {
-        return true;
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled)
+    {
+        this.enabled = enabled;
     }
 }

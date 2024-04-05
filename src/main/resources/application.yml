@@ -20,6 +20,7 @@ repository-manager:
   repo-dir: "repository"
   generate-wsc-banner: false
   banner-generator-path: "BannerGenerator"
+  protected-users: [1]
   discord:
     enable-logging: false
     catalog-webhook-url: ""

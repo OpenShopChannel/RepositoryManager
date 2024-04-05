@@ -7,6 +7,7 @@ import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.context.annotation.Configuration;
 
 import java.nio.file.Path;
+import java.util.Set;
 
 @Configuration
 @ConfigurationProperties(prefix = "repository-manager")
@@ -19,6 +20,8 @@ public class RepoManConfig
 
     private boolean generateWSCBanner;
     private Path bannerGeneratorPath;
+
+    private Set<Integer> protectedUsers;
 
     @NestedConfigurationProperty
     public DiscordConfig discordConfig;
@@ -91,5 +94,15 @@ public class RepoManConfig
     public void setBannerGeneratorPath(Path bannerGeneratorPath)
     {
         this.bannerGeneratorPath = bannerGeneratorPath;
+    }
+
+    public Set<Integer> getProtectedUsers()
+    {
+        return protectedUsers;
+    }
+
+    public void setProtectedUsers(Set<Integer> protectedUsers)
+    {
+        this.protectedUsers = protectedUsers;
     }
 }

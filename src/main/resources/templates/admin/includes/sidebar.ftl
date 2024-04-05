@@ -21,7 +21,7 @@
                 <div class="mt-10 font-size-12">
                     Hello ${currentUser.getUsername()}.
                 </div>
-                <span class="badge badge-secondary">${currentUser.getRole()}</span>
+                <span class="badge badge-secondary">${currentUser.getRole().getDisplayName()}</span>
             </div>
             <@category title="General"/>
                 <@page title="Home" icon="fa-home" path="/admin"/>

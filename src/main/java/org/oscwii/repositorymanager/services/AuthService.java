@@ -33,21 +33,33 @@ public class AuthService implements UserDetailsManager
     public void createUser(UserDetails details)
     {
         UserForm user = (UserForm) details;
-        String password = encoder.encode(details.getPassword());
+
+        if(userExists(user.getUsername()))
+            throw new IllegalArgumentException("User already exists");
+        else if(isEmailInUse(user.getEmail()))
+            throw new IllegalArgumentException("Email is already in use");
+
+        String password = null;
+        if(user.getPassword() != null)
+            password = encoder.encode(user.getPassword());
+
         userDao.createUser(user.getUsername(), user.getEmail(), password, user.getRole());
         logger.info("Created new user {} with role {}", user.getUsername(), user.getRole());
     }
 
     @Override
-    public void updateUser(UserDetails user)
+    public void updateUser(UserDetails details)
     {
-
+        User user = (User) details;
+        userDao.updateUser(user.getId(), user.isEnabled(), user.getEmail(), user.getRole());
+        logger.info("User {} ({}) has been updated", user.getUsername(), user.getRole());
     }
 
     @Override
     public void deleteUser(String username)
     {
-
+        userDao.deleteUser(username);
+        logger.info("User {} has been deleted", username);
     }
 
     @Override
@@ -71,6 +83,11 @@ public class AuthService implements UserDetailsManager
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException
     {
         return userDao.getByUsername(username).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    }
+
+    public User getUser(int id)
+    {
+        return userDao.getById(id).orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 
     public List<User> getUsers()

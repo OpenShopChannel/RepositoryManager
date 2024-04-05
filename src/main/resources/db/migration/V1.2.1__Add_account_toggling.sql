@@ -1,0 +1,2 @@
+ALTER TABLE users
+    ADD `enabled` BOOLEAN DEFAULT true NOT NULL;

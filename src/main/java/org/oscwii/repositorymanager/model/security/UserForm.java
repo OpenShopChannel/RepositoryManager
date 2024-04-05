@@ -18,6 +18,14 @@ public class UserForm implements UserDetails
         this.role = Role.GUEST;
     }
 
+    public UserForm(String username, String email, Role role)
+    {
+        this.username = username;
+        this.email = email;
+        this.password = null;
+        this.role = role;
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities()
     {

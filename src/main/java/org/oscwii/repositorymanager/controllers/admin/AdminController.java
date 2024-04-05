@@ -62,13 +62,6 @@ public class AdminController extends BaseController
         return "admin/apps";
     }
 
-    @GetMapping("/users")
-    public String users(Model model)
-    {
-        model.addAttribute("users", authService.getUsers());
-        return "admin/users";
-    }
-
     @GetMapping("/sources")
     public String sources(Model model)
     {

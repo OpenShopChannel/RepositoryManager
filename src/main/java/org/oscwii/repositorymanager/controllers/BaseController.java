@@ -1,6 +1,7 @@
 package org.oscwii.repositorymanager.controllers;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.oscwii.repositorymanager.config.repoman.RepoManConfig;
 import org.oscwii.repositorymanager.model.security.User;
 import org.oscwii.repositorymanager.services.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,8 @@ public abstract class BaseController
 {
     @Autowired
     protected AuthService authService;
+    @Autowired
+    protected RepoManConfig config;
 
     @ModelAttribute("request")
     protected HttpServletRequest getRequest(HttpServletRequest request)
