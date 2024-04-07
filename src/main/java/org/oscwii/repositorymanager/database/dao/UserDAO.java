@@ -29,6 +29,9 @@ public interface UserDAO
             """)
     void updateUser(int id, boolean enabled, String email, Role role);
 
+    @SqlUpdate("UPDATE users SET password_hash = :passwordHash WHERE id = :id")
+    void updatePassword(int id, String passwordHash);
+
     @SqlUpdate("DELETE FROM users WHERE username = :username")
     void deleteUser(String username);
 

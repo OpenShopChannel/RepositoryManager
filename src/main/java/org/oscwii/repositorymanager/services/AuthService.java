@@ -3,6 +3,7 @@ package org.oscwii.repositorymanager.services;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.oscwii.repositorymanager.database.dao.UserDAO;
+import org.oscwii.repositorymanager.model.security.PasswordToken;
 import org.oscwii.repositorymanager.model.security.User;
 import org.oscwii.repositorymanager.model.security.UserForm;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,14 +19,18 @@ import java.util.List;
 public class AuthService implements UserDetailsManager
 {
     private final Logger logger;
+    private final MailService mailService;
     private final PasswordEncoder encoder;
+    private final PasswordTokenService passwordTokenService;
     private final UserDAO userDao;
 
     @Autowired
-    public AuthService(PasswordEncoder encoder, UserDAO userDao)
+    public AuthService(MailService mailService, PasswordEncoder encoder, PasswordTokenService passwordTokenService, UserDAO userDao)
     {
         this.logger = LogManager.getLogger(AuthService.class);
+        this.mailService = mailService;
         this.encoder = encoder;
+        this.passwordTokenService = passwordTokenService;
         this.userDao = userDao;
     }
 
@@ -63,9 +68,34 @@ public class AuthService implements UserDetailsManager
     }
 
     @Override
-    public void changePassword(String oldPassword, String newPassword)
-    {
+    public void changePassword(String oldPassword, String newPassword) {}
 
+    public void changePassword(int id, String password)
+    {
+        password = encoder.encode(password);
+        userDao.updatePassword(id, password);
+        logger.info("Password has been updated for {}", getUser(id).getUsername());
+    }
+
+    public void requestPasswordReset(User user)
+    {
+        PasswordToken token = passwordTokenService.createToken(user.getId());
+        mailService.sendPasswordReset(user.getEmail(), token);
+        logger.info("Password reset link has been requested for {}", user.getUsername());
+    }
+
+    public PasswordToken getPasswordToken(String tokenStr)
+    {
+        return passwordTokenService.consumeToken(tokenStr);
+    }
+
+    public void validatePasswordToken(String tokenStr)
+    {
+        PasswordToken token = passwordTokenService.getToken(tokenStr);
+        if(token == null)
+            throw new IllegalArgumentException("Invalid password reset link");
+        if(token.isExpired())
+            throw new IllegalArgumentException("This password reset link has expired");
     }
 
     @Override

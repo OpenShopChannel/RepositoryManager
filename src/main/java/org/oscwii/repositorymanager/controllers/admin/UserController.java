@@ -1,9 +1,11 @@
 package org.oscwii.repositorymanager.controllers.admin;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.oscwii.repositorymanager.config.repoman.RepoManSecurityConfig;
 import org.oscwii.repositorymanager.model.security.Role;
 import org.oscwii.repositorymanager.model.security.User;
 import org.oscwii.repositorymanager.model.security.UserForm;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
@@ -24,6 +26,9 @@ import java.util.Map;
 @RequestMapping(path = "/admin/users")
 public class UserController extends BaseAdminController
 {
+    @Autowired
+    private RepoManSecurityConfig securityConfig;
+
     @GetMapping
     public String users(Model model, @ModelAttribute("message") String message)
     {
@@ -82,7 +87,7 @@ public class UserController extends BaseAdminController
         if(user.getId() == getUser(request).getId())
             return ResponseEntity.badRequest().build();
 
-        if(config.getProtectedUsers().contains(user.getId()))
+        if(securityConfig.protectedUsers().contains(user.getId()))
         {
             attributes.addFlashAttribute("message", "danger:Cannot delete protected user!");
             return "redirect:/admin/users";
@@ -94,10 +99,17 @@ public class UserController extends BaseAdminController
     }
 
     @GetMapping("/view/{id}")
-    public String details(@PathVariable int id, Model model)
+    public String details(@PathVariable int id, Model model, @ModelAttribute("message") String message)
     {
-        model.addAttribute("user", authService.getUser(id))
-                .addAttribute("messages", Map.of());
+        if(!message.isEmpty())
+        {
+            String[] split = message.split(":", 2);
+            model.addAttribute("messages", Map.of(split[1], split[0]));
+        }
+        else
+            model.addAttribute("messages", Map.of());
+
+        model.addAttribute("user", authService.getUser(id));
         return "admin/user/details";
     }
 
@@ -131,5 +143,17 @@ public class UserController extends BaseAdminController
         model.addAttribute("user", authService.getUser(id))
                 .addAttribute("messages", Map.of("User updated successfully", "primary"));
         return "admin/user/details";
+    }
+
+    @PostMapping("/reset-password/{id}")
+    public Object resetPassword(@PathVariable int id, RedirectAttributes attributes)
+    {
+        User user = authService.getUser(id);
+        if(user == null)
+            return ResponseEntity.notFound().build();
+
+        authService.requestPasswordReset(user);
+        attributes.addFlashAttribute("message", "success:User has been emailed a password reset link");
+        return "redirect:/admin/users/view/" + id;
     }
 }

@@ -1,6 +1,6 @@
 package org.oscwii.repositorymanager.config;
 
-import org.oscwii.repositorymanager.config.repoman.RepoManConfig;
+import org.oscwii.repositorymanager.config.repoman.RepoManSecurityConfig;
 import org.oscwii.repositorymanager.services.AuthService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,12 +21,12 @@ import org.springframework.web.filter.CorsFilter;
 public class SecurityConfig
 {
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, RepoManConfig config) throws Exception
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, RepoManSecurityConfig config) throws Exception
     {
         http
                 .authorizeHttpRequests(requests -> requests
                         .requestMatchers("/", "/static/**", "/api/**", "/hbb/**").permitAll()
-                        .requestMatchers("/admin/register").permitAll()
+                        .requestMatchers("/admin/register", "/admin/reset-password").permitAll()
                         .anyRequest().authenticated())
                 .formLogin(form -> form
                         .loginPage("/admin/login")
@@ -36,7 +36,7 @@ public class SecurityConfig
                         .logoutUrl("/admin/login?logout")
                         .permitAll())
                 .rememberMe(rememberMe -> rememberMe
-                        .key(config.getSecretKey())
+                        .key(config.secretKey())
                         .rememberMeParameter("remember-me")
                         .rememberMeCookieName("remember-me")
                         .tokenValiditySeconds(365 * 24 * 60 * 60)

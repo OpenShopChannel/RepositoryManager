@@ -7,43 +7,35 @@ import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.context.annotation.Configuration;
 
 import java.nio.file.Path;
-import java.util.Set;
 
 @Configuration
 @ConfigurationProperties(prefix = "repository-manager")
 public class RepoManConfig
 {
-    private boolean allowRegistration;
     private String baseUrl;
     private String defaultPlatform;
-    private String secretKey;
     private Path repoDir;
 
     private boolean generateWSCBanner;
     private Path bannerGeneratorPath;
 
-    private Set<Integer> protectedUsers;
-
     @NestedConfigurationProperty
     public DiscordConfig discordConfig;
     @NestedConfigurationProperty
     public FetchConfig fetchConfig;
+    @NestedConfigurationProperty
+    public MailConfig mailConfig;
+    @NestedConfigurationProperty
+    public RepoManSecurityConfig securityConfig;
 
     @Autowired
-    public RepoManConfig(DiscordConfig discordConfig, FetchConfig fetchConfig)
+    public RepoManConfig(DiscordConfig discordConfig, FetchConfig fetchConfig, MailConfig mailConfig,
+                         RepoManSecurityConfig securityConfig)
     {
         this.discordConfig = discordConfig;
         this.fetchConfig = fetchConfig;
-    }
-
-    public boolean isAllowRegistration()
-    {
-        return allowRegistration;
-    }
-
-    public void setAllowRegistration(boolean allowRegistration)
-    {
-        this.allowRegistration = allowRegistration;
+        this.mailConfig = mailConfig;
+        this.securityConfig = securityConfig;
     }
 
     public String getBaseUrl()
@@ -65,16 +57,6 @@ public class RepoManConfig
     public void setDefaultPlatform(String defaultPlatform)
     {
         this.defaultPlatform = defaultPlatform;
-    }
-
-    public String getSecretKey()
-    {
-        return secretKey;
-    }
-
-    public void setSecretKey(String secretKey)
-    {
-        this.secretKey = secretKey;
     }
 
     public Path getRepoDir()
@@ -105,15 +87,5 @@ public class RepoManConfig
     public void setBannerGeneratorPath(Path bannerGeneratorPath)
     {
         this.bannerGeneratorPath = bannerGeneratorPath;
-    }
-
-    public Set<Integer> getProtectedUsers()
-    {
-        return protectedUsers;
-    }
-
-    public void setProtectedUsers(Set<Integer> protectedUsers)
-    {
-        this.protectedUsers = protectedUsers;
     }
 }

@@ -14,14 +14,11 @@ spring:
     password: danbo
 
 repository-manager:
-  allow-registration: false
   base-url: "http://localhost:8080"
   default-platform: "wii"
-  secret-key: "ChangeMe"
   repo-dir: "repository"
   generate-wsc-banner: false
   banner-generator-path: "BannerGenerator"
-  protected-users: [1]
   discord:
     enable-logging: false
     catalog-webhook-url: ""
@@ -32,3 +29,10 @@ repository-manager:
     secret-user-agents: {}
     github-token: ""
     itchio-token: ""
+  mail:
+    sender-address: "no-reply@example.com"
+    sendgrid-api-key: ""
+  security:
+    allow-registration: false
+    protected-users: [1]
+    secret-key: "ChangeMe"
