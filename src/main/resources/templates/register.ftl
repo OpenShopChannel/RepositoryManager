@@ -9,7 +9,7 @@
 <body>
 <section class="section">
     <div class="container">
-        <#list message as msg, class>
+        <#list messages as msg, class>
             <div class="notification is-${class}">
                 ${msg}
             </div>

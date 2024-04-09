@@ -5,24 +5,16 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 
-public class UserForm implements UserDetails
+public class DummyUser implements UserDetails
 {
     private final String username, email, password;
     private final Role role;
 
-    public UserForm(String username, String email, String password)
+    public DummyUser(String username, String email, String password, Role role)
     {
         this.username = username;
         this.email = email;
         this.password = password;
-        this.role = Role.GUEST;
-    }
-
-    public UserForm(String username, String email, Role role)
-    {
-        this.username = username;
-        this.email = email;
-        this.password = null;
         this.role = role;
     }
 

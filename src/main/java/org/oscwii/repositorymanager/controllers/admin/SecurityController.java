@@ -2,11 +2,16 @@ package org.oscwii.repositorymanager.controllers.admin;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import org.oscwii.repositorymanager.config.repoman.RepoManSecurityConfig;
+import org.oscwii.repositorymanager.model.security.DummyUser;
 import org.oscwii.repositorymanager.model.security.PasswordToken;
-import org.oscwii.repositorymanager.model.security.UserForm;
+import org.oscwii.repositorymanager.model.security.Role;
 import org.oscwii.repositorymanager.services.AuthService;
+import org.oscwii.repositorymanager.validation.UserNotExists;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSourceResolvable;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
@@ -14,10 +19,12 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.HashMap;
@@ -68,41 +75,35 @@ public class SecurityController
     {
         if(!config.allowRegistration())
             return ResponseEntity.badRequest().body("Registration is disabled.");
-
         if(request.getRemoteUser() != null)
             return "redirect:/admin";
 
-        model.addAttribute("message", Map.of());
+        model.addAttribute("messages", Map.of());
         return "register";
     }
 
-    @PostMapping(value = "/admin/register", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    public Object registerAction(HttpServletRequest request, UserForm form, Model model)
+    @PostMapping("/admin/register")
+    public Object registerAction(HttpServletRequest request, @Valid @UserNotExists UserForm form)
     {
         if(!config.allowRegistration())
             return ResponseEntity.badRequest().body("Registration is disabled.");
-
         if(request.getRemoteUser() != null)
             return "redirect:/admin";
+        DummyUser user = new DummyUser(form.username(), form.email(), form.password(), Role.GUEST);
+        authService.createUser(user);
+        return "redirect:/admin/login";
+    }
 
-        Map<String, String> messages = new HashMap<>();
-        String username = form.getUsername();
-        String email = form.getEmail();
-        String password = form.getPassword();
+    @ExceptionHandler(HandlerMethodValidationException.class)
+    public Object handleInvalidForm(Model model, HandlerMethodValidationException e)
+    {
+        if(!config.allowRegistration())
+            return ResponseEntity.badRequest().body("Registration is disabled.");
+        Map<String, String> errors = new HashMap<>();
+        for(MessageSourceResolvable error : e.getAllErrors())
+            errors.put(error.getDefaultMessage(), "danger");
 
-        if(username == null || email == null || password == null)
-            messages.put("All fields are required.", "danger");
-        else if(authService.userExists(username))
-            messages.put("Username already in use.", "danger");
-        else if(authService.isEmailInUse(email))
-            messages.put("Email already in use.", "danger");
-        else
-        {
-            authService.createUser(form);
-            return "redirect:/admin/login";
-        }
-
-        model.addAttribute("message", messages);
+        model.addAttribute("messages", errors);
         return "register";
     }
 
@@ -155,4 +156,10 @@ public class SecurityController
 
         return message;
     }
+
+    public record UserForm(
+            @NotBlank(message = "Username is required!") String username,
+            @NotBlank(message = "Email is required!") String email,
+            @NotBlank(message = "Password is required!") String password)
+    {}
 }

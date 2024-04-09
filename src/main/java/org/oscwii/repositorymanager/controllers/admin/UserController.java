@@ -4,7 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.oscwii.repositorymanager.config.repoman.RepoManSecurityConfig;
 import org.oscwii.repositorymanager.model.security.Role;
 import org.oscwii.repositorymanager.model.security.User;
-import org.oscwii.repositorymanager.model.security.UserForm;
+import org.oscwii.repositorymanager.model.security.DummyUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -61,7 +61,7 @@ public class UserController extends BaseAdminController
             return ResponseEntity.badRequest().build();
 
         Map<String, String> messages = new HashMap<>();
-        UserForm user = new UserForm(username, email, role);
+        DummyUser user = new DummyUser(username, email, null, role);
 
         try
         {

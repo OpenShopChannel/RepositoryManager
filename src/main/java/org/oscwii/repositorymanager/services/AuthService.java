@@ -5,7 +5,7 @@ import org.apache.logging.log4j.Logger;
 import org.oscwii.repositorymanager.database.dao.UserDAO;
 import org.oscwii.repositorymanager.model.security.PasswordToken;
 import org.oscwii.repositorymanager.model.security.User;
-import org.oscwii.repositorymanager.model.security.UserForm;
+import org.oscwii.repositorymanager.model.security.DummyUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -37,7 +37,7 @@ public class AuthService implements UserDetailsManager
     @Override
     public void createUser(UserDetails details)
     {
-        UserForm user = (UserForm) details;
+        DummyUser user = (DummyUser) details;
 
         if(userExists(user.getUsername()))
             throw new IllegalArgumentException("User already exists");

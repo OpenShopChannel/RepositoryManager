@@ -25,7 +25,7 @@ public class SecurityConfig
     {
         http
                 .authorizeHttpRequests(requests -> requests
-                        .requestMatchers("/", "/static/**", "/api/**", "/hbb/**").permitAll()
+                        .requestMatchers("/", "/setup", "/static/**", "/api/**", "/hbb/**").permitAll()
                         .requestMatchers("/admin/register", "/admin/reset-password").permitAll()
                         .anyRequest().authenticated())
                 .formLogin(form -> form
