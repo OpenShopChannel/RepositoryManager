@@ -2,6 +2,7 @@ package org.oscwii.repositorymanager;
 
 import org.jdbi.v3.spring5.EnableJdbiRepositories;
 import org.oscwii.repositorymanager.config.repoman.RepoManConfig;
+import org.oscwii.repositorymanager.database.dao.SettingsDAO;
 import org.oscwii.repositorymanager.services.FeaturedApp;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -9,10 +10,13 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.context.event.EventListener;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import java.util.Optional;
 
 @SpringBootApplication
 @Controller
@@ -20,12 +24,19 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @ConfigurationPropertiesScan(value = "org.oscwii.repositorymanager.config.repoman")
 public class DanboApp
 {
+    private final FeaturedApp featuredApp;
+    private final RepositoryIndex index;
+    private final RepoManConfig config;
+    private final SettingsDAO settingsDao;
+
     @Autowired
-    private RepoManConfig config;
-    @Autowired
-    private RepositoryIndex index;
-    @Autowired
-    private FeaturedApp featuredApp;
+    public DanboApp(FeaturedApp featuredApp, RepositoryIndex index, RepoManConfig config, SettingsDAO settingsDao)
+    {
+        this.featuredApp = featuredApp;
+        this.index = index;
+        this.config = config;
+        this.settingsDao = settingsDao;
+    }
 
     @EventListener(ApplicationReadyEvent.class)
     public void onStartup()
@@ -38,12 +49,21 @@ public class DanboApp
     }
 
     @GetMapping("/")
-    public String hello(Model model)
+    public Object hello(Model model)
     {
+        Optional<String> gitUrl = settingsDao.getSetting("git_url");
+        if(settingsDao.getSetting("setup_complete").isEmpty() || gitUrl.isEmpty())
+        {
+            return ResponseEntity.ok("""
+           This RepositoryManager instance has not been installed.
+           <a href='/setup'>Click here to go to the setup.</a>
+           """);
+        }
+
         model.addAttribute("app_count", index.getContents().size())
                 .addAttribute("repository_name", index.getInfo().name())
                 .addAttribute("repository_provider", index.getInfo().provider())
-                .addAttribute("git_url", "TODO") // TODO
+                .addAttribute("git_url", gitUrl.get())
                 .addAttribute("base_url", config.getBaseUrl());
         return "hello_world";
     }
