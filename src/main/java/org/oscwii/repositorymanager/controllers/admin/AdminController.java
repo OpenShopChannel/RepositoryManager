@@ -1,6 +1,7 @@
 package org.oscwii.repositorymanager.controllers.admin;
 
 import org.oscwii.repositorymanager.RepositoryIndex;
+import org.oscwii.repositorymanager.database.dao.SettingsDAO;
 import org.oscwii.repositorymanager.sources.SourceRegistry;
 import org.oscwii.repositorymanager.utils.FileUtil;
 import org.oscwii.repositorymanager.utils.FormatUtil;
@@ -9,10 +10,12 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,13 +26,16 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @Controller
-@RequestMapping(path = "/admin", method = RequestMethod.GET)
+@RequestMapping("/admin")
 public class AdminController extends BaseAdminController
 {
     @Autowired
     private RepositoryIndex index;
+    @Autowired
+    private SettingsDAO settingsDao;
     @Autowired
     private SourceRegistry sourceRegistry;
 
@@ -76,9 +82,18 @@ public class AdminController extends BaseAdminController
     }
 
     @GetMapping("/settings")
-    public String settings()
+    public String settings(Model model)
     {
+        model.addAttribute("settings", settingsDao.getAllSettings());
         return "admin/settings";
+    }
+
+    @PostMapping("/settings")
+    public String updateSettings(@RequestParam MultiValueMap<String, String> form)
+    {
+        for(Map.Entry<String, String> entry : form.toSingleValueMap().entrySet())
+            settingsDao.insertSetting(entry.getKey(), entry.getValue());
+        return "redirect:settings";
     }
 
     @GetMapping("/log/{log}")

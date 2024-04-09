@@ -3,7 +3,7 @@
 <#macro setting title key>
     <div class="form-group">
         <label for="${key}">${title}</label>
-        <input type="text" class="form-control" id="${key}" name="${key}" value="TODO">
+        <input type="text" class="form-control" id="${key}" name="${key}" value="${settings[key]}">
     </div>
 </#macro>
 
@@ -14,7 +14,9 @@
         </h1>
         <div class="content-body">
             <form action="/admin/settings" method="post" enctype="multipart/form-data">
-                <@setting title="Repository URL" key="git_url"/>
+                <@setting "Repository URL" "git_url"/>
+
+                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
                 <button type="submit" class="btn btn-primary">Save</button>
             </form>
         </div>
