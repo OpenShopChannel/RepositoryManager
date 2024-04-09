@@ -4,7 +4,7 @@ import org.oscwii.repositorymanager.controllers.RepoManController;
 import org.oscwii.repositorymanager.model.RepositoryInfo;
 import org.oscwii.repositorymanager.model.api.App;
 import org.oscwii.repositorymanager.model.app.InstalledApp;
-import org.oscwii.repositorymanager.services.FeaturedApp;
+import org.oscwii.repositorymanager.services.FeaturedAppService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -21,10 +21,10 @@ import java.util.Map;
 @RequestMapping(path = "/api/v3", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.GET)
 public class RepositoryController extends RepoManController
 {
-    private final FeaturedApp featuredApp;
+    private final FeaturedAppService featuredApp;
 
     @Autowired
-    public RepositoryController(FeaturedApp featuredApp)
+    public RepositoryController(FeaturedAppService featuredApp)
     {
         this.featuredApp = featuredApp;
     }

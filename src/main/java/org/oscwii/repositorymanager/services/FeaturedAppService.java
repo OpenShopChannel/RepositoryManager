@@ -11,7 +11,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Supplier;
 
 @Service
-public class FeaturedApp
+public class FeaturedAppService
 {
     private final Supplier<InstalledApp> featured;
     private final RepositoryIndex index;
@@ -19,7 +19,7 @@ public class FeaturedApp
     private String slug = "";
 
     @Autowired
-    public FeaturedApp(RepositoryIndex index)
+    public FeaturedAppService(RepositoryIndex index)
     {
         this.index = index;
         this.featured = () -> index.getApp(slug);

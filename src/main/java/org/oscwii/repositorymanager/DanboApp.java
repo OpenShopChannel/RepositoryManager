@@ -3,7 +3,7 @@ package org.oscwii.repositorymanager;
 import org.jdbi.v3.spring5.EnableJdbiRepositories;
 import org.oscwii.repositorymanager.config.repoman.RepoManConfig;
 import org.oscwii.repositorymanager.database.dao.SettingsDAO;
-import org.oscwii.repositorymanager.services.FeaturedApp;
+import org.oscwii.repositorymanager.services.FeaturedAppService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -24,13 +24,13 @@ import java.util.Optional;
 @ConfigurationPropertiesScan(value = "org.oscwii.repositorymanager.config.repoman")
 public class DanboApp
 {
-    private final FeaturedApp featuredApp;
+    private final FeaturedAppService featuredApp;
     private final RepositoryIndex index;
     private final RepoManConfig config;
     private final SettingsDAO settingsDao;
 
     @Autowired
-    public DanboApp(FeaturedApp featuredApp, RepositoryIndex index, RepoManConfig config, SettingsDAO settingsDao)
+    public DanboApp(FeaturedAppService featuredApp, RepositoryIndex index, RepoManConfig config, SettingsDAO settingsDao)
     {
         this.featuredApp = featuredApp;
         this.index = index;
@@ -41,6 +41,9 @@ public class DanboApp
     @EventListener(ApplicationReadyEvent.class)
     public void onStartup()
     {
+        if(settingsDao.getSetting("setup_complete").isEmpty())
+            return;
+
         // Load the repository without updating apps
         index.initialize();
 
