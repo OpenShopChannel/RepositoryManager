@@ -2,6 +2,8 @@ package org.oscwii.repositorymanager.controllers.admin;
 
 import org.oscwii.repositorymanager.RepositoryIndex;
 import org.oscwii.repositorymanager.database.dao.SettingsDAO;
+import org.oscwii.repositorymanager.model.security.Role;
+import org.oscwii.repositorymanager.security.RequiredRole;
 import org.oscwii.repositorymanager.sources.SourceRegistry;
 import org.oscwii.repositorymanager.utils.FileUtil;
 import org.oscwii.repositorymanager.utils.FormatUtil;
@@ -30,6 +32,7 @@ import java.util.Map;
 
 @Controller
 @RequestMapping("/admin")
+@RequiredRole(Role.ADMINISTRATOR)
 public class AdminController extends BaseAdminController
 {
     @Autowired
@@ -40,6 +43,7 @@ public class AdminController extends BaseAdminController
     private SourceRegistry sourceRegistry;
 
     @GetMapping
+    @RequiredRole
     public String home(Model model)
     {
         model.addAttribute("repoInfo", index.getInfo())
@@ -54,6 +58,7 @@ public class AdminController extends BaseAdminController
     }
 
     @GetMapping("/moderation")
+    @RequiredRole(Role.MODERATOR)
     public String moderation(Model model)
     {
         model.addAttribute("modEntries", List.of()); // TODO
@@ -61,6 +66,7 @@ public class AdminController extends BaseAdminController
     }
 
     @GetMapping("/apps")
+    @RequiredRole
     public String apps(Model model)
     {
         model.addAttribute("contents", index.getContents());
@@ -68,6 +74,7 @@ public class AdminController extends BaseAdminController
     }
 
     @GetMapping("/sources")
+    @RequiredRole(Role.MODERATOR)
     public String sources(Model model)
     {
         model.addAttribute("sources", sourceRegistry.getSources());

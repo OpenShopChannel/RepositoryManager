@@ -6,6 +6,7 @@ import org.oscwii.repositorymanager.controllers.admin.SecurityController.UserFor
 import org.oscwii.repositorymanager.database.dao.SettingsDAO;
 import org.oscwii.repositorymanager.model.security.DummyUser;
 import org.oscwii.repositorymanager.model.security.Role;
+import org.oscwii.repositorymanager.security.Anyone;
 import org.oscwii.repositorymanager.services.AuthService;
 import org.oscwii.repositorymanager.validation.UserNotExists;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import java.util.HashMap;
 import java.util.Map;
 
+@Anyone
 @Controller
 @RequestMapping("/setup")
 public class SetupController

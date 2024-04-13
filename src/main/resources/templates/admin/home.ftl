@@ -12,7 +12,7 @@
         </h1>
         You are logged in as <strong>${currentUser.getUsername()}</strong>.
     </div>
-    <!-- TODO HAS ACCESS - start -->
+    <#if currentUser.hasAccess("Administrator")>
     <div class="card">
         <div class="row row-eq-spacing justify-content-center" style="margin-top: unset; margin-bottom: unset;">
             <div class="btn-group btn-group-lg" role="group" aria-label="Basic example">
@@ -21,7 +21,7 @@
             </div>
         </div>
     </div>
-    <!-- TODO HAS ACCESS - end -->
+    </#if>
     <div class="card">
         <h2 class="card-title">
             ${repoInfo.name()} (Provider: ${repoInfo.provider()})

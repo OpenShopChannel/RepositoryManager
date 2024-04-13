@@ -2,9 +2,10 @@ package org.oscwii.repositorymanager.controllers.admin;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.oscwii.repositorymanager.config.repoman.RepoManSecurityConfig;
+import org.oscwii.repositorymanager.model.security.DummyUser;
 import org.oscwii.repositorymanager.model.security.Role;
 import org.oscwii.repositorymanager.model.security.User;
-import org.oscwii.repositorymanager.model.security.DummyUser;
+import org.oscwii.repositorymanager.security.RequiredRole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -23,6 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Controller
+@RequiredRole(Role.ADMINISTRATOR)
 @RequestMapping(path = "/admin/users")
 public class UserController extends BaseAdminController
 {

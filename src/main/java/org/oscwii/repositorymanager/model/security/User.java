@@ -3,6 +3,7 @@ package org.oscwii.repositorymanager.model.security;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.util.Assert;
 
 import java.util.Collection;
 import java.util.List;
@@ -25,6 +26,20 @@ public class User implements UserDetails
         this.email = email;
         this.passwordHash = passwordHash;
         setRole(role);
+    }
+
+    public boolean hasAccess(String roleStr)
+    {
+        if(roleStr.isEmpty())
+            return true;
+        Role role = Role.from(roleStr);
+        Assert.notNull(role, "Unknown role: " + roleStr);
+        return hasAccess(role);
+    }
+
+    public boolean hasAccess(Role required)
+    {
+        return role.ordinal() >= required.ordinal();
     }
 
     @Override

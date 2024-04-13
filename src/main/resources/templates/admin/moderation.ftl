@@ -17,7 +17,7 @@
             <#if mod_entry.status() == status>
                 <tr>
                     <th style="text-align: center"><i class="fa-solid fa-gavel"></i></th>
-                    <th>${mod_entry.app()}-${mod_entry.checksum().substring(0, 24)}...</th>
+                    <th>${mod_entry.app()}-${mod_entry.checksum()?truncate_c(24, "...")}</th>
                     <th>${mod_entry.discoveryDate()}</th>
                     <td>
                         <div class="btn-group" role="group">
