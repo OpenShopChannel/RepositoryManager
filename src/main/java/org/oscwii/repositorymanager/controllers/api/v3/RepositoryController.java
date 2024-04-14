@@ -1,6 +1,7 @@
 package org.oscwii.repositorymanager.controllers.api.v3;
 
 import org.oscwii.repositorymanager.controllers.RepoManController;
+import org.oscwii.repositorymanager.database.dao.SettingsDAO;
 import org.oscwii.repositorymanager.model.RepositoryInfo;
 import org.oscwii.repositorymanager.model.api.App;
 import org.oscwii.repositorymanager.model.app.InstalledApp;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Controller
 @RequestMapping(path = "/api/v3", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.GET)
@@ -30,16 +32,18 @@ public class RepositoryController extends RepoManController
     }
 
     @GetMapping("/information")
-    public ResponseEntity<Map<String, Object>> getInformation()
+    public ResponseEntity<Map<String, Object>> getInformation(SettingsDAO settingsDao)
     {
+        Optional<String> gitUrl = settingsDao.getSetting("git_url");
         RepositoryInfo info = index.getInfo();
+
         Map<String, Object> information = Map.of(
                 "name", info.name(),
                 "provider", info.provider(),
                 "description", info.description(),
                 "available_categories", index.getCategories(),
                 "available_apps_count", index.getContents().size(),
-                "git_url", "TODO" // TODO
+                "git_url", gitUrl.orElse("Unknown")
         );
 
         return ResponseEntity.ok(information);

@@ -8,7 +8,7 @@ import org.oscwii.repositorymanager.config.repoman.RepoManSecurityConfig;
 import org.oscwii.repositorymanager.model.security.DummyUser;
 import org.oscwii.repositorymanager.model.security.PasswordToken;
 import org.oscwii.repositorymanager.model.security.Role;
-import org.oscwii.repositorymanager.security.Anyone;
+import org.oscwii.repositorymanager.security.annotations.Anyone;
 import org.oscwii.repositorymanager.services.AuthService;
 import org.oscwii.repositorymanager.validation.UserNotExists;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -146,13 +146,12 @@ public class SecurityController
 
     private String getLoginErrorMessage(HttpServletRequest request)
     {
-        String message = "Incorrect username or password.";
-        Object ex = request.getAttribute(AUTHENTICATION_EXCEPTION);
-        System.out.println(request.getAttributeNames());
+        String message = "Incorrect username or password";
+        Object ex = request.getSession().getAttribute(AUTHENTICATION_EXCEPTION);
 
         if(ex instanceof AuthenticationException authEx)
         {
-            if(StringUtils.hasText(authEx.getMessage()))
+            if(StringUtils.hasText(authEx.getMessage()) && !authEx.getMessage().equals("Bad credentials"))
                 message = authEx.getMessage();
         }
 

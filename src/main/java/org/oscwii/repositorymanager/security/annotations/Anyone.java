@@ -1,4 +1,4 @@
-package org.oscwii.repositorymanager.security;
+package org.oscwii.repositorymanager.security.annotations;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;

@@ -1,6 +1,7 @@
 package org.oscwii.repositorymanager.config;
 
 import org.oscwii.repositorymanager.config.repoman.RepoManSecurityConfig;
+import org.oscwii.repositorymanager.security.RepoManAuthenticationProvider;
 import org.oscwii.repositorymanager.security.RepoManAuthorizationManager;
 import org.oscwii.repositorymanager.services.AuthService;
 import org.springframework.aop.Advisor;
@@ -10,7 +11,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Role;
 import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.authorization.method.AuthorizationInterceptorsOrder;
 import org.springframework.security.authorization.method.AuthorizationManagerBeforeMethodInterceptor;
 import org.springframework.security.config.Customizer;
@@ -73,7 +73,7 @@ public class SecurityConfig
     @Bean
     public AuthenticationProvider authProvider(AuthService authService, PasswordEncoder encoder)
     {
-        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+        RepoManAuthenticationProvider authProvider = new RepoManAuthenticationProvider();
         authProvider.setUserDetailsService(authService);
         authProvider.setPasswordEncoder(encoder);
         return authProvider;

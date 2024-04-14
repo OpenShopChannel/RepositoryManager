@@ -3,7 +3,7 @@ package org.oscwii.repositorymanager.controllers.admin;
 import org.oscwii.repositorymanager.RepositoryIndex;
 import org.oscwii.repositorymanager.database.dao.SettingsDAO;
 import org.oscwii.repositorymanager.model.security.Role;
-import org.oscwii.repositorymanager.security.RequiredRole;
+import org.oscwii.repositorymanager.security.annotations.RequiredRole;
 import org.oscwii.repositorymanager.sources.SourceRegistry;
 import org.oscwii.repositorymanager.utils.FileUtil;
 import org.oscwii.repositorymanager.utils.FormatUtil;

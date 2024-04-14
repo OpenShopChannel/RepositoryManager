@@ -1,4 +1,4 @@
-package org.oscwii.repositorymanager.security;
+package org.oscwii.repositorymanager.security.annotations;
 
 import org.oscwii.repositorymanager.model.security.Role;
 

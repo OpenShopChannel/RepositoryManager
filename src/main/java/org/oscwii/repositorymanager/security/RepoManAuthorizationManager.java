@@ -3,6 +3,8 @@ package org.oscwii.repositorymanager.security;
 import org.aopalliance.intercept.MethodInvocation;
 import org.oscwii.repositorymanager.model.security.Role;
 import org.oscwii.repositorymanager.model.security.User;
+import org.oscwii.repositorymanager.security.annotations.Anyone;
+import org.oscwii.repositorymanager.security.annotations.RequiredRole;
 import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.security.access.AccessDeniedException;
