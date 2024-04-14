@@ -12,7 +12,7 @@ import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
 
 import java.io.IOException;
 
-import static freemarker.template.Configuration.getVersion;
+import static freemarker.template.Configuration.VERSION_2_3_32;
 
 @Configuration
 @EnableWebMvc
@@ -24,7 +24,7 @@ public class WebConfig implements WebMvcConfigurer
         FreeMarkerConfigurer freeMarkerConfigurer = new FreeMarkerConfigurer();
         freeMarkerConfigurer.setTemplateLoaderPath("classpath:templates/");
 
-        Java8ObjectWrapper objectWrapper = new Java8ObjectWrapper(getVersion());
+        Java8ObjectWrapper objectWrapper = new Java8ObjectWrapper(VERSION_2_3_32);
         objectWrapper.setExposeFields(true);
 
         freeMarkerConfigurer.afterPropertiesSet();

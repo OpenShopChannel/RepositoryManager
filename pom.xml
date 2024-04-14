@@ -7,7 +7,7 @@
     <parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.2.2</version>
+		<version>3.2.4</version>
 		<relativePath/>
 	</parent>
 
@@ -19,6 +19,7 @@
         <java.version>17</java.version>
         <log4j2.version>2.23.1</log4j2.version>
         <sentry.version>7.6.0</sentry.version>
+        <flyway.version>10.11.0</flyway.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
