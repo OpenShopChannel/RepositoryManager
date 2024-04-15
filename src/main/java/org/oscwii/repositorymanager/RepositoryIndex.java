@@ -295,9 +295,10 @@ public class RepositoryIndex
             {
                 try(WebhookClient webhook = discordWebhook.logWebhook())
                 {
-                    if(webhook != null)
+                    if(webhook != null && updateApps)
                     {
-                        var embed = new DiscordMessage(null, "App index failure", e.getMessage());
+                        var embed = new DiscordMessage(null, "App index failure",
+                                "**FAILED TO PROCESS " + meta.getName() + ":**\n" + e.getMessage());
                         WebhookMessage message = new WebhookMessageBuilder()
                                 .addEmbeds(embed.toEmbed())
                                 .setUsername("Repository Manager: Error")
