@@ -14,6 +14,7 @@ import org.oscwii.repositorymanager.model.security.User;
 import org.oscwii.repositorymanager.security.annotations.RequiredRole;
 import org.oscwii.repositorymanager.utils.FileUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.nio.file.Path;
+import java.util.Optional;
 
 @Controller
 @RequiredRole(Role.MODERATOR)
@@ -43,15 +45,20 @@ public class ModerationController extends BaseAdminController
     @GetMapping("/{checksum}/{action}")
     public Object action(@PathVariable String checksum, @PathVariable String action, HttpServletRequest request, RedirectAttributes attributes)
     {
+        Optional<ModeratedBinary> optEntry = modDao.findByChecksum(checksum);
+        if(optEntry.isEmpty())
+            return ResponseEntity.notFound().build();
+
+        ModeratedBinary entry = optEntry.get();
         switch(action)
         {
             case "approve":
-                approveApp(checksum, getUser(request));
-                attributes.addFlashAttribute("message", "success:Approved " + checksum);
+                approveApp(entry, getUser(request));
+                attributes.addFlashAttribute("message", "success:Approved " + entry.app() + "-" + checksum);
                 break;
             case "reject":
-                rejectApp(checksum, getUser(request));
-                attributes.addFlashAttribute("message", "danger:Rejected " + checksum);
+                rejectApp(entry, getUser(request));
+                attributes.addFlashAttribute("message", "danger:Rejected " + entry.app() + "-" + checksum);
                 break;
             case "download":
                 return FileUtil.getContent(Path.of("data", "moderation", checksum + ".zip"));
@@ -60,18 +67,20 @@ public class ModerationController extends BaseAdminController
         return "redirect:/admin/moderation";
     }
 
-    private void approveApp(String checksum, User moderator)
+    private void approveApp(ModeratedBinary entry, User moderator)
     {
+        String checksum = entry.checksum();
         modDao.updateEntry(checksum, Status.APPROVED, moderator.getId());
-        ModeratedBinary entry = modDao.findByChecksum(checksum).orElseThrow();
+        entry = modDao.findByChecksum(checksum).orElseThrow();
         notifyDiscord(entry, Status.APPROVED);
         logger.info("App {} ({}) has been APPROVED by {}", entry.app(), checksum, moderator.getUsername());
     }
 
-    private void rejectApp(String checksum, User moderator)
+    private void rejectApp(ModeratedBinary entry, User moderator)
     {
+        String checksum = entry.checksum();
         modDao.updateEntry(checksum, Status.REJECTED, moderator.getId());
-        ModeratedBinary entry = modDao.findByChecksum(checksum).orElseThrow();
+        entry = modDao.findByChecksum(checksum).orElseThrow();
         notifyDiscord(entry, Status.REJECTED);
         logger.info("App {} ({}) has been REJECTED by {}", entry.app(), checksum, moderator.getUsername());
     }

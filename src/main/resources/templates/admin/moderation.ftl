@@ -39,6 +39,13 @@
 
 <@base.content>
     <div class="content">
+        <#list messages as msg, class>
+            <div class="alert alert-${class}">
+                ${msg}
+            </div>
+            <br>
+        </#list>
+
         <h1 class="content-title font-size-22">
             Moderation
         </h1>

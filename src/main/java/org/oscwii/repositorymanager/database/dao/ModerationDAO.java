@@ -46,8 +46,8 @@ public interface ModerationDAO
     @SqlUpdate("""
             UPDATE moderated_binaries
             SET status = :status,
-                moderator = :moderator,
-                modified_date = :CURRENT_TIMESTAMP
+                moderated_by = :moderator,
+                modified_date = CURRENT_TIMESTAMP
             WHERE checksum = :checksum
             """)
     void updateEntry(String checksum, Status status, int moderator);
