@@ -2,6 +2,7 @@ package org.oscwii.repositorymanager;
 
 import club.minnced.discord.webhook.WebhookClient;
 import club.minnced.discord.webhook.send.WebhookEmbed;
+import club.minnced.discord.webhook.send.WebhookEmbed.EmbedTitle;
 import club.minnced.discord.webhook.send.WebhookEmbedBuilder;
 import club.minnced.discord.webhook.send.WebhookMessage;
 import club.minnced.discord.webhook.send.WebhookMessageBuilder;
@@ -18,13 +19,16 @@ import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 import org.oscwii.repositorymanager.config.repoman.RepoManConfig;
 import org.oscwii.repositorymanager.database.dao.AppDAO;
+import org.oscwii.repositorymanager.database.dao.ModerationDAO;
 import org.oscwii.repositorymanager.exceptions.AppFilesMissingException;
+import org.oscwii.repositorymanager.exceptions.ModerationException;
 import org.oscwii.repositorymanager.exceptions.QuietException;
 import org.oscwii.repositorymanager.factory.DiscordWebhookFactory;
 import org.oscwii.repositorymanager.logging.DiscordAppender;
 import org.oscwii.repositorymanager.logging.DiscordMessage;
 import org.oscwii.repositorymanager.logging.IndexTriggeringPolicy;
 import org.oscwii.repositorymanager.logging.WebSocketAppender;
+import org.oscwii.repositorymanager.model.ModeratedBinary;
 import org.oscwii.repositorymanager.model.RepositoryInfo;
 import org.oscwii.repositorymanager.model.UpdateLevel;
 import org.oscwii.repositorymanager.model.app.Category;
@@ -64,11 +68,13 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.TimeUnit.HOURS;
+import static org.oscwii.repositorymanager.logging.DiscordAppender.ERROR_AVATAR;
 
 @Service
 public class RepositoryIndex
@@ -78,6 +84,7 @@ public class RepositoryIndex
     private final FeaturedAppService featuredAppService;
     private final Gson gson;
     private final Logger logger;
+    private final ModerationDAO modDao;
     private final RepoManConfig config;
     private final RepositorySource repoSource;
     private final SourceRegistry sources;
@@ -92,13 +99,14 @@ public class RepositoryIndex
 
     @Autowired
     public RepositoryIndex(AppDAO appDao, DiscordWebhookFactory discordWebhook, @Lazy FeaturedAppService featuredAppService, Gson gson,
-                           RepoManConfig config, RepositorySource repoSource, SourceRegistry sources,
+                           ModerationDAO modDao, RepoManConfig config, RepositorySource repoSource, SourceRegistry sources,
                            TreatmentRegistry treatments, SimpMessageSendingOperations webSocket)
     {
         this.appDao = appDao;
         this.discordWebhook = discordWebhook;
         this.gson = gson;
         this.logger = LogManager.getLogger(RepositoryIndex.class);
+        this.modDao = modDao;
         this.config = config;
         this.featuredAppService = featuredAppService;
         this.repoSource = repoSource;
@@ -283,6 +291,22 @@ public class RepositoryIndex
                 logger.error("Cancelling initial indexing...");
                 throw e;
             }
+            catch(ModerationException e)
+            {
+                try(WebhookClient webhook = discordWebhook.logWebhook())
+                {
+                    if(webhook != null)
+                    {
+                        var embed = new DiscordMessage(null, "App index failure", e.getMessage());
+                        WebhookMessage message = new WebhookMessageBuilder()
+                                .addEmbeds(embed.toEmbed())
+                                .setUsername("Repository Manager: Error")
+                                .setAvatarUrl(ERROR_AVATAR)
+                                .build();
+                        webhook.send(message);
+                    }
+                }
+            }
             catch(Exception e)
             {
                 handleApplicationUpdateFailure(meta, e);
@@ -400,7 +424,7 @@ public class RepositoryIndex
             }
 
             checkRequiredContents(app, app.getDataPath());
-            // TODO moderation
+            checkModerationStatus(app, app.getDataPath());
         }
         else
             updateApp(app);
@@ -434,7 +458,8 @@ public class RepositoryIndex
             // Check for required contents
             checkRequiredContents(app, tmpDir);
 
-            // TODO moderation
+            // Check moderation status
+            checkModerationStatus(app, tmpDir);
 
             // Cleanup the app directory and move the new files
             FileSystemUtils.deleteRecursively(appDir);
@@ -516,6 +541,69 @@ public class RepositoryIndex
             throw new QuietException("Couldn't find boot.dol or boot.elf binary.");
     }
 
+    private void checkModerationStatus(InstalledApp app, Path tmpDir) throws IOException
+    {
+        Path appFilesDir = tmpDir.resolve("apps").resolve(app.getSlug());
+        Path binary = appFilesDir.resolve("boot." + app.getComputedInfo().packageType);
+        String hash = FileUtil.md5Hash(binary);
+        app.getComputedInfo().md5Hash = hash;
+
+        logger.info("- Checking moderation status");
+        logger.info("  - Binary checksum: {}", hash);
+
+        Path modArchive = Path.of("data", "moderation", hash + ".zip");
+        Optional<ModeratedBinary> optEntry = modDao.findByChecksum(hash);
+        if(optEntry.isPresent())
+        {
+            ModeratedBinary modEntry = optEntry.get();
+            switch(modEntry.status())
+            {
+                case APPROVED:
+                    logger.info("  - Application binary is approved by moderation");
+                    break;
+                case PENDING:
+                    logger.info("  - Application binary is currently pending moderation");
+                    FileUtil.zipDirectory(tmpDir, modArchive);
+                    logger.info("  - Updated moderation archive.");
+                    throw new ModerationException("Binary requires moderation");
+                case REJECTED:
+                    logger.info("  - Application binary has been rejected by moderation");
+                    FileUtil.zipDirectory(tmpDir, modArchive);
+                    logger.info("  - Updated moderation archive.");
+                    throw new ModerationException("Binary rejected in moderation");
+            }
+        }
+        else
+        {
+            if(appDao.appExists(app.getSlug()).isEmpty())
+            {
+                // App not in db = first run, but we have app files?
+                throw new IllegalStateException("Could not verify moderation status for an unregistered app. " +
+                        "This app requires an update.");
+            }
+
+            ModeratedBinary modEntry = new ModeratedBinary(hash, app.getSlug());
+            modDao.insertEntry(modEntry);
+
+            // Notify Discord
+            try(WebhookClient webhook = discordWebhook.modWebhook())
+            {
+                if(webhook == null)
+                    return;
+                WebhookEmbed embed = new WebhookEmbedBuilder()
+                        .setTitle(new EmbedTitle("New version discovered and pending moderation!", null))
+                        .setDescription(app.getSlug() + "-" + hash)
+                        .build();
+                webhook.send(embed);
+            }
+
+            logger.info("  - Submitted application binary for moderation");
+            FileUtil.zipDirectory(tmpDir, modArchive);
+            logger.info("  - Updated moderation archive.");
+            throw new ModerationException("Binary requires moderation");
+        }
+    }
+
     private void generateWSCBanner(InstalledApp app) throws IOException
     {
         if(config.generateWSCBanner())
@@ -577,7 +665,6 @@ public class RepositoryIndex
         app.getComputedInfo().binarySize = Files.size(binary);
         app.getComputedInfo().iconSize = Files.size(appFiles.resolve("icon.png"));
         app.getComputedInfo().rawSize = FileUtils.sizeOfDirectory(appFiles.toFile());
-        app.getComputedInfo().md5Hash = FileUtil.md5Hash(binary);
         app.getComputedInfo().peripherals = Peripheral.buildHBBList(app.getPeripherals());
 
         // Create subdirectories list
@@ -721,7 +808,7 @@ public class RepositoryIndex
             return;
 
         WebhookEmbed embed = new WebhookEmbedBuilder()
-                .setTitle(new WebhookEmbed.EmbedTitle(title, null))
+                .setTitle(new EmbedTitle(title, null))
                 .setDescription(description)
                 .build();
         WebhookMessage message = new WebhookMessageBuilder()

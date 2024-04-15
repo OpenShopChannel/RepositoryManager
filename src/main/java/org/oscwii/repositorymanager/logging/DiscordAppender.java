@@ -40,5 +40,5 @@ public class DiscordAppender extends AbstractAppender
         webhook.send(message);
     }
 
-    private static final String ERROR_AVATAR = "https://cdn.discordapp.com/avatars/1136222166749302864/ab15048a5c7b9a93d6ab42d47cf0a377.webp";
+    public static final String ERROR_AVATAR = "https://cdn.discordapp.com/avatars/1136222166749302864/ab15048a5c7b9a93d6ab42d47cf0a377.webp";
 }

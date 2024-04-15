@@ -25,12 +25,21 @@ public class DiscordWebhookFactory
     {
         if(!config.isLoggingEnabled())
             return null;
-        return createWebhook(config.getCatalogWebhookUrl());
+        return createWebhook(config.catalogWebhookUrl());
+    }
+
+    public WebhookClient modWebhook()
+    {
+        if(!config.isLoggingEnabled())
+            return null;
+        return createWebhook(config.modWebhookUrl());
     }
 
     public WebhookClient logWebhook()
     {
-        return createWebhook(config.getLogWebhookUrl());
+        if(!config.isLoggingEnabled())
+            return null;
+        return createWebhook(config.logWebhookUrl());
     }
 
     private WebhookClient createWebhook(String url)

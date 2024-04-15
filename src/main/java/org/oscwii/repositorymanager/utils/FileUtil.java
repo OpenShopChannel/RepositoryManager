@@ -69,6 +69,7 @@ public class FileUtil
 
     public static void zipDirectory(Path source, Path destination) throws IOException
     {
+        Files.createDirectories(destination.getParent());
         try(Stream<Path> stream = Files.walk(source);
             ZipArchiveOutputStream zos = new ZipArchiveOutputStream(destination))
         {

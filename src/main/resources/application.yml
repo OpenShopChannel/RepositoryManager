@@ -23,6 +23,7 @@ repository-manager:
     enable-logging: false
     catalog-webhook-url: ""
     log-webhook-url: ""
+    mod-webhook-url: ""
   fetch:
     timeout: 60
     user-agent: "RepositoryManager-DEV"
