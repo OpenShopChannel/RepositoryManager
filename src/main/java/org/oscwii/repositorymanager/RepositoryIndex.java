@@ -33,6 +33,7 @@ import org.oscwii.repositorymanager.model.app.OSCMeta;
 import org.oscwii.repositorymanager.model.app.Peripheral;
 import org.oscwii.repositorymanager.model.app.Platform;
 import org.oscwii.repositorymanager.model.app.ShopTitle;
+import org.oscwii.repositorymanager.services.FeaturedAppService;
 import org.oscwii.repositorymanager.sources.SourceDownloader;
 import org.oscwii.repositorymanager.sources.SourceRegistry;
 import org.oscwii.repositorymanager.treatments.TreatmentRegistry;
@@ -41,7 +42,9 @@ import org.oscwii.repositorymanager.utils.AppUtil;
 import org.oscwii.repositorymanager.utils.FileUtil;
 import org.oscwii.repositorymanager.utils.FormatUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.util.FileSystemUtils;
@@ -65,17 +68,21 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
+import static java.util.concurrent.TimeUnit.HOURS;
 
 @Service
 public class RepositoryIndex
 {
     private final AppDAO appDao;
     private final DiscordWebhookFactory discordWebhook;
+    private final FeaturedAppService featuredAppService;
     private final Gson gson;
     private final Logger logger;
     private final RepoManConfig config;
+    private final RepositorySource repoSource;
     private final SourceRegistry sources;
     private final TreatmentRegistry treatments;
+
 
     private List<Category> categories;
     private List<InstalledApp> contents;
@@ -84,15 +91,17 @@ public class RepositoryIndex
     private RepositoryInfo info;
 
     @Autowired
-    public RepositoryIndex(AppDAO appDao, DiscordWebhookFactory discordWebhook, Gson gson,
-                           RepoManConfig config, SourceRegistry sources, TreatmentRegistry treatments,
-                           SimpMessageSendingOperations webSocket)
+    public RepositoryIndex(AppDAO appDao, DiscordWebhookFactory discordWebhook, @Lazy FeaturedAppService featuredAppService, Gson gson,
+                           RepoManConfig config, RepositorySource repoSource, SourceRegistry sources,
+                           TreatmentRegistry treatments, SimpMessageSendingOperations webSocket)
     {
         this.appDao = appDao;
         this.discordWebhook = discordWebhook;
         this.gson = gson;
         this.logger = LogManager.getLogger(RepositoryIndex.class);
         this.config = config;
+        this.featuredAppService = featuredAppService;
+        this.repoSource = repoSource;
         this.sources = sources;
         this.treatments = treatments;
 
@@ -133,6 +142,19 @@ public class RepositoryIndex
         {
             // Ensure the logging level is back to normal
             Configurator.setLevel(logger, Level.INFO);
+        }
+    }
+
+    @Scheduled(fixedDelay = 6, initialDelay = 6, timeUnit = HOURS)
+    public void updateIndex()
+    {
+        repoSource.pull();
+        index(true);
+
+        if(featuredAppService.getFeatured() == null)
+        {
+            // The app has been removed, pick a new one
+            featuredAppService.pickFeaturedApp();
         }
     }
 

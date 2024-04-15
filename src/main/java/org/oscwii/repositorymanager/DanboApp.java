@@ -14,7 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.Optional;
 
@@ -69,15 +68,6 @@ public class DanboApp
                 .addAttribute("git_url", gitUrl.get())
                 .addAttribute("base_url", config.getBaseUrl());
         return "hello_world";
-    }
-
-    // TODO remove debug
-    @GetMapping("/debug")
-    @ResponseBody
-    public String debug()
-    {
-        index.index(true);
-        return "running";
     }
 
     public static void main(String[] args)

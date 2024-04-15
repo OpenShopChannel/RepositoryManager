@@ -1,6 +1,7 @@
 package org.oscwii.repositorymanager.controllers.admin;
 
 import org.oscwii.repositorymanager.RepositoryIndex;
+import org.oscwii.repositorymanager.RepositorySource;
 import org.oscwii.repositorymanager.database.dao.SettingsDAO;
 import org.oscwii.repositorymanager.model.security.Role;
 import org.oscwii.repositorymanager.security.annotations.RequiredRole;
@@ -40,6 +41,7 @@ import java.util.Map;
 public class AdminController extends BaseAdminController
 {
     private final RepositoryIndex index;
+    private final RepositorySource repoSource;
     private final SettingsDAO settingsDao;
     private final SourceRegistry sourceRegistry;
     private final TaskScheduler scheduler;
@@ -47,10 +49,11 @@ public class AdminController extends BaseAdminController
     private boolean runIndex = false;
 
     @Autowired
-    public AdminController(RepositoryIndex index, SettingsDAO settingsDao, SourceRegistry sourceRegistry,
-                           @Qualifier("taskScheduler") TaskScheduler scheduler)
+    public AdminController(RepositoryIndex index, RepositorySource repoSource, SettingsDAO settingsDao,
+                           SourceRegistry sourceRegistry, @Qualifier("taskScheduler") TaskScheduler scheduler)
     {
         this.index = index;
+        this.repoSource = repoSource;
         this.settingsDao = settingsDao;
         this.sourceRegistry = sourceRegistry;
         this.scheduler = scheduler;
@@ -86,13 +89,34 @@ public class AdminController extends BaseAdminController
         return "admin/debug";
     }
 
+    @GetMapping("/debug/{action}")
+    public String debugAction(@PathVariable String action, RedirectAttributes attributes)
+    {
+        switch(action)
+        {
+            case "init_repo":
+                attributes.addFlashAttribute("message", "success:Successfully initialized repository");
+                repoSource.initialize();
+                break;
+            case "pull_repo":
+                attributes.addFlashAttribute("message", "success:Successfully pulled repository");
+                repoSource.pull();
+                break;
+            case "update_index":
+                attributes.addFlashAttribute("message", "success:Successfully updated index");
+                scheduler.schedule(() -> index.index(true), Instant.now());
+        }
+
+        return "admin/debug";
+    }
+
     @GetMapping("/status")
     public String taskStatus()
     {
         if(runIndex)
         {
             this.runIndex = false;
-            scheduler.schedule(() -> index.index(true), Instant.now().plusSeconds(5));
+            scheduler.schedule(index::updateIndex, Instant.now().plusSeconds(5));
         }
 
         return "admin/task_status";
