@@ -5,6 +5,9 @@ import org.apache.logging.log4j.core.appender.AbstractAppender;
 import org.apache.logging.log4j.core.config.Property;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 public class WebSocketAppender extends AbstractAppender
 {
     private final SimpMessageSendingOperations webSocket;
@@ -25,6 +28,15 @@ public class WebSocketAppender extends AbstractAppender
             level = "title";
         else if(message.equals("Finished indexing application manifests"))
             level = "success";
+
+        StringWriter exWriter = new StringWriter();
+        PrintWriter exPrinter = new PrintWriter(exWriter);
+        if(event.getThrown() != null)
+        {
+            event.getThrown().printStackTrace(exPrinter);
+            exPrinter.flush();
+            message += exWriter;
+        }
 
         webSocket.convertAndSend("/logUpdate", new LogLine(message, level));
     }
