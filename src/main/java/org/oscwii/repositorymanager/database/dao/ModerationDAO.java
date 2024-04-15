@@ -42,4 +42,10 @@ public interface ModerationDAO
                 null)
             """)
     void insertEntry(String checksum, String appSlug, Status status);
+
+    @SqlQuery("SELECT * FROM moderated_binaries")
+    List<ModeratedBinary> getAllEntries();
+
+    @SqlQuery("SELECT * FROM moderated_binaries WHERE status = 'PENDING'")
+    List<ModeratedBinary> getPendingEntries();
 }

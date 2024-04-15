@@ -3,6 +3,7 @@ package org.oscwii.repositorymanager.controllers.admin;
 import jakarta.servlet.http.HttpServletRequest;
 import org.oscwii.repositorymanager.config.repoman.RepoManConfig;
 import org.oscwii.repositorymanager.controllers.RepoManController;
+import org.oscwii.repositorymanager.database.dao.ModerationDAO;
 import org.oscwii.repositorymanager.model.security.User;
 import org.oscwii.repositorymanager.security.annotations.RequiredRole;
 import org.oscwii.repositorymanager.services.AuthService;
@@ -17,12 +18,20 @@ public abstract class BaseAdminController extends RepoManController
     @Autowired
     protected AuthService authService;
     @Autowired
+    protected ModerationDAO modDao;
+    @Autowired
     protected RepoManConfig config;
 
     @ModelAttribute("request")
     protected HttpServletRequest getRequest(HttpServletRequest request)
     {
         return request;
+    }
+
+    @ModelAttribute("pendingModeration")
+    protected int getPendingModEntries()
+    {
+        return modDao.getPendingEntries().size();
     }
 
     @ModelAttribute("currentUser")

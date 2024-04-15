@@ -28,7 +28,7 @@
                 <@page title="Home" icon="fa-home" path="/admin"/>
                 <@page title="Debug" icon="fa-bug" path="/admin/debug" required_role="Administrator"/>
             <@category title="Moderation"/>
-                <@page title="Moderation" icon="fa-gavel" path="/admin/moderation" required_role="Moderator" pill=0 pill_plural="pending"/> <!-- TODO -->
+                <@page title="Moderation" icon="fa-gavel" path="/admin/moderation" required_role="Moderator" pill=pendingModeration pill_plural="pending"/>
             <@category title="Repository"/>
                 <@page title="Applications" icon="fa-rectangle-list" path="/admin/apps"/>
             <@category title="System"/>

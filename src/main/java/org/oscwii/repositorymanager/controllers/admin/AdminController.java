@@ -126,7 +126,7 @@ public class AdminController extends BaseAdminController
     @RequiredRole(Role.MODERATOR)
     public String moderation(Model model)
     {
-        model.addAttribute("modEntries", List.of()); // TODO
+        model.addAttribute("modEntries", modDao.getAllEntries());
         return "admin/moderation";
     }
 

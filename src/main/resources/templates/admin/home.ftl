@@ -40,7 +40,7 @@
         <div class="col-6 col-xl-3">
             <div class="card">
                 <h2 class="card-title">Pending Moderation</h2>
-                TODO <!--TODO notifications()["pending_moderation"]-->
+                ${pendingModeration}
             </div>
         </div>
         <div class="col-6 col-xl-3">
