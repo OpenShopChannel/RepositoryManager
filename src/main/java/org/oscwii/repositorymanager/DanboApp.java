@@ -72,6 +72,9 @@ public class DanboApp
 
     public static void main(String[] args)
     {
+        if(System.getProperty("spring.profiles.default") == null)
+            System.setProperty("spring.profiles.default", "prod");
+
         SpringApplication.run(DanboApp.class, args);
     }
 }

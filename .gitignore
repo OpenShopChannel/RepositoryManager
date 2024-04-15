@@ -25,6 +25,9 @@ hs_err_pid*
 # idea
 *.iml
 .idea/
+
+application-staging.yml
+application-dev.yml
 data/
 repository/
 target/
