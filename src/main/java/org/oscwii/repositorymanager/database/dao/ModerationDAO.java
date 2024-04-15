@@ -43,6 +43,15 @@ public interface ModerationDAO
             """)
     void insertEntry(String checksum, String appSlug, Status status);
 
+    @SqlUpdate("""
+            UPDATE moderated_binaries
+            SET status = :status,
+                moderator = :moderator,
+                modified_date = :CURRENT_TIMESTAMP
+            WHERE checksum = :checksum
+            """)
+    void updateEntry(String checksum, Status status, int moderator);
+
     @SqlQuery("SELECT * FROM moderated_binaries")
     List<ModeratedBinary> getAllEntries();
 

@@ -122,14 +122,6 @@ public class AdminController extends BaseAdminController
         return "admin/task_status";
     }
 
-    @GetMapping("/moderation")
-    @RequiredRole(Role.MODERATOR)
-    public String moderation(Model model)
-    {
-        model.addAttribute("modEntries", modDao.getAllEntries());
-        return "admin/moderation";
-    }
-
     @GetMapping("/apps")
     @RequiredRole
     public String apps(Model model)
