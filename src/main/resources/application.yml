@@ -41,6 +41,8 @@ logging:
   level:
     org.springframework: INFO
     org.springframework.context.support.PostProcessorRegistrationDelegate: WARN
+    org.springframework.messaging.simp.broker.SimpleBrokerMessageHandler: ERROR
+    org.springframework.web.SimpLogging: ERROR
     com.github.junrar: ERROR
     # org.springframework.beans: TRACE
     # org.oscwii.repositorymanager.security: TRACE

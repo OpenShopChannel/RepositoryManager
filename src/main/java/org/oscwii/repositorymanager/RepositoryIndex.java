@@ -24,6 +24,7 @@ import org.oscwii.repositorymanager.factory.DiscordWebhookFactory;
 import org.oscwii.repositorymanager.logging.DiscordAppender;
 import org.oscwii.repositorymanager.logging.DiscordMessage;
 import org.oscwii.repositorymanager.logging.IndexTriggeringPolicy;
+import org.oscwii.repositorymanager.logging.WebSocketAppender;
 import org.oscwii.repositorymanager.model.RepositoryInfo;
 import org.oscwii.repositorymanager.model.UpdateLevel;
 import org.oscwii.repositorymanager.model.app.Category;
@@ -40,6 +41,7 @@ import org.oscwii.repositorymanager.utils.AppUtil;
 import org.oscwii.repositorymanager.utils.FileUtil;
 import org.oscwii.repositorymanager.utils.FormatUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.util.FileSystemUtils;
@@ -82,7 +84,9 @@ public class RepositoryIndex
     private RepositoryInfo info;
 
     @Autowired
-    public RepositoryIndex(AppDAO appDao, DiscordWebhookFactory discordWebhook, Gson gson, RepoManConfig config, SourceRegistry sources, TreatmentRegistry treatments)
+    public RepositoryIndex(AppDAO appDao, DiscordWebhookFactory discordWebhook, Gson gson,
+                           RepoManConfig config, SourceRegistry sources, TreatmentRegistry treatments,
+                           SimpMessageSendingOperations webSocket)
     {
         this.appDao = appDao;
         this.discordWebhook = discordWebhook;
@@ -97,13 +101,19 @@ public class RepositoryIndex
         this.contents = Collections.emptyList();
         this.platforms = Collections.emptyMap();
 
+        // Register web status appender
+        var loggerImpl = (org.apache.logging.log4j.core.Logger) logger;
+        WebSocketAppender webSocketAppender = new WebSocketAppender(webSocket);
+        webSocketAppender.start();
+        loggerImpl.addAppender(webSocketAppender);
+
         // Register the logger appender to notify Discord
         // if we have a valid webhook configured
         if(config.discordConfig.isLoggingEnabled())
         {
             DiscordAppender appender = new DiscordAppender(discordWebhook);
             appender.start();
-            ((org.apache.logging.log4j.core.Logger) logger).addAppender(appender);
+            loggerImpl.addAppender(appender);
         }
     }
 

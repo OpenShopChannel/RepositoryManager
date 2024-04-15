@@ -16,7 +16,7 @@
     <div class="card">
         <div class="row row-eq-spacing justify-content-center" style="margin-top: unset; margin-bottom: unset;">
             <div class="btn-group btn-group-lg" role="group" aria-label="Basic example">
-                <a href="/admin/action" class="btn btn-success" type="button">Update</a>
+                <a href="/admin/action/update" class="btn btn-success" type="button">Update</a>
                 <a href="/admin/settings" class="btn" type="button">Settings</a>
             </div>
         </div>

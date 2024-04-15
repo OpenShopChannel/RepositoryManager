@@ -13,7 +13,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,16 +31,8 @@ public class UserController extends BaseAdminController
     private RepoManSecurityConfig securityConfig;
 
     @GetMapping
-    public String users(Model model, @ModelAttribute("message") String message)
+    public String users(Model model)
     {
-        if(!message.isEmpty())
-        {
-            String[] split = message.split(":", 2);
-            model.addAttribute("messages", Map.of(split[1], split[0]));
-        }
-        else
-            model.addAttribute("messages", Map.of());
-
         model.addAttribute("users", authService.getUsers());
         return "admin/users";
     }
@@ -101,16 +92,8 @@ public class UserController extends BaseAdminController
     }
 
     @GetMapping("/view/{id}")
-    public String details(@PathVariable int id, Model model, @ModelAttribute("message") String message)
+    public String details(@PathVariable int id, Model model)
     {
-        if(!message.isEmpty())
-        {
-            String[] split = message.split(":", 2);
-            model.addAttribute("messages", Map.of(split[1], split[0]));
-        }
-        else
-            model.addAttribute("messages", Map.of());
-
         model.addAttribute("user", authService.getUser(id));
         return "admin/user/details";
     }

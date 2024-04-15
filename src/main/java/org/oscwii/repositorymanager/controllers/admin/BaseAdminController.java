@@ -9,6 +9,8 @@ import org.oscwii.repositorymanager.services.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
+import java.util.Map;
+
 @RequiredRole // GUEST = Logged in
 public abstract class BaseAdminController extends RepoManController
 {
@@ -31,5 +33,17 @@ public abstract class BaseAdminController extends RepoManController
             return null;
 
         return (User) authService.loadUserByUsername(username);
+    }
+
+    @ModelAttribute("messages")
+    protected Map<String, String> getMessages(@ModelAttribute("message") String message)
+    {
+        if(!message.isEmpty())
+        {
+            String[] split = message.split(":", 2);
+            return Map.of(split[1], split[0]);
+        }
+        else
+            return Map.of();
     }
 }

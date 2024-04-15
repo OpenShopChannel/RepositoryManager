@@ -8,8 +8,10 @@ import org.oscwii.repositorymanager.sources.SourceRegistry;
 import org.oscwii.repositorymanager.utils.FileUtil;
 import org.oscwii.repositorymanager.utils.FormatUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.MultiValueMap;
@@ -18,12 +20,14 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
@@ -35,12 +39,22 @@ import java.util.Map;
 @RequiredRole(Role.ADMINISTRATOR)
 public class AdminController extends BaseAdminController
 {
+    private final RepositoryIndex index;
+    private final SettingsDAO settingsDao;
+    private final SourceRegistry sourceRegistry;
+    private final TaskScheduler scheduler;
+
+    private boolean runIndex = false;
+
     @Autowired
-    private RepositoryIndex index;
-    @Autowired
-    private SettingsDAO settingsDao;
-    @Autowired
-    private SourceRegistry sourceRegistry;
+    public AdminController(RepositoryIndex index, SettingsDAO settingsDao, SourceRegistry sourceRegistry,
+                           @Qualifier("taskScheduler") TaskScheduler scheduler)
+    {
+        this.index = index;
+        this.settingsDao = settingsDao;
+        this.sourceRegistry = sourceRegistry;
+        this.scheduler = scheduler;
+    }
 
     @GetMapping
     @RequiredRole
@@ -51,10 +65,37 @@ public class AdminController extends BaseAdminController
         return "admin/home";
     }
 
+    @GetMapping("/action/{action}")
+    public String action(@PathVariable String action, RedirectAttributes attributes)
+    {
+        //noinspection SwitchStatementWithTooFewBranches
+        switch(action)
+        {
+            case "update":
+                this.runIndex = true;
+                attributes.addFlashAttribute("message", "info:Scheduled immediate index update.");
+                return "redirect:/admin/status";
+            default:
+                return "redirect:/admin";
+        }
+    }
+
     @GetMapping("/debug")
     public String debug()
     {
         return "admin/debug";
+    }
+
+    @GetMapping("/status")
+    public String taskStatus()
+    {
+        if(runIndex)
+        {
+            this.runIndex = false;
+            scheduler.schedule(() -> index.index(true), Instant.now().plusSeconds(5));
+        }
+
+        return "admin/task_status";
     }
 
     @GetMapping("/moderation")
