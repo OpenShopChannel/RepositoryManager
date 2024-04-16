@@ -276,17 +276,15 @@ public class RepositoryIndex
 
         for(File meta : manifests)
         {
+            InstalledApp app = null;
             logger.info("Loading manifest \"{}\" for processing ({}/{})",
                     meta.getName(), ++index, manifests.size());
 
             try
             {
-                InstalledApp app = processMeta(meta, updateApps);
+                app = processMeta(meta, updateApps);
                 contents.add(requireNonNull(app));
                 indexed++;
-
-                // Notify if necessary
-                determineUpdateLevel(app);
             }
             catch(AppFilesMissingException ignored)
             {
@@ -313,7 +311,15 @@ public class RepositoryIndex
             {
                 handleApplicationUpdateFailure(meta, e);
                 errors++;
+
+                // Try to use the old version
+                app = getApp(meta.getName().replace(".oscmeta", ""));
+                if(app == null)
+                    continue;
             }
+
+            // Notify if necessary
+            determineUpdateLevel(app);
         }
 
         this.contents = contents;
