@@ -91,7 +91,7 @@ public class RepositoryIndex
     private final SourceRegistry sources;
     private final TreatmentRegistry treatments;
 
-
+    private boolean logMissingFiles = false;
     private List<Category> categories;
     private List<InstalledApp> contents;
     private Map<String, Platform> platforms;
@@ -142,15 +142,17 @@ public class RepositoryIndex
             Configurator.setLevel(logger, Level.ERROR);
             index(false);
         }
-        catch(AppFilesMissingException ignored)
-        {
-            Configurator.setLevel(logger, Level.INFO);
-            logger.info("You might want to trigger an update from your admin panel.");
-        }
         finally
         {
             // Ensure the logging level is back to normal
             Configurator.setLevel(logger, Level.INFO);
+
+            if(logMissingFiles)
+            {
+                this.logMissingFiles = false;
+                logger.info("Some app files are missing, they were skipped from indexing.");
+                logger.info("You may want to force an update.");
+            }
         }
     }
 
@@ -286,11 +288,9 @@ public class RepositoryIndex
                 // Notify if necessary
                 determineUpdateLevel(app);
             }
-            catch(AppFilesMissingException e)
+            catch(AppFilesMissingException ignored)
             {
-                logger.error("Some app files are missing. New instance?");
-                logger.error("Cancelling initial indexing...");
-                throw e;
+                this.logMissingFiles = true;
             }
             catch(ModerationException e)
             {
@@ -420,10 +420,7 @@ public class RepositoryIndex
         if(!updateApp)
         {
             if(Files.notExists(app.getAppFilesPath()))
-            {
-                logger.error("Application files for {} are missing!", app);
                 throw new AppFilesMissingException();
-            }
 
             checkRequiredContents(app, app.getDataPath());
             checkModerationStatus(app, app.getDataPath());
