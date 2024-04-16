@@ -73,6 +73,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
+import static java.util.Objects.requireNonNullElse;
 import static java.util.concurrent.TimeUnit.HOURS;
 import static org.oscwii.repositorymanager.logging.DiscordAppender.ERROR_AVATAR;
 
@@ -629,11 +630,11 @@ public class RepositoryIndex
         logger.info("- Computing information");
         Element root = metaxml.getRootElement();
 
-        app.getMetaXml().name = root.elementText("name");
-        app.getMetaXml().coder = root.elementText("coder");
-        app.getMetaXml().version = root.elementText("version");
-        app.getMetaXml().shortDesc = root.elementText("short_description");
-        app.getMetaXml().longDesc = root.elementText("long_description");
+        app.getMetaXml().name = requireNonNullElse(root.elementText("name"), app.getMeta().name());
+        app.getMetaXml().coder = requireNonNullElse(root.elementText("coder"), app.getMeta().author());
+        app.getMetaXml().version = requireNonNullElse(root.elementText("version"), "Unknown");
+        app.getMetaXml().shortDesc = requireNonNullElse(root.elementText("short_description"), "");
+        app.getMetaXml().longDesc = requireNonNullElse(root.elementText("long_description"), "");
 
         // Determine release date
         String dateText = root.elementText("release_date");
