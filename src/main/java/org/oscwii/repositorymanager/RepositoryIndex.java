@@ -576,13 +576,6 @@ public class RepositoryIndex
         }
         else
         {
-            if(appDao.appExists(app.getSlug()).isEmpty())
-            {
-                // App not in db = first run, but we have app files?
-                throw new IllegalStateException("Could not verify moderation status for an unregistered app. " +
-                        "This app requires an update.");
-            }
-
             ModeratedBinary modEntry = new ModeratedBinary(hash, app.getSlug());
             modDao.insertEntry(modEntry);
 
