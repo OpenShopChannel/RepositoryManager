@@ -276,7 +276,7 @@ public class RepositoryIndex
 
         for(File meta : manifests)
         {
-            InstalledApp app = null;
+            InstalledApp app;
             logger.info("Loading manifest \"{}\" for processing ({}/{})",
                     meta.getName(), ++index, manifests.size());
 
@@ -289,6 +289,7 @@ public class RepositoryIndex
             catch(AppFilesMissingException ignored)
             {
                 this.logMissingFiles = true;
+                continue;
             }
             catch(ModerationException e)
             {
@@ -306,6 +307,8 @@ public class RepositoryIndex
                         webhook.send(message);
                     }
                 }
+
+                continue;
             }
             catch(Exception e)
             {
