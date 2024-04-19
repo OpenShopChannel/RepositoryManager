@@ -194,6 +194,28 @@ public class RepositoryIndex
         IndexTriggeringPolicy.INSTANCE.trigger();
     }
 
+    public void generateShopData()
+    {
+        logger.info("Generating Shop Data...");
+
+        for(InstalledApp app : contents)
+        {
+            logger.debug("- Processing {}...", app);
+
+            try
+            {
+                checkRequiredContents(app, app.getDataPath());
+                generateWSCBanner(app, true);
+            }
+            catch(Exception e)
+            {
+                logger.error("Failed to generate shop data for {}:", app, e);
+            }
+        }
+
+        logger.info("Finished generating shop data for all apps!");
+    }
+
     public List<InstalledApp> getContents()
     {
         return contents;
@@ -479,7 +501,7 @@ public class RepositoryIndex
             FileUtil.zipDirectory(appDir, appArchive);
 
             // Generate WSC Banner
-            generateWSCBanner(app);
+            generateWSCBanner(app, false);
         }
         catch(IOException e)
         {
@@ -526,9 +548,10 @@ public class RepositoryIndex
         if(Files.notExists(appDir.resolve("icon.png")))
         {
             logger.info("- icon.png is missing. Using placeholder instead.");
-            InputStream placeholder = requireNonNull(getClass().getResourceAsStream(PLACEHOLDER_ICON));
-            Files.copy(placeholder, appDir.resolve("icon.png"));
-            placeholder.close();
+            try(InputStream placeholder = requireNonNull(getClass().getResourceAsStream(PLACEHOLDER_ICON)))
+            {
+                Files.copy(placeholder, appDir.resolve("icon.png"));
+            }
         }
 
         // Check meta.xml exists
@@ -605,11 +628,12 @@ public class RepositoryIndex
         }
     }
 
-    private void generateWSCBanner(InstalledApp app) throws IOException
+    private void generateWSCBanner(InstalledApp app, boolean silent) throws IOException
     {
         if(config.generateWSCBanner())
         {
-            logger.info("- Creating banner for Wii Shop Channel");
+            if(!silent)
+                logger.info("- Creating banner for Wii Shop Channel");
             Process proc = Runtime.getRuntime().exec(config.getBannerGeneratorPath() +
                     " data/contents/ " + app.getSlug());
             try(BufferedReader reader = proc.errorReader())
@@ -664,9 +688,9 @@ public class RepositoryIndex
 
         app.getComputedInfo().archiveHash = FileUtil.md5Hash(appArchive);
         app.getComputedInfo().archiveSize = Files.size(appArchive);
-        app.getComputedInfo().binarySize = Files.size(binary);
-        app.getComputedInfo().iconSize = Files.size(appFiles.resolve("icon.png"));
-        app.getComputedInfo().rawSize = FileUtils.sizeOfDirectory(appFiles.toFile());
+        app.getComputedInfo().binarySize  = Files.size(binary);
+        app.getComputedInfo().iconSize    = Files.size(appFiles.resolve("icon.png"));
+        app.getComputedInfo().rawSize     = FileUtils.sizeOfDirectory(appFiles.toFile());
         app.getComputedInfo().peripherals = Peripheral.buildHBBList(app.getPeripherals());
 
         // Create subdirectories list

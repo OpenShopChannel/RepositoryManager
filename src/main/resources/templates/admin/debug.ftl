@@ -16,6 +16,7 @@
             <a href="debug/init_repo" class="btn btn-danger" role="button">Initialize Repository</a>
             <a href="debug/pull_repo" class="btn" role="button">Pull Remote</a>
             <a href="debug/update_index" class="btn" role="button">Update Index</a>
+            <a href="debug/update_shop" class="btn" role="button">Generate Shop Data</a>
         </div>
     </div>
 </@base.content>

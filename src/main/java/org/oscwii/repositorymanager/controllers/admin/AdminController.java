@@ -105,9 +105,13 @@ public class AdminController extends BaseAdminController
             case "update_index":
                 attributes.addFlashAttribute("message", "success:Successfully updated index");
                 scheduler.schedule(() -> index.index(true), Instant.now());
+                break;
+            case "update_shop":
+                attributes.addFlashAttribute("message", "success:Successfully generated shop data");
+                scheduler.schedule(index::generateShopData, Instant.now());
         }
 
-        return "admin/debug";
+        return "redirect:/admin/debug";
     }
 
     @GetMapping("/status")
