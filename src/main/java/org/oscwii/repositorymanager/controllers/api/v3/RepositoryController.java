@@ -3,7 +3,7 @@ package org.oscwii.repositorymanager.controllers.api.v3;
 import org.oscwii.repositorymanager.controllers.RepoManController;
 import org.oscwii.repositorymanager.database.dao.SettingsDAO;
 import org.oscwii.repositorymanager.model.RepositoryInfo;
-import org.oscwii.repositorymanager.model.api.App;
+import org.oscwii.repositorymanager.model.api.PublishedApp;
 import org.oscwii.repositorymanager.model.app.InstalledApp;
 import org.oscwii.repositorymanager.services.FeaturedAppService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,15 +24,17 @@ import java.util.Optional;
 public class RepositoryController extends RepoManController
 {
     private final FeaturedAppService featuredApp;
+    private final SettingsDAO settingsDao;
 
     @Autowired
-    public RepositoryController(FeaturedAppService featuredApp)
+    public RepositoryController(FeaturedAppService featuredApp, SettingsDAO settingsDao)
     {
         this.featuredApp = featuredApp;
+        this.settingsDao = settingsDao;
     }
 
     @GetMapping("/information")
-    public ResponseEntity<Map<String, Object>> getInformation(SettingsDAO settingsDao)
+    public ResponseEntity<Map<String, Object>> getInformation()
     {
         Optional<String> gitUrl = settingsDao.getSetting("git_url");
         RepositoryInfo info = index.getInfo();
@@ -50,21 +52,21 @@ public class RepositoryController extends RepoManController
     }
 
     @GetMapping("/contents")
-    public ResponseEntity<List<App>> getContents()
+    public ResponseEntity<List<PublishedApp>> getContents()
     {
-        List<App> apps = new ArrayList<>(index.getContents().size());
+        List<PublishedApp> apps = new ArrayList<>(index.getContents().size());
         for(InstalledApp installedApp : index.getContents())
-            apps.add(new App(installedApp));
+            apps.add(new PublishedApp(installedApp));
 
         return ResponseEntity.ok(apps);
     }
 
     @GetMapping("/featured-app")
-    public ResponseEntity<App> getFeaturedApp()
+    public ResponseEntity<PublishedApp> getFeaturedApp()
     {
         InstalledApp app = featuredApp.getFeatured();
         if(app == null)
             return ResponseEntity.notFound().build();
-        return ResponseEntity.ok(new App(app));
+        return ResponseEntity.ok(new PublishedApp(app));
     }
 }

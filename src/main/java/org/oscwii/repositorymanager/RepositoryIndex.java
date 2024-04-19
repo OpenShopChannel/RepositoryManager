@@ -551,7 +551,7 @@ public class RepositoryIndex
         Path appFilesDir = tmpDir.resolve("apps").resolve(app.getSlug());
         Path binary = appFilesDir.resolve("boot." + app.getComputedInfo().packageType);
         String hash = FileUtil.md5Hash(binary);
-        app.getComputedInfo().md5Hash = hash;
+        app.getComputedInfo().binaryHash = hash;
 
         logger.info("- Checking moderation status");
         logger.info("  - Binary checksum: {}", hash);
@@ -659,6 +659,7 @@ public class RepositoryIndex
 
         Path binary = appFiles.resolve("boot." + app.getComputedInfo().packageType);
 
+        app.getComputedInfo().archiveHash = FileUtil.md5Hash(appArchive);
         app.getComputedInfo().archiveSize = Files.size(appArchive);
         app.getComputedInfo().binarySize = Files.size(binary);
         app.getComputedInfo().iconSize = Files.size(appFiles.resolve("icon.png"));

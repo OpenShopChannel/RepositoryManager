@@ -97,7 +97,7 @@ public class InstalledApp
             return UpdateLevel.FIRST_RUN;
         if(other.computedInfo.rawSize != this.computedInfo.rawSize)
             return UpdateLevel.MODIFIED;
-        else if(!other.computedInfo.md5Hash.equals(this.computedInfo.md5Hash))
+        else if(!other.computedInfo.binaryHash.equals(this.computedInfo.binaryHash))
             return UpdateLevel.NEW_BINARY;
         else if(!other.metaXml.version.equals(this.metaXml.version))
             return UpdateLevel.NEW_VERSION;
@@ -129,7 +129,7 @@ public class InstalledApp
         public int releaseDate;
         public List<String> subdirectories;
         public long archiveSize, binarySize, iconSize, rawSize;
-        public String packageType, md5Hash, peripherals;
+        public String packageType, archiveHash, binaryHash, peripherals;
 
         @Override
         public String toString()
@@ -142,7 +142,8 @@ public class InstalledApp
                     ", iconSize=" + iconSize +
                     ", rawSize=" + rawSize +
                     ", packageType='" + packageType + '\'' +
-                    ", md5Hash='" + md5Hash + '\'' +
+                    ", archiveHash='" + archiveHash + '\'' +
+                    ", binaryHash='" + binaryHash + '\'' +
                     ", peripherals='" + peripherals + '\'' +
                     '}';
         }
@@ -165,16 +166,6 @@ public class InstalledApp
         public String version()
         {
             return version;
-        }
-
-        public String shortDesc()
-        {
-            return shortDesc;
-        }
-
-        public String longDesc()
-        {
-            return longDesc;
         }
 
         @Override
