@@ -684,8 +684,6 @@ public class RepositoryIndex
                 catch(ParseException ignored) {}
             }
         }
-        else
-            app.getComputedInfo().releaseDate = 0;
 
         Path binary = appFiles.resolve("boot." + app.getComputedInfo().packageType);
 

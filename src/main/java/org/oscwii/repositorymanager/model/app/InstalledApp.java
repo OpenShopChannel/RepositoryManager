@@ -126,7 +126,7 @@ public class InstalledApp
 
     public static class IndexComputedInfo
     {
-        public int releaseDate;
+        public int releaseDate = 1163980800; // November 20th, 2006;
         public List<String> subdirectories;
         public long archiveSize, binarySize, iconSize, rawSize, shopBannerSize;
         public String packageType, archiveHash, binaryHash, peripherals;
