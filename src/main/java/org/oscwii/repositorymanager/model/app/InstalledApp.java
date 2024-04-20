@@ -128,7 +128,7 @@ public class InstalledApp
     {
         public int releaseDate;
         public List<String> subdirectories;
-        public long archiveSize, binarySize, iconSize, rawSize;
+        public long archiveSize, binarySize, iconSize, rawSize, shopBannerSize;
         public String packageType, archiveHash, binaryHash, peripherals;
 
         @Override
@@ -141,6 +141,7 @@ public class InstalledApp
                     ", binarySize=" + binarySize +
                     ", iconSize=" + iconSize +
                     ", rawSize=" + rawSize +
+                    ", shopBannerSize=" + shopBannerSize +
                     ", packageType='" + packageType + '\'' +
                     ", archiveHash='" + archiveHash + '\'' +
                     ", binaryHash='" + binaryHash + '\'' +

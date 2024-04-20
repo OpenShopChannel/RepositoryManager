@@ -4,7 +4,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
-import org.oscwii.repositorymanager.config.repoman.RepoManSecurityConfig;
+import org.oscwii.repositorymanager.config.repoman.SecurityConfig;
 import org.oscwii.repositorymanager.model.security.DummyUser;
 import org.oscwii.repositorymanager.model.security.PasswordToken;
 import org.oscwii.repositorymanager.model.security.Role;
@@ -38,10 +38,10 @@ import static org.springframework.security.web.WebAttributes.AUTHENTICATION_EXCE
 public class SecurityController
 {
     private final AuthService authService;
-    private final RepoManSecurityConfig config;
+    private final SecurityConfig config;
 
     @Autowired
-    public SecurityController(AuthService authService, RepoManSecurityConfig config)
+    public SecurityController(AuthService authService, SecurityConfig config)
     {
         this.authService = authService;
         this.config = config;

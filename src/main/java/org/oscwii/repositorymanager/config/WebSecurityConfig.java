@@ -1,6 +1,6 @@
 package org.oscwii.repositorymanager.config;
 
-import org.oscwii.repositorymanager.config.repoman.RepoManSecurityConfig;
+import org.oscwii.repositorymanager.config.repoman.SecurityConfig;
 import org.oscwii.repositorymanager.security.RepoManAuthenticationProvider;
 import org.oscwii.repositorymanager.security.RepoManAuthorizationManager;
 import org.oscwii.repositorymanager.services.AuthService;
@@ -27,10 +27,10 @@ import org.springframework.web.filter.CorsFilter;
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = false)
-public class SecurityConfig
+public class WebSecurityConfig
 {
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, RepoManSecurityConfig config) throws Exception
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, SecurityConfig config) throws Exception
     {
         http
                 .authorizeHttpRequests(requests -> requests

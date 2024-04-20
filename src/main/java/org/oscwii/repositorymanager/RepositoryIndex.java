@@ -53,7 +53,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.util.FileSystemUtils;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -205,7 +204,9 @@ public class RepositoryIndex
             try
             {
                 checkRequiredContents(app, app.getDataPath());
-                generateWSCBanner(app, true);
+                generateWSCBanner(app);
+                Path bannerOut = config.shopConfig.bannerOutputPath().resolve(app.getTitleInfo().getTitleId());
+                app.getComputedInfo().shopBannerSize = FileUtils.sizeOfDirectory(bannerOut.toFile());
             }
             catch(Exception e)
             {
@@ -501,7 +502,11 @@ public class RepositoryIndex
             FileUtil.zipDirectory(appDir, appArchive);
 
             // Generate WSC Banner
-            generateWSCBanner(app, false);
+            if(config.shopConfig.generateBanner())
+            {
+                logger.info("- Creating banner for Wii Shop Channel");
+                generateWSCBanner(app);
+            }
         }
         catch(IOException e)
         {
@@ -628,25 +633,23 @@ public class RepositoryIndex
         }
     }
 
-    private void generateWSCBanner(InstalledApp app, boolean silent) throws IOException
+    private void generateWSCBanner(InstalledApp app) throws IOException
     {
-        if(config.generateWSCBanner())
-        {
-            if(!silent)
-                logger.info("- Creating banner for Wii Shop Channel");
-            Process proc = Runtime.getRuntime().exec(new String[]{config.getBannerGeneratorPath().toString(),
-                    "data/contents/", app.getSlug()});
-            try(BufferedReader reader = proc.errorReader())
-            {
-                int exitCode = proc.waitFor();
-                if(exitCode != 0)
-                    throw new QuietException("Failure in creating banner: " + reader.readLine());
-            }
-            catch(InterruptedException e)
-            {
-                throw new QuietException("Banner creation Was interrupted", e);
-            }
-        }
+        Path generator = config.shopConfig.bannerGeneratorPath();
+        Path workingDir = generator.getParent();
+        Path contentsDir = Path.of("data", "contents").toAbsolutePath();
+
+        // Generate the banner
+        AppUtil.generateBanner(app, logger, generator, contentsDir, workingDir);
+
+        // Calculate size for banner
+        Path bannerOut = workingDir.resolve("out").resolve(app.getTitleInfo().getTitleId());
+        app.getComputedInfo().shopBannerSize = FileUtils.sizeOfDirectory(bannerOut.toFile());
+
+        // Move the banner output
+        Path outputPath = config.shopConfig.bannerOutputPath();
+        FileSystemUtils.deleteRecursively(outputPath.resolve(app.getTitleInfo().getTitleId()));
+        FileUtils.moveDirectoryToDirectory(bannerOut.toFile(), outputPath.toFile(), true);
     }
 
     private void loadAppInformation(InstalledApp app, Path appArchive) throws IOException
@@ -711,6 +714,12 @@ public class RepositoryIndex
         // Check the app has a TID assigned
         assignTID(app, shopTitle);
         app.setTitleInfo(shopTitle);
+
+        if(app.getComputedInfo().shopBannerSize == 0)
+        {
+            Path bannerOut = config.shopConfig.bannerOutputPath().resolve(app.getTitleInfo().getTitleId());
+            app.getComputedInfo().shopBannerSize = FileUtils.sizeOfDirectory(bannerOut.toFile());
+        }
     }
 
     private Document parseMetaXml(Path file) throws IOException

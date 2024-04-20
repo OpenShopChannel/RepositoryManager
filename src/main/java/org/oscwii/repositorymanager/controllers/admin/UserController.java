@@ -1,7 +1,7 @@
 package org.oscwii.repositorymanager.controllers.admin;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.oscwii.repositorymanager.config.repoman.RepoManSecurityConfig;
+import org.oscwii.repositorymanager.config.repoman.SecurityConfig;
 import org.oscwii.repositorymanager.model.security.DummyUser;
 import org.oscwii.repositorymanager.model.security.Role;
 import org.oscwii.repositorymanager.model.security.User;
@@ -28,7 +28,7 @@ import java.util.Map;
 public class UserController extends BaseAdminController
 {
     @Autowired
-    private RepoManSecurityConfig securityConfig;
+    private SecurityConfig securityConfig;
 
     @GetMapping
     public String users(Model model)

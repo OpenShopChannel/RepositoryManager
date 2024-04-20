@@ -17,8 +17,6 @@ repository-manager:
   base-url: "http://localhost:8080"
   default-platform: "wii"
   repo-dir: "repository"
-  generate-wsc-banner: false
-  banner-generator-path: "BannerGenerator"
   discord:
     enable-logging: false
     catalog-webhook-url: ""
@@ -37,6 +35,10 @@ repository-manager:
     allow-registration: false
     protected-users: [1]
     secret-key: "ChangeMe"
+  shop:
+    generate-banner: false
+    banner-generator-path: "BannerGenerator"
+    banner-output-path: "data/titles/"
 
 logging:
   level:

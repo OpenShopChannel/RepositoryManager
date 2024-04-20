@@ -16,9 +16,6 @@ public class RepoManConfig
     private String defaultPlatform;
     private Path repoDir;
 
-    private boolean generateWSCBanner;
-    private Path bannerGeneratorPath;
-
     @NestedConfigurationProperty
     public DiscordConfig discordConfig;
     @NestedConfigurationProperty
@@ -26,16 +23,19 @@ public class RepoManConfig
     @NestedConfigurationProperty
     public MailConfig mailConfig;
     @NestedConfigurationProperty
-    public RepoManSecurityConfig securityConfig;
+    public SecurityConfig securityConfig;
+    @NestedConfigurationProperty
+    public ShopConfig shopConfig;
 
     @Autowired
     public RepoManConfig(DiscordConfig discordConfig, FetchConfig fetchConfig, MailConfig mailConfig,
-                         RepoManSecurityConfig securityConfig)
+                         SecurityConfig securityConfig, ShopConfig shopConfig)
     {
         this.discordConfig = discordConfig;
         this.fetchConfig = fetchConfig;
         this.mailConfig = mailConfig;
         this.securityConfig = securityConfig;
+        this.shopConfig = shopConfig;
     }
 
     public String getBaseUrl()
@@ -67,25 +67,5 @@ public class RepoManConfig
     public void setRepoDir(Path repoDir)
     {
         this.repoDir = repoDir;
-    }
-
-    public boolean generateWSCBanner()
-    {
-        return generateWSCBanner;
-    }
-
-    public void setGenerateWSCBanner(boolean generateWSCBanner)
-    {
-        this.generateWSCBanner = generateWSCBanner;
-    }
-
-    public Path getBannerGeneratorPath()
-    {
-        return bannerGeneratorPath;
-    }
-
-    public void setBannerGeneratorPath(Path bannerGeneratorPath)
-    {
-        this.bannerGeneratorPath = bannerGeneratorPath;
     }
 }

@@ -53,11 +53,12 @@ public record PublishedApp(String slug, String name, String author, String categ
     }
 
     @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-    public record ShopInfo(String titleId, int titleVersion)
+    public record ShopInfo(long bannerSize, String titleId, int titleVersion)
     {
         public ShopInfo(InstalledApp app)
         {
-            this(app.getTitleInfo().getTitleId(), app.getTitleInfo().getVersion());
+            this(app.getComputedInfo().shopBannerSize, app.getTitleInfo().getTitleId(),
+                    app.getTitleInfo().getVersion());
         }
     }
 
