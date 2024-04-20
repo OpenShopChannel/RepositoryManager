@@ -18,7 +18,7 @@
         <div class="box">
             <form method="post" action="">
                 <h1 class="title has-text-centered">
-                    Welcome to Open Shop Channel's Repository Manager! <small>${version}</small>
+                    Welcome to Open Shop Channel's Repository Manager! <small>${version?truncate_c(7, "")}</small>
                 </h1>
                 <h2 class="subtitle has-text-centered">First time set-up</h2>
 
