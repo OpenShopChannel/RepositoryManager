@@ -634,8 +634,8 @@ public class RepositoryIndex
         {
             if(!silent)
                 logger.info("- Creating banner for Wii Shop Channel");
-            Process proc = Runtime.getRuntime().exec(config.getBannerGeneratorPath() +
-                    " data/contents/ " + app.getSlug());
+            Process proc = Runtime.getRuntime().exec(new String[]{config.getBannerGeneratorPath().toString(),
+                    "data/contents/", app.getSlug()});
             try(BufferedReader reader = proc.errorReader())
             {
                 int exitCode = proc.waitFor();
