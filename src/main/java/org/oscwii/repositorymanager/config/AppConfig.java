@@ -2,6 +2,8 @@ package org.oscwii.repositorymanager.config;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import io.sentry.okhttp.SentryOkHttpEventListener;
+import io.sentry.okhttp.SentryOkHttpInterceptor;
 import okhttp3.OkHttpClient;
 import org.oscwii.repositorymanager.config.repoman.FetchConfig;
 import org.oscwii.repositorymanager.model.app.OSCMeta;
@@ -31,6 +33,8 @@ public class AppConfig
     public OkHttpClient httpClient(FetchConfig config)
     {
         return new OkHttpClient.Builder()
+                .addInterceptor(new SentryOkHttpInterceptor())
+                .eventListener(new SentryOkHttpEventListener())
                 .connectTimeout(config.getTimeout(), TimeUnit.SECONDS)
                 .readTimeout(config.getTimeout(), TimeUnit.SECONDS)
                 .build();

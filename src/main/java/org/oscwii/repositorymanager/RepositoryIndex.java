@@ -8,6 +8,9 @@ import club.minnced.discord.webhook.send.WebhookMessage;
 import club.minnced.discord.webhook.send.WebhookMessageBuilder;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import io.sentry.ISpan;
+import io.sentry.MeasurementUnit;
+import io.sentry.Sentry;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -367,6 +370,15 @@ public class RepositoryIndex
         {
             logger.info("{}: {}", entry.getKey(), entry.getValue());
             discordStr.append(String.format("**%s:** %s\n", entry.getKey(), entry.getValue()));
+        }
+
+        // Send Sentry metrics
+        ISpan span = Sentry.getSpan();
+        if(span != null)
+        {
+            span.setMeasurement("indexed_applications", info[1]);
+            span.setMeasurement("index_errors", info[2]);
+            span.setMeasurement("index_completion_time", elapsed, MeasurementUnit.Duration.SECOND);
         }
 
         logger.info(new DiscordMessage("** INDEX SUMMARY **", "Index Summary", discordStr.toString()));

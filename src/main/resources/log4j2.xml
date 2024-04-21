@@ -6,12 +6,9 @@
             <PatternLayout disableAnsi="false" pattern="[%d{dd-MM-YYYY HH:mm:ss}] [%style{%t}{bright,cyan}] [%style{%c{1}}{green}] [%level] - %msg%n" />
         </Console>
 
-        <!-- Sentry -->
-        <Sentry name="Sentry" />
-
         <!-- Index logging -->
         <RollingRandomAccessFile name="IndexFile" fileName="logs/latest.log" filePattern="logs/index-%d{dd-MM-YYYY-HH-mm-ss}-%i.log">
-            <PatternLayout pattern="[%d{dd-MM-YYYY HH:mm:ss}] [%level] - %msg%n" />
+            <PatternLayout pattern="[%d{dd-MM-YYYY HH:mm:ss}] [%level] %msg%n" />
 
             <DefaultRolloverStrategy>
                 <Delete basePath="logs/" maxDepth="2">
@@ -29,7 +26,6 @@
     <Loggers>
         <Root level="trace">
             <AppenderRef ref="Console" level="info" />
-            <AppenderRef ref="Sentry" level="error" />
         </Root>
 
         <Logger name="org.oscwii.repositorymanager.RepositoryIndex" level="info">

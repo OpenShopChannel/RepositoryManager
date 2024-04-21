@@ -18,7 +18,7 @@
     <properties>
         <java.version>17</java.version>
         <log4j2.version>2.23.1</log4j2.version>
-        <sentry.version>7.6.0</sentry.version>
+        <sentry.version>7.8.0</sentry.version>
         <flyway.version>10.11.0</flyway.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -30,6 +30,14 @@
                 <groupId>org.jdbi</groupId>
                 <artifactId>jdbi3-bom</artifactId>
                 <version>3.45.0</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>io.sentry</groupId>
+                <artifactId>sentry-bom</artifactId>
+                <version>${sentry.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -131,6 +139,12 @@
         </dependency>
 
         <dependency>
+            <groupId>com.github.gavlyukovskiy</groupId>
+            <artifactId>p6spy-spring-boot-starter</artifactId>
+            <version>1.9.1</version>
+        </dependency>
+
+        <dependency>
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>okhttp</artifactId>
             <version>4.12.0</version>
@@ -195,16 +209,25 @@
             <version>${log4j2.version}</version>
         </dependency>
 
+        <!-- Sentry -->
         <dependency>
             <groupId>io.sentry</groupId>
             <artifactId>sentry-log4j2</artifactId>
-            <version>${sentry.version}</version>
         </dependency>
 
         <dependency>
             <groupId>io.sentry</groupId>
             <artifactId>sentry-spring-boot-starter-jakarta</artifactId>
-            <version>${sentry.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.sentry</groupId>
+            <artifactId>sentry-jdbc</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>io.sentry</groupId>
+            <artifactId>sentry-okhttp</artifactId>
         </dependency>
 
         <!-- Mail -->

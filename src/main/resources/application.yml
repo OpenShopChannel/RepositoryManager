@@ -3,6 +3,14 @@ server:
 
 sentry:
   dsn: ""
+  environment: "production"
+  # It is recommended to lower this value from the default of 1.0 on production
+  traces-sample-rate: 1.0
+
+decorator:
+  datasource:
+    p6spy:
+      enable-logging: false
 
 spring:
   application:
