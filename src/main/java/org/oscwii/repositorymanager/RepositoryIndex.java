@@ -205,8 +205,7 @@ public class RepositoryIndex
             {
                 checkRequiredContents(app, app.getDataPath());
                 generateWSCBanner(app);
-                Path bannerOut = config.shopConfig.bannerOutputPath().resolve(app.getTitleInfo().getTitleId());
-                app.getComputedInfo().shopBannerSize = FileUtils.sizeOfDirectory(bannerOut.toFile());
+                calculateShopBannerSize(app, config.shopConfig.bannerOutputPath());
             }
             catch(Exception e)
             {
@@ -644,7 +643,7 @@ public class RepositoryIndex
 
         // Calculate size for banner
         Path bannerOut = workingDir.resolve("out").resolve(app.getTitleInfo().getTitleId());
-        app.getComputedInfo().shopBannerSize = FileUtils.sizeOfDirectory(bannerOut.toFile());
+        calculateShopBannerSize(app, bannerOut.getParent());
 
         // Move the banner output
         Path outputPath = config.shopConfig.bannerOutputPath();
@@ -713,11 +712,8 @@ public class RepositoryIndex
         assignTID(app, shopTitle);
         app.setTitleInfo(shopTitle);
 
-        if(app.getComputedInfo().shopBannerSize == 0)
-        {
-            Path bannerOut = config.shopConfig.bannerOutputPath().resolve(app.getTitleInfo().getTitleId());
-            app.getComputedInfo().shopBannerSize = FileUtils.sizeOfDirectory(bannerOut.toFile());
-        }
+        if(app.getComputedInfo().shopTmdSize == 0)
+            calculateShopBannerSize(app, config.shopConfig.bannerOutputPath());
     }
 
     private Document parseMetaXml(Path file) throws IOException
@@ -765,6 +761,16 @@ public class RepositoryIndex
             shopTitle.setTitleId(titleId);
             logger.info("  - Assigned new title ID: {}", titleId);
         }
+    }
+
+    private void calculateShopBannerSize(InstalledApp app, Path working) throws IOException
+    {
+        Path bannerOut = working.resolve(app.getTitleInfo().getTitleId());
+        long tmdSize = Files.size(bannerOut.resolve("tmd"));
+        long contentSize = FileUtils.sizeOfDirectory(bannerOut.toFile()) - tmdSize;
+
+        app.getComputedInfo().shopTmdSize = tmdSize;
+        app.getComputedInfo().shopContentsSize = contentSize;
     }
 
     private void determineUpdateLevel(InstalledApp newApp)

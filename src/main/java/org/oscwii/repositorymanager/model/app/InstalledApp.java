@@ -128,7 +128,7 @@ public class InstalledApp
     {
         public int releaseDate = 1163980800; // November 20th, 2006;
         public List<String> subdirectories;
-        public long archiveSize, binarySize, iconSize, rawSize, shopBannerSize;
+        public long archiveSize, binarySize, iconSize, rawSize, shopContentsSize, shopTmdSize;
         public String packageType, archiveHash, binaryHash, peripherals;
 
         @Override
@@ -141,7 +141,8 @@ public class InstalledApp
                     ", binarySize=" + binarySize +
                     ", iconSize=" + iconSize +
                     ", rawSize=" + rawSize +
-                    ", shopBannerSize=" + shopBannerSize +
+                    ", shopContentsSize=" + shopContentsSize +
+                    ", shopTmdSize=" + shopTmdSize +
                     ", packageType='" + packageType + '\'' +
                     ", archiveHash='" + archiveHash + '\'' +
                     ", binaryHash='" + binaryHash + '\'' +
