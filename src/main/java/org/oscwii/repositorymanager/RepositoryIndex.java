@@ -204,7 +204,7 @@ public class RepositoryIndex
             try
             {
                 checkRequiredContents(app, app.getDataPath());
-                generateWSCBanner(app);
+                generateShopBanner(app);
                 calculateShopBannerSize(app, config.shopConfig.bannerOutputPath());
             }
             catch(Exception e)
@@ -504,7 +504,7 @@ public class RepositoryIndex
             if(config.shopConfig.generateBanner())
             {
                 logger.info("- Creating banner for Wii Shop Channel");
-                generateWSCBanner(app);
+                generateShopBanner(app);
             }
         }
         catch(IOException e)
@@ -632,7 +632,7 @@ public class RepositoryIndex
         }
     }
 
-    private void generateWSCBanner(InstalledApp app) throws IOException
+    private void generateShopBanner(InstalledApp app) throws IOException
     {
         Path generator = config.shopConfig.bannerGeneratorPath();
         Path workingDir = generator.getParent();
@@ -771,6 +771,7 @@ public class RepositoryIndex
 
         app.getComputedInfo().shopTmdSize = tmdSize;
         app.getComputedInfo().shopContentsSize = contentSize;
+        app.getComputedInfo().inodes = FileUtil.getFiles(bannerOut, 1, (x) -> true).size() - 1;
     }
 
     private void determineUpdateLevel(InstalledApp newApp)
