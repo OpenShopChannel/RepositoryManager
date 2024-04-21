@@ -725,7 +725,13 @@ public class RepositoryIndex
         app.setTitleInfo(shopTitle);
 
         if(app.getComputedInfo().shopTmdSize == 0)
-            calculateShopBannerSize(app, config.shopConfig.bannerOutputPath());
+        {
+            try
+            {
+                calculateShopBannerSize(app, config.shopConfig.bannerOutputPath());
+            }
+            catch(Exception ignored) {}
+        }
     }
 
     private Document parseMetaXml(Path file) throws IOException
