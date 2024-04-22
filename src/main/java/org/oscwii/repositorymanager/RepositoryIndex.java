@@ -467,11 +467,10 @@ public class RepositoryIndex
 
             checkRequiredContents(app, app.getDataPath());
             checkModerationStatus(app, app.getDataPath());
+            loadAppInformation(app, Path.of("data", "contents", app.getSlug() + ".zip"));
         }
         else
             updateApp(app);
-
-        loadAppInformation(app, Path.of("data", "contents", app.getSlug() + ".zip"));
 
         // Hurrah! we finished!
         logger.info("{} has been updated.", app.getMeta().name());
@@ -511,6 +510,9 @@ public class RepositoryIndex
             logger.info("- Creating ZIP file");
             Path appArchive = appDir.getParent().resolve(app + ".zip");
             FileUtil.zipDirectory(appDir, appArchive);
+
+            // Load app information from database
+            loadAppInformation(app, appArchive);
 
             // Generate WSC Banner
             if(config.shopConfig.generateBanner())
