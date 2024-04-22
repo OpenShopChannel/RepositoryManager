@@ -1,5 +1,6 @@
 package org.oscwii.repositorymanager.model.api;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import org.oscwii.repositorymanager.model.app.InstalledApp;
@@ -26,7 +27,8 @@ public record PublishedApp(String slug, String name, String author, String categ
     }
 
     @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-    public record Description(String shortDescription, String longDescription)
+    public record Description(@JsonProperty("short") String shortDescription,
+                              @JsonProperty("long") String longDescription)
     {
         public Description(InstalledApp app)
         {
