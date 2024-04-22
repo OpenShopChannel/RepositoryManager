@@ -108,7 +108,7 @@ public class RepositoryIndex
         this.appDao = appDao;
         this.discordWebhook = discordWebhook;
         this.gson = gson;
-        this.logger = LogManager.getLogger(RepositoryIndex.class);
+        this.logger = LOGGER;
         this.modDao = modDao;
         this.config = config;
         this.featuredAppService = featuredAppService;
@@ -907,6 +907,8 @@ public class RepositoryIndex
     {
         throw new QuietException(msg, e);
     }
+
+    public static final Logger LOGGER = LogManager.getLogger(RepositoryIndex.class);
 
     private static final SimpleDateFormat[] DATE_FORMATS = {
             new SimpleDateFormat("yyyyMMddHHmmss"),

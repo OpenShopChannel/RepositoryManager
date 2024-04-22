@@ -1,7 +1,5 @@
 package org.oscwii.repositorymanager.sources;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.oscwii.repositorymanager.model.app.InstalledApp;
 
 import java.io.IOException;
@@ -16,6 +14,4 @@ public interface SourceDownloader
     String getDescription();
 
     Path downloadFiles(InstalledApp app, Path tmpDir) throws IOException;
-
-    Logger LOGGER = LogManager.getLogger(SourceDownloader.class);
 }

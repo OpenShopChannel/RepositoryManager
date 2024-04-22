@@ -1,6 +1,7 @@
 package org.oscwii.repositorymanager.treatments;
 
 import org.apache.logging.log4j.Logger;
+import org.oscwii.repositorymanager.RepositoryIndex;
 import org.oscwii.repositorymanager.model.app.InstalledApp;
 import org.oscwii.repositorymanager.model.app.OSCMeta.Treatment;
 
@@ -15,7 +16,7 @@ public abstract class BaseTreatmentRunnable implements TreatmentRunnable
 
     protected BaseTreatmentRunnable(String id)
     {
-        this.logger = TreatmentRunnable.LOGGER;
+        this.logger = RepositoryIndex.LOGGER;
         this.id = id;
     }
 

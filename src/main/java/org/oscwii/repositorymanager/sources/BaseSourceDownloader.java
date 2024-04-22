@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import org.apache.logging.log4j.Logger;
+import org.oscwii.repositorymanager.RepositoryIndex;
 import org.oscwii.repositorymanager.config.repoman.FetchConfig;
 import org.oscwii.repositorymanager.model.app.InstalledApp;
 import org.oscwii.repositorymanager.utils.HttpUtil;
@@ -30,7 +31,7 @@ public abstract class BaseSourceDownloader implements SourceDownloader
         this.type = type;
         this.name = name;
         this.description = description;
-        this.logger = SourceDownloader.LOGGER;
+        this.logger = RepositoryIndex.LOGGER;
     }
 
     @Override
