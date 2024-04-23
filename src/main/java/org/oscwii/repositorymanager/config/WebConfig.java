@@ -1,9 +1,12 @@
 package org.oscwii.repositorymanager.config;
 
 import freemarker.template.TemplateException;
+import jakarta.servlet.Filter;
 import no.api.freemarker.java8.Java8ObjectWrapper;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.filter.ShallowEtagHeaderFilter;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -48,5 +51,15 @@ public class WebConfig implements WebMvcConfigurer
     {
         registry.addResourceHandler("/static/**")
                 .addResourceLocations("classpath:/static/");
+    }
+
+    @Bean
+    public FilterRegistrationBean<?> registerFilters()
+    {
+        // Required to compute Content-Length for API responses
+        FilterRegistrationBean<Filter> registration = new FilterRegistrationBean<>();
+        registration.setFilter(new ShallowEtagHeaderFilter());
+        registration.addUrlPatterns("/api/*");
+        return registration;
     }
 }
