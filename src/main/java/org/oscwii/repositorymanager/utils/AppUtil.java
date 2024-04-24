@@ -44,10 +44,9 @@ public class AppUtil
                 .body(new ByteArrayResource(image));
     }
 
-    public static void generateBanner(InstalledApp app, Logger logger, Path generator, Path contentsDir, Path workingDir) throws IOException
+    public static void generateBanners(Logger logger, Path generator, Path contentsDir, Path workingDir) throws IOException
     {
-        Process proc = new ProcessBuilder(List.of(generator.toString(),
-                    contentsDir.toString() + File.separatorChar, app.getSlug()))
+        Process proc = new ProcessBuilder(List.of(generator.toString(), contentsDir.toString() + File.separatorChar))
                 .directory(workingDir.toFile())
                 .start();
 

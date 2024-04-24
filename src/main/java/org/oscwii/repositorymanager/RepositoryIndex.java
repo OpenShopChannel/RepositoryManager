@@ -189,6 +189,10 @@ public class RepositoryIndex
         // Create icon cache
         createIconCache();
 
+        // Generate Shop Banners
+        if(config.shopConfig.generateBanner())
+            generateShopData();
+
         // Print index summary
         printIndexSummary(info, start);
 
@@ -207,8 +211,7 @@ public class RepositoryIndex
             try
             {
                 checkRequiredContents(app, app.getDataPath());
-                generateShopBanner(app);
-                calculateShopBannerSize(app, config.shopConfig.bannerOutputPath());
+                generateShopBanners();
             }
             catch(Exception e)
             {
@@ -513,13 +516,6 @@ public class RepositoryIndex
 
             // Load app information from database
             loadAppInformation(app, appArchive);
-
-            // Generate WSC Banner
-            if(config.shopConfig.generateBanner())
-            {
-                logger.info("- Creating banner for Wii Shop Channel");
-                generateShopBanner(app);
-            }
         }
         catch(IOException e)
         {
@@ -646,23 +642,27 @@ public class RepositoryIndex
         }
     }
 
-    private void generateShopBanner(InstalledApp app) throws IOException
+    private void generateShopBanners() throws IOException
     {
         Path generator = config.shopConfig.bannerGeneratorPath();
         Path workingDir = generator.getParent();
         Path contentsDir = Path.of("data", "contents").toAbsolutePath();
 
-        // Generate the banner
-        AppUtil.generateBanner(app, logger, generator, contentsDir, workingDir);
+        // Generate the banners
+        AppUtil.generateBanners(logger, generator, contentsDir, workingDir);
 
-        // Calculate size for banner
-        Path bannerOut = workingDir.resolve("out").resolve(app.getTitleInfo().getTitleId());
-        calculateShopBannerSize(app, bannerOut.getParent());
+        // Calculate size for banners
+        Path outDir = workingDir.resolve("out");
+        for(InstalledApp app : contents)
+        {
+            Path bannerOut = outDir.resolve(app.getTitleInfo().getTitleId());
+            calculateShopBannerSize(app, bannerOut.getParent());
 
-        // Move the banner output
-        Path outputPath = config.shopConfig.bannerOutputPath();
-        FileSystemUtils.deleteRecursively(outputPath.resolve(app.getTitleInfo().getTitleId()));
-        FileUtils.moveDirectoryToDirectory(bannerOut.toFile(), outputPath.toFile(), true);
+            // Move the banner output
+            Path outputPath = config.shopConfig.bannerOutputPath();
+            FileSystemUtils.deleteRecursively(outputPath.resolve(app.getTitleInfo().getTitleId()));
+            FileUtils.moveDirectoryToDirectory(bannerOut.toFile(), outputPath.toFile(), true);
+        }
     }
 
     private void loadAppInformation(InstalledApp app, Path appArchive) throws IOException
