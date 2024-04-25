@@ -59,9 +59,13 @@ public class AppUtil
             while((line = in.readLine()) != null)
                 logger.trace("GENERATOR OUTPUT: {}", line);
 
-            exitCode = proc.exitValue();
+            exitCode = proc.waitFor();
             if(exitCode != 0)
                 throw new QuietException("Failure while creating banner: " + errIn.readLine());
+        }
+        catch(InterruptedException e)
+        {
+            throw new QuietException("Banner creation was interrupted", e);
         }
     }
 
