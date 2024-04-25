@@ -139,15 +139,24 @@ public class RepositoryIndex
 
     public void initialize()
     {
+        boolean changedLevel = false;
+
         try
         {
-            Configurator.setLevel(logger, Level.ERROR);
+            if(logger.getLevel() == Level.INFO)
+            {
+                // This really isn't great, but don't have a better way to do it...
+                Configurator.setLevel(logger, Level.ERROR);
+                changedLevel = true;
+            }
+
             index(false);
         }
         finally
         {
             // Ensure the logging level is back to normal
-            Configurator.setLevel(logger, Level.INFO);
+            if(changedLevel)
+                Configurator.setLevel(logger, Level.INFO);
 
             if(logMissingFiles)
             {
@@ -214,6 +223,7 @@ public class RepositoryIndex
         }
 
         logger.info("Finished generating shop data for all apps!");
+        IndexTriggeringPolicy.INSTANCE.trigger();
     }
 
     public List<InstalledApp> getContents()

@@ -24,11 +24,11 @@
     </Appenders>
 
     <Loggers>
-        <Root level="trace">
-            <AppenderRef ref="Console" level="info" />
+        <Root>
+            <AppenderRef ref="Console"/>
         </Root>
 
-        <Logger name="org.oscwii.repositorymanager.RepositoryIndex" level="info">
+        <Logger name="org.oscwii.repositorymanager.RepositoryIndex">
             <AppenderRef ref="IndexFile" />
         </Logger>
     </Loggers>

@@ -50,6 +50,7 @@ repository-manager:
 
 logging:
   level:
+    # org.oscwii.repositorymanager.RepositoryIndex: TRACE
     org.springframework: INFO
     org.springframework.context.support.PostProcessorRegistrationDelegate: WARN
     org.springframework.messaging.simp.broker.SimpleBrokerMessageHandler: ERROR

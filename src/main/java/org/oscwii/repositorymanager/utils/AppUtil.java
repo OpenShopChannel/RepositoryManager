@@ -53,16 +53,15 @@ public class AppUtil
         try(BufferedReader in = proc.inputReader();
             BufferedReader errIn = proc.errorReader())
         {
-            int exitCode = proc.waitFor();
-            if(exitCode != 0)
-                throw new QuietException("Failure in creating banner: " + errIn.readLine());
+            int exitCode;
+            String line;
 
-            while(in.ready())
-                logger.trace("GENERATOR OUTPUT: {}", in.readLine());
-        }
-        catch(InterruptedException e)
-        {
-            throw new QuietException("Banner creation Was interrupted", e);
+            while((line = in.readLine()) != null)
+                logger.trace("GENERATOR OUTPUT: {}", line);
+
+            exitCode = proc.exitValue();
+            if(exitCode != 0)
+                throw new QuietException("Failure while creating banner: " + errIn.readLine());
         }
     }
 
