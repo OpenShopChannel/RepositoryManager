@@ -190,7 +190,7 @@ public class RepositoryIndex
         createIconCache();
 
         // Generate Shop Banners
-        if(config.shopConfig.generateBanner())
+        if(config.shopConfig.generateBanner() && updateApps)
             generateShopData();
 
         // Print index summary
@@ -204,19 +204,13 @@ public class RepositoryIndex
     {
         logger.info("Generating Shop Data...");
 
-        for(InstalledApp app : contents)
+        try
         {
-            logger.debug("- Processing {}...", app);
-
-            try
-            {
-                checkRequiredContents(app, app.getDataPath());
-                generateShopBanners();
-            }
-            catch(Exception e)
-            {
-                logger.error("Failed to generate shop data for {}:", app, e);
-            }
+            generateShopBanners();
+        }
+        catch(Exception e)
+        {
+            logger.error("Failed to generate shop data:", e);
         }
 
         logger.info("Finished generating shop data for all apps!");
