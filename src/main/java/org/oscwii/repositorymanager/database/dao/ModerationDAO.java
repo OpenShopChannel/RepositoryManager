@@ -52,7 +52,7 @@ public interface ModerationDAO
             """)
     void updateEntry(String checksum, Status status, int moderator);
 
-    @SqlQuery("SELECT * FROM moderated_binaries")
+    @SqlQuery("SELECT * FROM moderated_binaries ORDER BY modified_date DESC")
     List<ModeratedBinary> getAllEntries();
 
     @SqlQuery("SELECT COUNT(*) FROM moderated_binaries WHERE status = 'PENDING'")
