@@ -68,6 +68,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -365,11 +366,13 @@ public class RepositoryIndex
     private void printIndexSummary(int[] info, long start)
     {
         long elapsed = (System.currentTimeMillis() - start) / 1000;
-        Map<String, Object> summary = Map.of(
-                "Installed Manifests", info[0],
-                "Indexed Applications", info[1],
-                "Indexing errors", info[2],
-                "Elapsed time", FormatUtil.secondsToTime(elapsed));
+        Map<String, Object> summary = new LinkedHashMap<>()
+        {{
+            put("Installed Manifests", info[0]);
+            put("Indexed Applications", info[1]);
+            put("Indexing Errors", info[2]);
+            put("Elapsed time", FormatUtil.secondsToTime(elapsed));
+        }};
 
         logger.info("** INDEX SUMMARY **");
         StringBuilder discordStr = new StringBuilder();
