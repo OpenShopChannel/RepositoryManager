@@ -55,6 +55,6 @@ public interface ModerationDAO
     @SqlQuery("SELECT * FROM moderated_binaries")
     List<ModeratedBinary> getAllEntries();
 
-    @SqlQuery("SELECT * FROM moderated_binaries WHERE status = 'PENDING'")
-    List<ModeratedBinary> getPendingEntries();
+    @SqlQuery("SELECT COUNT(*) FROM moderated_binaries WHERE status = 'PENDING'")
+    long getPendingEntries();
 }

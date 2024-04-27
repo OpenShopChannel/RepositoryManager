@@ -50,12 +50,14 @@ repository-manager:
 
 logging:
   level:
-    # org.oscwii.repositorymanager.RepositoryIndex: TRACE
+    root: INFO
     org.springframework: INFO
     org.springframework.context.support.PostProcessorRegistrationDelegate: WARN
     org.springframework.messaging.simp.broker.SimpleBrokerMessageHandler: ERROR
     org.springframework.web.SimpLogging: ERROR
+    org.springframework.security.web.DefaultSecurityFilterChain: OFF
     com.github.junrar: ERROR
+    # org.oscwii.repositorymanager.RepositoryIndex: TRACE
     # org.springframework.beans: TRACE
     # org.oscwii.repositorymanager.security: TRACE
     # org.springframework.security: TRACE

@@ -8,6 +8,7 @@ import org.oscwii.repositorymanager.model.security.User;
 import org.oscwii.repositorymanager.security.annotations.RequiredRole;
 import org.oscwii.repositorymanager.services.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
 import java.util.Map;
@@ -29,19 +30,17 @@ public abstract class BaseAdminController extends RepoManController
     }
 
     @ModelAttribute("pendingModeration")
-    protected int getPendingModEntries()
+    protected long getPendingModEntries()
     {
-        return modDao.getPendingEntries().size();
+        return modDao.getPendingEntries();
     }
 
     @ModelAttribute("currentUser")
-    protected User getUser(HttpServletRequest request)
+    protected User getUser()
     {
-        String username = request.getRemoteUser();
-        if(username == null)
-            return null;
-
-        return (User) authService.loadUserByUsername(username);
+        if(SecurityContextHolder.getContext().getAuthentication().getPrincipal() instanceof User user)
+            return user;
+        throw new IllegalStateException("User is not authenticated!");
     }
 
     @ModelAttribute("messages")

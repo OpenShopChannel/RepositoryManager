@@ -3,7 +3,6 @@ package org.oscwii.repositorymanager.controllers.admin;
 import club.minnced.discord.webhook.WebhookClient;
 import club.minnced.discord.webhook.send.WebhookEmbed;
 import club.minnced.discord.webhook.send.WebhookEmbedBuilder;
-import jakarta.servlet.http.HttpServletRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.oscwii.repositorymanager.factory.DiscordWebhookFactory;
@@ -43,7 +42,7 @@ public class ModerationController extends BaseAdminController
     }
 
     @GetMapping("/{checksum}/{action}")
-    public Object action(@PathVariable String checksum, @PathVariable String action, HttpServletRequest request, RedirectAttributes attributes)
+    public Object action(@PathVariable String checksum, @PathVariable String action, RedirectAttributes attributes)
     {
         Optional<ModeratedBinary> optEntry = modDao.findByChecksum(checksum);
         if(optEntry.isEmpty())
@@ -53,11 +52,11 @@ public class ModerationController extends BaseAdminController
         switch(action)
         {
             case "approve":
-                approveApp(entry, getUser(request));
+                approveApp(entry, getUser());
                 attributes.addFlashAttribute("message", "success:Approved " + entry.app() + "-" + checksum);
                 break;
             case "reject":
-                rejectApp(entry, getUser(request));
+                rejectApp(entry, getUser());
                 attributes.addFlashAttribute("message", "danger:Rejected " + entry.app() + "-" + checksum);
                 break;
             case "download":

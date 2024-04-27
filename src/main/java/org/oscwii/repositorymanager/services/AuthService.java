@@ -117,7 +117,7 @@ public class AuthService implements UserDetailsManager
 
     public User getUser(int id)
     {
-        return userDao.getById(id).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        return userDao.getById(id).orElse(null);
     }
 
     public List<User> getUsers()

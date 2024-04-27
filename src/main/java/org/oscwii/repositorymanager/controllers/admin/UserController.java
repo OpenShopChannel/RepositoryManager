@@ -1,6 +1,5 @@
 package org.oscwii.repositorymanager.controllers.admin;
 
-import jakarta.servlet.http.HttpServletRequest;
 import org.oscwii.repositorymanager.config.repoman.SecurityConfig;
 import org.oscwii.repositorymanager.model.security.DummyUser;
 import org.oscwii.repositorymanager.model.security.Role;
@@ -8,7 +7,6 @@ import org.oscwii.repositorymanager.model.security.User;
 import org.oscwii.repositorymanager.security.annotations.RequiredRole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.MultiValueMap;
@@ -72,12 +70,12 @@ public class UserController extends BaseAdminController
     }
 
     @PostMapping("/delete/{id}")
-    public Object delete(@PathVariable int id, HttpServletRequest request, RedirectAttributes attributes)
+    public Object delete(@PathVariable int id, RedirectAttributes attributes)
     {
         User user = authService.getUser(id);
         if(user == null)
             return ResponseEntity.notFound().build();
-        if(user.getId() == getUser(request).getId())
+        if(user.getId() == getUser().getId())
             return ResponseEntity.badRequest().build();
 
         if(securityConfig.protectedUsers().contains(user.getId()))
@@ -101,11 +99,9 @@ public class UserController extends BaseAdminController
     @PostMapping("/view/{id}")
     public Object modify(@PathVariable int id, @RequestParam MultiValueMap<String, String> form, Model model)
     {
-        User user;
-
-        try {user = authService.getUser(id);}
-        catch(UsernameNotFoundException ignored)
-        {return ResponseEntity.notFound().build();}
+        User user = authService.getUser(id);
+        if(user == null)
+            return ResponseEntity.notFound().build();
 
         if(form.containsKey("id"))
         {
