@@ -90,9 +90,16 @@ public class UserController extends BaseAdminController
     }
 
     @GetMapping("/view/{id}")
-    public String details(@PathVariable int id, Model model)
+    public String details(@PathVariable int id, Model model, RedirectAttributes attributes)
     {
-        model.addAttribute("user", authService.getUser(id));
+        User user = authService.getUser(id);
+        if(user == null)
+        {
+            attributes.addFlashAttribute("message", "danger:Unknown user");
+            return "redirect:/admin/users";
+        }
+
+        model.addAttribute("user", user);
         return "admin/user/details";
     }
 
