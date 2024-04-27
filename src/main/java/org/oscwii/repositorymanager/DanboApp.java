@@ -1,5 +1,7 @@
 package org.oscwii.repositorymanager;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jdbi.v3.spring5.EnableJdbiRepositories;
 import org.oscwii.repositorymanager.config.repoman.RepoManConfig;
 import org.oscwii.repositorymanager.database.dao.SettingsDAO;
@@ -24,6 +26,7 @@ import java.util.Optional;
 public class DanboApp
 {
     private final FeaturedAppService featuredApp;
+    private final Logger logger;
     private final RepositoryIndex index;
     private final RepoManConfig config;
     private final SettingsDAO settingsDao;
@@ -32,6 +35,7 @@ public class DanboApp
     public DanboApp(FeaturedAppService featuredApp, RepositoryIndex index, RepoManConfig config, SettingsDAO settingsDao)
     {
         this.featuredApp = featuredApp;
+        this.logger = LogManager.getLogger(DanboApp.class);
         this.index = index;
         this.config = config;
         this.settingsDao = settingsDao;
@@ -45,6 +49,7 @@ public class DanboApp
 
         // Load the repository without updating apps
         index.initialize();
+        logger.info("Indexed and serving {} apps", index.getContents().size());
 
         // Pick a featured app
         featuredApp.pickFeaturedApp();
