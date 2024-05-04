@@ -1,6 +1,4 @@
 <#macro header>
-    <!DOCTYPE html>
-    <html lang="en">
     <head>
         <!-- Meta tags -->
         <meta charset="utf-8"/>
@@ -9,17 +7,10 @@
         <meta name="viewport" content="width=device-width"/>
 
         <title>Admin</title>
+        <link rel="icon" type="image/png" href="/static/assets/images/blueicon.png"/>
 
         <!-- Halfmoon CSS -->
         <link href="/static/halfmoon/css/halfmoon-variables.min.css" rel="stylesheet"/>
-        <link rel="stylesheet" href="/static/fa/css/all.min.css">
-
-        <!-- Fonts -->
-        <style>
-            @font-face {
-                font-family: JetBrainsMono;
-                src: url(/static/fonts/JetBrainsMono/JetBrainsMono-Regular.ttf);
-            }
-        </style>
+        <link href="/static/fa/css/all.min.css" rel="stylesheet">
     </head>
 </#macro>

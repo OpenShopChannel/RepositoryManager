@@ -3,6 +3,9 @@
 <#import "includes/sidebar.ftl" as sidebar>
 
 <#macro content>
+    <!DOCTYPE html>
+    <html lang="en">
+
     <@header.header/>
 
     <body class="with-custom-webkit-scrollbars with-custom-css-scrollbars" data-dm-shortcut-enabled="true"
