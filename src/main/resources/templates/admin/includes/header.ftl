@@ -6,7 +6,8 @@
         <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"/>
         <meta name="viewport" content="width=device-width"/>
 
-        <title>Admin</title>
+        <title>Admin - Repository Manager</title>
+
         <link rel="icon" type="image/png" href="/static/assets/images/blueicon.png"/>
 
         <!-- Halfmoon CSS -->

@@ -46,8 +46,6 @@ public class AdminController extends BaseAdminController
     private final SourceRegistry sourceRegistry;
     private final TaskScheduler scheduler;
 
-    private boolean runIndex = false;
-
     @Autowired
     public AdminController(RepositoryIndex index, RepositorySource repoSource, SettingsDAO settingsDao,
                            SourceRegistry sourceRegistry, @Qualifier("taskScheduler") TaskScheduler scheduler)
@@ -75,7 +73,7 @@ public class AdminController extends BaseAdminController
         switch(action)
         {
             case "update":
-                this.runIndex = true;
+                scheduler.schedule(index::updateIndex, Instant.now().plusSeconds(5));
                 attributes.addFlashAttribute("message", "info:Scheduled immediate index update.");
                 return "redirect:/admin/status";
             default:
@@ -117,12 +115,6 @@ public class AdminController extends BaseAdminController
     @GetMapping("/status")
     public String taskStatus()
     {
-        if(runIndex)
-        {
-            this.runIndex = false;
-            scheduler.schedule(index::updateIndex, Instant.now().plusSeconds(5));
-        }
-
         return "admin/task_status";
     }
 
