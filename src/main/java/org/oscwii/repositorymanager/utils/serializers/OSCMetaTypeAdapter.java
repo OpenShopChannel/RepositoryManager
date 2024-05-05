@@ -13,7 +13,7 @@
  * program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.oscwii.repositorymanager.utils;
+package org.oscwii.repositorymanager.utils.serializers;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonDeserializationContext;

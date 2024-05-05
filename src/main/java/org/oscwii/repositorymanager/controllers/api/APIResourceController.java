@@ -13,7 +13,7 @@
  * program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.oscwii.repositorymanager.controllers.api.v3;
+package org.oscwii.repositorymanager.controllers.api;
 
 import org.oscwii.repositorymanager.controllers.RepoManController;
 import org.oscwii.repositorymanager.model.app.InstalledApp;
@@ -32,8 +32,8 @@ import org.springframework.web.bind.annotation.RestController;
 import java.io.IOException;
 
 @RestController("apiResourceController")
-@RequestMapping(path = "/api/v3", method = RequestMethod.GET)
-public class ResourceController extends RepoManController
+@RequestMapping(path = {"/api", "/api/v3", "/api/v4"}, method = RequestMethod.GET)
+public class APIResourceController extends RepoManController
 {
     @GetMapping(value = "/contents/{slug}/icon.png", produces = MediaType.IMAGE_PNG_VALUE)
     public ResponseEntity<ByteArrayResource> getIcon(@PathVariable String slug) throws IOException

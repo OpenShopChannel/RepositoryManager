@@ -73,6 +73,11 @@ public class FormatUtil
         return str;
     }
 
+    public static String binaryUrl(String slug, String type)
+    {
+        return urlFor(BINARY_PATH.formatted(slug, slug, type));
+    }
+
     public static String iconUrl(String slug)
     {
         return urlFor(ICON_PATH.formatted(slug));
@@ -81,6 +86,11 @@ public class FormatUtil
     public static String logUrl(String log)
     {
         return urlFor(LOG_PATH.formatted(log));
+    }
+
+    public static String metaXmlUrl(String slug)
+    {
+        return urlFor(META_XML.formatted(slug, slug));
     }
 
     public static String zipUrl(String slug)
@@ -98,8 +108,10 @@ public class FormatUtil
         return DATE_FORMAT.format(date);
     }
 
-    private static final String ICON_PATH = "/api/v3/contents/%s/icon.png";
-    private static final String LOG_PATH  = "/admin/log/%s";
-    private static final String ZIP_PATH  = "/api/v3/contents/%s/%s.zip";
+    private static final String BINARY_PATH = "/unzipped_apps/%s/apps/%s/boot.%s";
+    private static final String ICON_PATH   = "/api/contents/%s/icon.png";
+    private static final String LOG_PATH    = "/admin/log/%s";
+    private static final String META_XML    = "/unzipped_apps/%s/apps/%s/meta.xml";
+    private static final String ZIP_PATH    = "/api/contents/%s/%s.zip";
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 }

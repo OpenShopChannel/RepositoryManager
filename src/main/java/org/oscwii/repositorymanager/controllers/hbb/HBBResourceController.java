@@ -35,13 +35,13 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-@RestController("hbbResourceController")
+@RestController
 @RequestMapping(produces = MediaType.APPLICATION_OCTET_STREAM_VALUE, method = RequestMethod.GET)
-public class ResourceController extends RepoManController
+public class HBBResourceController extends RepoManController
 {
     private final Logger logger;
 
-    public ResourceController()
+    public HBBResourceController()
     {
         this.logger = LogManager.getLogger("Homebrew Browser Resources");
     }
