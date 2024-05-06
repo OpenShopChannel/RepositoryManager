@@ -80,6 +80,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -266,6 +267,11 @@ public class RepositoryIndex
     public RepositoryInfo getInfo()
     {
         return info;
+    }
+
+    public Collection<Platform> getPlatforms()
+    {
+        return platforms.values();
     }
 
     private void loadRepositoryInfo()

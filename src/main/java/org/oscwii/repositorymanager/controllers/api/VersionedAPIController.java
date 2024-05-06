@@ -15,14 +15,13 @@
 
 package org.oscwii.repositorymanager.controllers.api;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
 import org.oscwii.repositorymanager.controllers.RepoManController;
 import org.oscwii.repositorymanager.database.dao.SettingsDAO;
 import org.oscwii.repositorymanager.model.RepositoryInfo;
+import org.oscwii.repositorymanager.model.api.PublishedAppV3;
+import org.oscwii.repositorymanager.model.api.PublishedAppV4;
 import org.oscwii.repositorymanager.model.app.InstalledApp;
 import org.oscwii.repositorymanager.services.FeaturedAppService;
-import org.oscwii.repositorymanager.utils.serializers.AppSerializer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -31,6 +30,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -38,17 +40,13 @@ import java.util.Optional;
 @RequestMapping(path = "/api", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.GET)
 public class VersionedAPIController extends RepoManController
 {
-    private final AppSerializer appSerializer;
     private final FeaturedAppService featuredApp;
-    private final Gson gson;
     private final SettingsDAO settingsDao;
 
     @Autowired
-    public VersionedAPIController(FeaturedAppService featuredApp, Gson gson, SettingsDAO settingsDao)
+    public VersionedAPIController(FeaturedAppService featuredApp, SettingsDAO settingsDao)
     {
-        this.appSerializer = new AppSerializer();
         this.featuredApp = featuredApp;
-        this.gson = gson;
         this.settingsDao = settingsDao;
     }
 
@@ -58,14 +56,16 @@ public class VersionedAPIController extends RepoManController
         Optional<String> gitUrl = settingsDao.getSetting("git_url");
         RepositoryInfo info = index.getInfo();
 
-        Map<String, Object> information = Map.of(
-                "name", info.name(),
-                "provider", info.provider(),
-                "description", info.description(),
-                "available_categories", index.getCategories(),
-                "available_apps_count", index.getContents().size(),
-                "git_url", gitUrl.orElse("Unknown")
-        );
+        Map<String, Object> information = new LinkedHashMap<>()
+        {{
+            put("name", info.name());
+            put("provider", info.provider());
+            put("description", info.description());
+            put("git_url", gitUrl.orElse("Unknown"));
+            put("available_apps_count", index.getContents().size());
+            put("available_categories", index.getCategories());
+            put("available_platforms", index.getPlatforms());
+        }};
 
         return ResponseEntity.ok(information);
     }
@@ -73,42 +73,42 @@ public class VersionedAPIController extends RepoManController
     // API v3
 
     @GetMapping("/v3/contents")
-    public ResponseEntity<String> getContentsV3()
+    public ResponseEntity<List<PublishedAppV3>> getContentsV3()
     {
-        JsonArray apps = new JsonArray(index.getContents().size());
+        List<PublishedAppV3> apps = new ArrayList<>(index.getContents().size());
         for(InstalledApp installedApp : index.getContents())
-            apps.add(appSerializer.serializeV3(installedApp));
+            apps.add(new PublishedAppV3(installedApp));
 
-        return ResponseEntity.ok(gson.toJson(apps));
+        return ResponseEntity.ok(apps);
     }
 
     @GetMapping("/v3/featured-app")
-    public ResponseEntity<String> getFeaturedAppV3()
+    public ResponseEntity<PublishedAppV3> getFeaturedAppV3()
     {
         InstalledApp app = featuredApp.getFeatured();
         if(app == null)
             return ResponseEntity.notFound().build();
-        return ResponseEntity.ok(gson.toJson(appSerializer.serializeV3(app)));
+        return ResponseEntity.ok(new PublishedAppV3(app));
     }
 
     // API v4
 
     @GetMapping("/v4/contents")
-    public ResponseEntity<String> getContentsV4()
+    public ResponseEntity<List<PublishedAppV4>> getContentsV4()
     {
-        JsonArray apps = new JsonArray(index.getContents().size());
+        List<PublishedAppV4> apps = new ArrayList<>(index.getContents().size());
         for(InstalledApp installedApp : index.getContents())
-            apps.add(appSerializer.serializeV4(installedApp));
+            apps.add(new PublishedAppV4(installedApp));
 
-        return ResponseEntity.ok(gson.toJson(apps));
+        return ResponseEntity.ok(apps);
     }
 
     @GetMapping("/v4/featured-app")
-    public ResponseEntity<String> getFeaturedAppV4()
+    public ResponseEntity<PublishedAppV4> getFeaturedAppV4()
     {
         InstalledApp app = featuredApp.getFeatured();
         if(app == null)
             return ResponseEntity.notFound().build();
-        return ResponseEntity.ok(gson.toJson(appSerializer.serializeV4(app)));
+        return ResponseEntity.ok(new PublishedAppV4(app));
     }
 }
