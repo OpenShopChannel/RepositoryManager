@@ -80,8 +80,8 @@ public class WebSecurityConfig
         config.addAllowedOrigin("*");
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
-        source.registerCorsConfiguration("/hbb/", config);
-        source.registerCorsConfiguration("/api/v3/", config);
+        source.registerCorsConfiguration("/hbb/**", config);
+        source.registerCorsConfiguration("/api/**", config);
         return new CorsFilter(source);
     }
 
