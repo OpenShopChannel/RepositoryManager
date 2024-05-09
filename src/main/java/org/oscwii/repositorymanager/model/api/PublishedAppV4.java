@@ -33,19 +33,19 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 import static org.oscwii.repositorymanager.model.api.PublishedAppV3.getPlatforms;
 
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-public record PublishedAppV4(String slug, String name, String author, String category,
-                             Description description, Map<String, Asset> assets, EnumSet<OSCMeta.Flag> flags,
-                             String packageType, List<String> peripherals, long releaseDate, ShopInfo shop,
-                             List<String> subdirectories, List<String> supportedPlatforms, long uncompressedSize,
-                             String version)
+public record PublishedAppV4(String slug, String name, String author, String[] authors, String category,
+                             String[] contributors, Description description, Map<String, Asset> assets,
+                             EnumSet<OSCMeta.Flag> flags, String packageType, List<String> peripherals,
+                             long releaseDate, ShopInfo shop, List<String> subdirectories,
+                             List<String> supportedPlatforms, long uncompressedSize, String version)
 {
     public PublishedAppV4(InstalledApp app)
     {
-        this(app.getSlug(), app.getMeta().name(), app.getMeta().author(), app.getMeta().category(),
-                new Description(app), getAssets(app), app.getMeta().flags(), app.getComputedInfo().packageType,
-                getPeripherals(app), app.getComputedInfo().releaseDate, new ShopInfo(app),
-                app.getComputedInfo().subdirectories, getPlatforms(app), app.getComputedInfo().rawSize,
-                app.getEffectiveVersion());
+        this(app.getSlug(), app.getMeta().name(), app.getMeta().author(), app.getMeta().authors(),
+                app.getMeta().category(), app.getMeta().contributors(), new Description(app), getAssets(app),
+                app.getMeta().flags(), app.getComputedInfo().packageType, getPeripherals(app),
+                app.getComputedInfo().releaseDate, new ShopInfo(app), app.getComputedInfo().subdirectories,
+                getPlatforms(app), app.getComputedInfo().rawSize, app.getEffectiveVersion());
     }
 
     public record Asset(String url, @JsonInclude(NON_NULL) String hash, @JsonInclude(NON_DEFAULT) long size) {}

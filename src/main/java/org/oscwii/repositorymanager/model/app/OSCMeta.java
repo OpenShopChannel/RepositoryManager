@@ -23,8 +23,8 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
-public record OSCMeta(String name, String author, String category,
-                      String authorContact, List<String> supportedPlatforms,
+public record OSCMeta(String name, String author, String[] authors, String category,
+                      String authorContact, String[] contributors, List<String> supportedPlatforms,
                       List<String> peripherals, String version, EnumSet<Flag> flags,
                       Source source, List<Treatment> treatments)
 {

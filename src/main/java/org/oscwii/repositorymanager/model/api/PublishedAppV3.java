@@ -27,14 +27,14 @@ import java.util.EnumSet;
 import java.util.List;
 
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-public record PublishedAppV3(String slug, String name, String author, String category,
+public record PublishedAppV3(String slug, String name, String author, String category, String[] contributors,
                              Description description, FileSizes fileSize, EnumSet<OSCMeta.Flag> flags,
                              String packageType, List<String> peripherals, long releaseDate, ShopInfo shop,
                              List<String> subdirectories, List<String> supportedPlatforms, Resources url, String version)
 {
     public PublishedAppV3(InstalledApp app)
     {
-        this(app.getSlug(), app.getMeta().name(), app.getMeta().author(), app.getMeta().category(),
+        this(app.getSlug(), app.getMeta().name(), getAuthors(app), app.getMeta().category(), app.getMeta().contributors(),
                 new Description(app), new FileSizes(app), app.getMeta().flags(), app.getComputedInfo().packageType,
                 app.getMeta().peripherals(), app.getComputedInfo().releaseDate, new ShopInfo(app),
                 app.getComputedInfo().subdirectories, getPlatforms(app), new Resources(app),
@@ -76,6 +76,11 @@ public record PublishedAppV3(String slug, String name, String author, String cat
         {
             this(FormatUtil.iconUrl(app.getSlug()), FormatUtil.zipUrl(app.getSlug()));
         }
+    }
+
+    private static String getAuthors(InstalledApp app)
+    {
+        return String.join(", ", app.getAllAuthors());
     }
 
     static List<String> getPlatforms(InstalledApp app)

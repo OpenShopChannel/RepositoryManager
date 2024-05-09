@@ -40,6 +40,8 @@ public class OSCMetaTypeAdapter implements JsonDeserializer<OSCMeta>
         JsonObject obj = json.getAsJsonObject();
 
         JsonObject info = obj.getAsJsonObject("information");
+        JsonArray authorsArr = info.getAsJsonArray("authors");
+        JsonArray contributorsArr = info.getAsJsonArray("contributors");
         JsonArray platformsArr = info.getAsJsonArray("supported_platforms");
         JsonArray peripheralsArr = info.getAsJsonArray("peripherals");
         JsonArray flagsArr = info.getAsJsonArray("flags");
@@ -57,12 +59,19 @@ public class OSCMetaTypeAdapter implements JsonDeserializer<OSCMeta>
         return new OSCMeta(
                 Objects.requireNonNull(info.get("name")).getAsString(),
                 Objects.requireNonNull(info.get("author")).getAsString(),
+                authorsArr == null ? new String[0] : toArray(authorsArr),
                 Objects.requireNonNull(info.get("category")).getAsString(),
                 info.has("author_preferred_contact") ? info.get("author_preferred_contact").getAsString() : null,
+                contributorsArr == null ? new String[0] : toArray(contributorsArr),
                 platforms, peripherals,
                 Objects.requireNonNull(info.getAsJsonPrimitive("version")).getAsString(),
                 flags,
                 context.deserialize(obj.getAsJsonObject("source"), OSCMeta.Source.class),
                 treatments);
+    }
+
+    private String[] toArray(JsonArray arr)
+    {
+        return arr.asList().stream().map(JsonElement::getAsString).toArray(String[]::new);
     }
 }

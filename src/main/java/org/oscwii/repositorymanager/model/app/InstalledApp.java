@@ -19,6 +19,7 @@ import org.oscwii.repositorymanager.model.UpdateLevel;
 import org.springframework.util.Assert;
 
 import java.nio.file.Path;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -54,6 +55,14 @@ public class InstalledApp
     public String getSlug()
     {
         return slug;
+    }
+
+    public List<String> getAllAuthors()
+    {
+        List<String> authors = new LinkedList<>();
+        authors.add(meta.author());
+        authors.addAll(List.of(meta.authors()));
+        return authors;
     }
 
     public String getEffectiveVersion()
