@@ -56,6 +56,11 @@ public class InstalledApp
         return slug;
     }
 
+    public String getEffectiveVersion()
+    {
+        return meta.version().equals("auto") ? metaXml.version : meta.version();
+    }
+
     public OSCMeta getMeta()
     {
         return meta;

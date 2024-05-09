@@ -30,6 +30,7 @@ import java.util.Map;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_DEFAULT;
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+import static org.oscwii.repositorymanager.model.api.PublishedAppV3.getPlatforms;
 
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public record PublishedAppV4(String slug, String name, String author, String category,
@@ -43,8 +44,8 @@ public record PublishedAppV4(String slug, String name, String author, String cat
         this(app.getSlug(), app.getMeta().name(), app.getMeta().author(), app.getMeta().category(),
                 new Description(app), getAssets(app), app.getMeta().flags(), app.getComputedInfo().packageType,
                 getPeripherals(app), app.getComputedInfo().releaseDate, new ShopInfo(app),
-                app.getComputedInfo().subdirectories, app.getMeta().supportedPlatforms(), app.getComputedInfo().rawSize,
-                app.getMeta().version());
+                app.getComputedInfo().subdirectories, getPlatforms(app), app.getComputedInfo().rawSize,
+                app.getEffectiveVersion());
     }
 
     public record Asset(String url, @JsonInclude(NON_NULL) String hash, @JsonInclude(NON_DEFAULT) long size) {}

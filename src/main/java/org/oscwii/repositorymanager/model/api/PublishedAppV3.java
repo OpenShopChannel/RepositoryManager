@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import org.oscwii.repositorymanager.model.app.InstalledApp;
 import org.oscwii.repositorymanager.model.app.OSCMeta;
+import org.oscwii.repositorymanager.model.app.Platform;
 import org.oscwii.repositorymanager.utils.FormatUtil;
 
 import java.util.EnumSet;
@@ -36,8 +37,8 @@ public record PublishedAppV3(String slug, String name, String author, String cat
         this(app.getSlug(), app.getMeta().name(), app.getMeta().author(), app.getMeta().category(),
                 new Description(app), new FileSizes(app), app.getMeta().flags(), app.getComputedInfo().packageType,
                 app.getMeta().peripherals(), app.getComputedInfo().releaseDate, new ShopInfo(app),
-                app.getComputedInfo().subdirectories, app.getMeta().supportedPlatforms(), new Resources(app),
-                app.getMeta().version());
+                app.getComputedInfo().subdirectories, getPlatforms(app), new Resources(app),
+                app.getEffectiveVersion());
     }
 
     @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
@@ -75,5 +76,12 @@ public record PublishedAppV3(String slug, String name, String author, String cat
         {
             this(FormatUtil.iconUrl(app.getSlug()), FormatUtil.zipUrl(app.getSlug()));
         }
+    }
+
+    static List<String> getPlatforms(InstalledApp app)
+    {
+        return app.getSupportedPlatforms().stream()
+                .map(Platform::name)
+                .toList();
     }
 }
