@@ -649,6 +649,9 @@ public class RepositoryIndex
         else
         {
             ModeratedBinary modEntry = new ModeratedBinary(hash, app.getSlug());
+            int removedPending = modDao.removePendingEntries(app.getSlug());
+            if(removedPending > 0)
+                logger.info("  - Removed {} previous pending moderation entries", removedPending);
             modDao.insertEntry(modEntry);
 
             // Notify Discord

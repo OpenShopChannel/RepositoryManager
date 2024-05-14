@@ -42,6 +42,9 @@ public interface ModerationDAO
     """)
     Optional<ModeratedBinary> findByChecksum(String checksum);
 
+    @SqlUpdate("DELETE FROM moderated_binaries WHERE app_slug = :slug AND status = 'PENDING'")
+    int removePendingEntries(String slug);
+
     default void insertEntry(ModeratedBinary entry)
     {
         insertEntry(entry.checksum(), entry.app(), entry.status());
