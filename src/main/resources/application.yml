@@ -4,6 +4,8 @@ server:
 sentry:
   dsn: ""
   environment: "production"
+  ignored-exceptions-for-type:
+    - "org.springframework.security.access.AccessDeniedException"
   # It is recommended to lower this value from the default of 1.0 on production
   traces-sample-rate: 1.0
 
