@@ -330,23 +330,22 @@ public class RepositoryIndex
 
         for(File meta : manifests)
         {
-            InstalledApp app;
+            boolean recoverableError = false;
+            InstalledApp app = null;
             logger.info("Loading manifest \"{}\" for processing ({}/{})",
                     meta.getName(), ++index, manifests.size());
 
             try
             {
                 app = processMeta(meta, updateApps);
-                contents.add(requireNonNull(app));
-                indexed++;
             }
             catch(AppFilesMissingException ignored)
             {
                 this.logMissingFiles = true;
-                continue;
             }
             catch(ModerationException e)
             {
+                recoverableError = true;
                 try(WebhookClient webhook = discordWebhook.logWebhook())
                 {
                     if(webhook != null && updateApps)
@@ -361,22 +360,30 @@ public class RepositoryIndex
                         webhook.send(message);
                     }
                 }
-
-                continue;
             }
             catch(Exception e)
             {
                 handleApplicationUpdateFailure(meta, e);
                 errors++;
-
-                // Try to use the old version
-                app = getApp(meta.getName().replace(".oscmeta", ""));
-                if(app == null)
-                    continue;
             }
+            finally
+            {
+                // An error occurred, attempt to recover
+                if(recoverableError)
+                {
+                    // Try to use the old version
+                    app = getApp(meta.getName().replace(".oscmeta", ""));
+                }
 
-            // Notify if necessary
-            determineUpdateLevel(app);
+                if(app != null)
+                {
+                    contents.add(app);
+                    indexed++;
+
+                    // Notify if necessary
+                    determineUpdateLevel(app);
+                }
+            }
         }
 
         this.contents = contents;
