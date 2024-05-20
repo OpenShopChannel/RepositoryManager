@@ -50,6 +50,13 @@ repository-manager:
     banner-generator-path: "BannerGenerator"
     banner-output-path: "data/titles/"
 
+management:
+  endpoint:
+    health:
+      enabled: true
+      probes:
+        enabled: true
+
 logging:
   level:
     root: INFO
