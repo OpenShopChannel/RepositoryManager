@@ -174,13 +174,6 @@ public class RepositoryIndex
             // Ensure the logging level is back to normal
             if(changedLevel)
                 Configurator.setLevel(logger, Level.INFO);
-
-            if(logMissingFiles)
-            {
-                this.logMissingFiles = false;
-                logger.info("Some app files are missing, they were skipped from indexing.");
-                logger.info("You may want to force an update.");
-            }
         }
     }
 
@@ -217,7 +210,7 @@ public class RepositoryIndex
 
         // Generate Shop Banners
         if(config.shopConfig.generateBanner() && updateApps)
-            generateShopData();
+            generateShopData(false);
 
         // Print index summary
         printIndexSummary(info, start);
@@ -227,6 +220,11 @@ public class RepositoryIndex
     }
 
     public void generateShopData()
+    {
+        generateShopData(true);
+    }
+
+    private void generateShopData(boolean standalone)
     {
         logger.info("Generating Shop Data...");
 
@@ -240,7 +238,8 @@ public class RepositoryIndex
         }
 
         logger.info("Finished generating shop data for all apps!");
-        IndexTriggeringPolicy.INSTANCE.trigger();
+        if(standalone)
+            IndexTriggeringPolicy.INSTANCE.trigger();
     }
 
     public List<InstalledApp> getContents()
@@ -330,7 +329,6 @@ public class RepositoryIndex
 
         for(File meta : manifests)
         {
-            boolean recoverableError = false;
             InstalledApp app = null;
             logger.info("Loading manifest \"{}\" for processing ({}/{})",
                     meta.getName(), ++index, manifests.size());
@@ -345,7 +343,6 @@ public class RepositoryIndex
             }
             catch(ModerationException e)
             {
-                recoverableError = true;
                 try(WebhookClient webhook = discordWebhook.logWebhook())
                 {
                     if(webhook != null && updateApps)
@@ -369,13 +366,14 @@ public class RepositoryIndex
             finally
             {
                 // An error occurred, attempt to recover
-                if(recoverableError)
+                if(app == null)
                 {
                     // Try to use the old version
                     app = getApp(meta.getName().replace(".oscmeta", ""));
+                    logger.info("- Attempting to recover using previous version...");
                 }
 
-                if(app != null)
+                if(app != null && app.getMetaXml().isPresent())
                 {
                     contents.add(app);
                     indexed++;
@@ -420,6 +418,13 @@ public class RepositoryIndex
         }
 
         logger.info(new DiscordMessage("** INDEX SUMMARY **", "Index Summary", discordStr.toString()));
+
+        if(logMissingFiles)
+        {
+            this.logMissingFiles = false;
+            logger.warn("Some app files are missing, they were skipped from indexing.");
+            logger.warn("You may want to force an update.");
+        }
     }
 
     private void createIconCache()

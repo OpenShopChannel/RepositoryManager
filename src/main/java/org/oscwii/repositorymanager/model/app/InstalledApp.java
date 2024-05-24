@@ -186,6 +186,11 @@ public class InstalledApp
     {
         public String name, coder, version, shortDesc, longDesc;
 
+        public boolean isPresent()
+        {
+            return name != null && coder != null && version != null;
+        }
+
         public String name()
         {
             return name;

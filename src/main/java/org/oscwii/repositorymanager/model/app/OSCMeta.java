@@ -91,4 +91,23 @@ public record OSCMeta(String name, String author, String[] authors, String categ
         @SerializedName("writes_to_nand")
         WRITES_TO_NAND
     }
+
+    @Override
+    public String toString()
+    {
+        return "OSCMeta{" +
+                "name='" + name + '\'' +
+                ", author='" + author + '\'' +
+                ", authors=" + Arrays.toString(authors) +
+                ", category='" + category + '\'' +
+                ", authorContact='" + authorContact + '\'' +
+                ", contributors=" + Arrays.toString(contributors) +
+                ", supportedPlatforms=" + supportedPlatforms +
+                ", peripherals=" + peripherals +
+                ", version='" + version + '\'' +
+                ", flags=" + flags +
+                ", source=" + source +
+                ", treatments=" + treatments +
+                '}';
+    }
 }
