@@ -36,6 +36,7 @@ import org.oscwii.repositorymanager.model.app.OSCMeta.Source.Format;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.DigestUtils;
 
@@ -134,6 +135,7 @@ public class FileUtil
         FileSystemResource res = new FileSystemResource(path);
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + path.toFile().getName() + "\"")
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .body(res);
     }
 
