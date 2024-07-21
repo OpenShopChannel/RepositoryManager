@@ -18,6 +18,7 @@ package org.oscwii.repositorymanager.controllers.admin;
 import org.oscwii.repositorymanager.RepositoryIndex;
 import org.oscwii.repositorymanager.RepositorySource;
 import org.oscwii.repositorymanager.database.dao.SettingsDAO;
+import org.oscwii.repositorymanager.logging.IndexTriggeringPolicy;
 import org.oscwii.repositorymanager.model.security.Role;
 import org.oscwii.repositorymanager.security.annotations.RequiredRole;
 import org.oscwii.repositorymanager.sources.SourceRegistry;
@@ -121,7 +122,7 @@ public class AdminController extends BaseAdminController
                 break;
             case "update_shop":
                 attributes.addFlashAttribute("message", "success:Successfully generated shop data");
-                scheduler.schedule(index::generateShopData, Instant.now());
+                scheduler.schedule(this::generateShopData, Instant.now());
         }
 
         return "redirect:/admin/debug";
@@ -199,6 +200,12 @@ public class AdminController extends BaseAdminController
             logs.add(new LogFile(file.getName(), lines.size(), errors, creationDate));
         }
         return logs;
+    }
+
+    private void generateShopData()
+    {
+        index.generateShopData();
+        IndexTriggeringPolicy.INSTANCE.trigger();
     }
 
     public record LogFile(String name, int lines, int errors, String creationDate) {}

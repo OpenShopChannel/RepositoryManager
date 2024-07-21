@@ -210,7 +210,7 @@ public class RepositoryIndex
 
         // Generate Shop Banners
         if(config.shopConfig.generateBanner() && updateApps)
-            generateShopData(false);
+            generateShopData();
 
         // Print index summary
         printIndexSummary(info, start);
@@ -220,11 +220,6 @@ public class RepositoryIndex
     }
 
     public void generateShopData()
-    {
-        generateShopData(true);
-    }
-
-    private void generateShopData(boolean standalone)
     {
         logger.info("Generating Shop Data...");
 
@@ -238,8 +233,6 @@ public class RepositoryIndex
         }
 
         logger.info("Finished generating shop data for all apps!");
-        if(standalone)
-            IndexTriggeringPolicy.INSTANCE.trigger();
     }
 
     public List<InstalledApp> getContents()
