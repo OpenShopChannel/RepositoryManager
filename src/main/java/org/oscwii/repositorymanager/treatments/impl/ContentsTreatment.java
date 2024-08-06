@@ -16,6 +16,7 @@
 package org.oscwii.repositorymanager.treatments.impl;
 
 import org.apache.commons.io.FileUtils;
+import org.oscwii.repositorymanager.exceptions.QuietException;
 import org.oscwii.repositorymanager.model.app.InstalledApp;
 import org.oscwii.repositorymanager.model.app.OSCMeta.Treatment;
 import org.oscwii.repositorymanager.treatments.BaseTreatmentRunnable;
@@ -68,6 +69,7 @@ public class ContentsTreatment
             PathMatcher m = FileSystems.getDefault().getPathMatcher("glob:" + source);
             try(Stream<Path> stream = Files.walk(workingDir))
             {
+                boolean moved = false;
                 List<Path> files = stream.filter(path -> !path.equals(workingDir))
                         .toList();
 
@@ -75,10 +77,14 @@ public class ContentsTreatment
                 {
                     if(moveFile(file, destination, workingDir, m))
                     {
+                        moved = true;
                         logger.info("  - Moved {} to {}", source, arguments[1]);
                         break;
                     }
                 }
+
+                if(!moved)
+                    throw new QuietException("  - No files matched the pattern: '" + source + "'");
             }
         }
 
