@@ -591,6 +591,10 @@ public class RepositoryIndex
     {
         Path appDir = tmpDir.resolve("apps").resolve(app.getSlug());
 
+        // Check the folder exists
+        if(Files.notExists(appDir) || !Files.isDirectory(appDir))
+            throw new QuietException("Application folder does not exist or is not a directory!");
+
         // Check we have an icon
         if(Files.notExists(appDir.resolve("icon.png")))
         {
