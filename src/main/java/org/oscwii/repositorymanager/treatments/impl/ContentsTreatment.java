@@ -26,6 +26,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import org.springframework.util.FileSystemUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
@@ -101,12 +102,44 @@ public class ContentsTreatment
                     Files.move(file, destination, StandardCopyOption.REPLACE_EXISTING);
                 }
                 else
-                    FileUtils.moveDirectory(file.toFile(), destination.toFile());
+                {
+                    if(Files.exists(destination) && Files.isDirectory(destination))
+                        mergeDirectories(file, destination);
+                    else
+                        FileUtils.moveDirectory(file.toFile(), destination.toFile());
+                }
 
                 return true;
             }
 
             return false;
+        }
+
+        private void mergeDirectories(Path source, Path destination) throws IOException
+        {
+            try(Stream<Path> stream = Files.walk(source))
+            {
+                List<Path> files = stream.filter(path -> !path.equals(source)).toList();
+                for(Path path : files)
+                {
+                    Path relative = destination.resolve(source.relativize(path));
+
+                    if(Files.isDirectory(path))
+                        Files.createDirectories(relative);
+                    else
+                        Files.move(path, relative, StandardCopyOption.REPLACE_EXISTING);
+                }
+            }
+
+            // The following is very annoying and was added to workaround Windows ignoring casing in file names
+            FileUtils.deleteDirectory(source.toFile());
+            String finalName = source.toFile().getName();
+            // First we will have to rename it to something that will not clash with the first name
+            String tempName = finalName + "-" + System.currentTimeMillis();
+            File tempRenamedFile = destination.getParent().resolve(tempName).toFile();
+            FileUtils.moveDirectory(destination.toFile(), tempRenamedFile);
+            // Then rename back to the desired name
+            FileUtils.moveDirectory(tempRenamedFile, destination.getParent().resolve(finalName).toFile());
         }
     }
 

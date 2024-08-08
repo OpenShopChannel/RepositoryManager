@@ -191,19 +191,20 @@ public class FileUtil
         try(ArchiveInputStream<?> is = createArchiveInputStream(archive, format))
         {
             while((entry = is.getNextEntry()) != null)
-            {
-                if(entry.isDirectory())
-                    continue;
-
                 extractEntry(is, destination, entry);
-            }
         }
     }
 
     private static void extractEntry(InputStream is, Path destination, ArchiveEntry entry) throws IOException
     {
         Path extractedPath = destination.resolve(entry.getName());
-        Files.createDirectories(extractedPath.getParent());
-        Files.copy(is, extractedPath);
+
+        if(entry.isDirectory())
+            Files.createDirectories(extractedPath);
+        else
+        {
+            Files.createDirectories(extractedPath.getParent());
+            Files.copy(is, extractedPath);
+        }
     }
 }
