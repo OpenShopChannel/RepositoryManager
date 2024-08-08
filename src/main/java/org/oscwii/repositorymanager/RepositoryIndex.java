@@ -445,6 +445,9 @@ public class RepositoryIndex
 
     private InstalledApp processMeta(File meta, boolean updateApp) throws IOException
     {
+        if(!meta.getName().matches("^[a-zA-Z0-9_-]*.oscmeta"))
+            throw new QuietException("Application slug contains illegal charcters!");
+        
         OSCMeta oscMeta = FileUtil.loadJson(meta, OSCMeta.class, gson,
                 e -> handleFatalException(e, "Failed to process meta \"" + meta.getName() + "\":"));
 
