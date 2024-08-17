@@ -111,11 +111,11 @@ public class HBBController extends RepoManController
             // Extracted size
             response.appendLine(compInfo.rawSize);
             // Short description
-            String shortDesc = metaXml.shortDesc == null ? "No description provided." : metaXml.shortDesc;
+            String shortDesc = (metaXml.shortDesc == null || metaXml.shortDesc.isBlank()) ? "No description provided." : metaXml.shortDesc;
             response.appendLine(shortDesc);
             // Long description
             String longDesc = metaXml.longDesc;
-            if(longDesc != null)
+            if(longDesc != null && !longDesc.isBlank())
             {
                 longDesc = (longDescPrefix + longDesc).replace("\n", " ");
                 if(longDesc.length() > 128)

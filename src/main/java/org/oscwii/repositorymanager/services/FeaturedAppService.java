@@ -58,7 +58,7 @@ public class FeaturedAppService
             InstalledApp app = index.getContents().get(i);
 
             // Quality assurance
-            if(app.getMetaXml().shortDesc.isEmpty())
+            if(app.getMetaXml().shortDesc.isBlank())
                 continue;
             if(app.getMeta().category().equals("demos"))
                 continue;
