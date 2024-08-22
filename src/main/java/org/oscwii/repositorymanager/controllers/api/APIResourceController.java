@@ -15,10 +15,12 @@
 
 package org.oscwii.repositorymanager.controllers.api;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.oscwii.repositorymanager.controllers.RepoManController;
 import org.oscwii.repositorymanager.model.app.InstalledApp;
+import org.oscwii.repositorymanager.services.DownloadService;
 import org.oscwii.repositorymanager.utils.AppUtil;
-import org.oscwii.repositorymanager.utils.FileUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
@@ -35,6 +37,14 @@ import java.io.IOException;
 @RequestMapping(path = {"/api", "/api/v3", "/api/v4"}, method = RequestMethod.GET)
 public class APIResourceController extends RepoManController
 {
+    private final DownloadService downloadService;
+
+    @Autowired
+    public APIResourceController(DownloadService downloadService)
+    {
+        this.downloadService = downloadService;
+    }
+
     @GetMapping(value = "/contents/{slug}/icon.png", produces = MediaType.IMAGE_PNG_VALUE)
     public ResponseEntity<ByteArrayResource> getIcon(@PathVariable String slug) throws IOException
     {
@@ -46,12 +56,12 @@ public class APIResourceController extends RepoManController
     }
 
     @GetMapping(value = "/contents/{slug}/{_slug}.zip", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-    public ResponseEntity<Resource> getZip(@PathVariable String slug)
+    public ResponseEntity<Resource> getZip(@PathVariable String slug, HttpServletRequest request)
     {
         InstalledApp app = index.getApp(slug);
         if(app == null)
             return ResponseEntity.notFound().build();
 
-        return FileUtil.getContent(app.getDataPath().getParent().resolve(slug + ".zip"));
+        return downloadService.provideDownload(app, request);
     }
 }

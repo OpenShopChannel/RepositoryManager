@@ -763,7 +763,10 @@ public class RepositoryIndex
             logger.info("  - Registered app in database");
         }
         else
+        {
             appDao.updateApp(app);
+            app.setDownloads(appDao.getDownloads(app.getSlug()));
+        }
 
         // Check the app has a TID assigned
         assignTID(app, shopTitle);

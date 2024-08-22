@@ -32,6 +32,17 @@ public interface AppDAO
     @SqlQuery("SELECT 1 FROM app_information WHERE slug = :slug")
     Optional<Boolean> appExists(String slug);
 
+    @SqlQuery("SELECT downloads FROM app_information WHERE slug = :slug")
+    int getDownloads(String slug);
+
+    default void setDownloads(InstalledApp app)
+    {
+        setDownloads(app.getSlug(), app.getDownloads());
+    }
+
+    @SqlUpdate("UPDATE app_information SET downloads = :downloads WHERE slug = :slug")
+    void setDownloads(String slug, int downloads);
+
     default void insertApp(InstalledApp app)
     {
         insertApp(app.getSlug(), app.getMetaXml().coder, app.getMetaXml().version);
@@ -42,7 +53,7 @@ public interface AppDAO
 
     default void updateApp(InstalledApp app)
     {
-        updateApp(app.getSlug(), app.getMetaXml().coder, app.getMetaXml().version);
+        updateApp(app.getSlug(), app.getMetaXml().coder, app.getMetaXml().version, app.getDownloads());
     }
 
     @SqlUpdate("""
@@ -52,7 +63,7 @@ public interface AppDAO
                 last_index = CURRENT_TIMESTAMP
             WHERE slug = :slug
             """)
-    void updateApp(String slug, String author, String version);
+    void updateApp(String slug, String author, String version, int downloads);
 
     @SqlQuery("SELECT 1 FROM shop_title_information WHERE title_id = :titleId")
     Optional<Boolean> isTIDInUse(String titleId);

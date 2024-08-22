@@ -15,12 +15,15 @@
 
 package org.oscwii.repositorymanager.controllers.hbb;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.oscwii.repositorymanager.controllers.RepoManController;
 import org.oscwii.repositorymanager.model.app.InstalledApp;
+import org.oscwii.repositorymanager.services.DownloadService;
 import org.oscwii.repositorymanager.utils.AppUtil;
 import org.oscwii.repositorymanager.utils.FileUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
@@ -39,10 +42,13 @@ import java.nio.file.Path;
 @RequestMapping(produces = MediaType.APPLICATION_OCTET_STREAM_VALUE, method = RequestMethod.GET)
 public class HBBResourceController extends RepoManController
 {
+    private final DownloadService downloadService;
     private final Logger logger;
 
-    public HBBResourceController()
+    @Autowired
+    public HBBResourceController(DownloadService downloadService)
     {
+        this.downloadService = downloadService;
         this.logger = LogManager.getLogger("Homebrew Browser Resources");
     }
 
@@ -70,13 +76,13 @@ public class HBBResourceController extends RepoManController
     }
 
     @GetMapping(path = "/hbb/{slug}/{_slug}.zip", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-    public ResponseEntity<Resource> getZip(@PathVariable String slug)
+    public ResponseEntity<Resource> getZip(@PathVariable String slug, HttpServletRequest request)
     {
         InstalledApp app = index.getApp(slug);
         if(app == null)
             return ResponseEntity.notFound().build();
 
-        return FileUtil.getContent(app.getDataPath().getParent().resolve(slug + ".zip"));
+        return downloadService.provideDownload(app, request);
     }
 
     @GetMapping(path = "/unzipped_apps/{slug}/apps/{_slug}/meta.xml", produces = MediaType.APPLICATION_XML_VALUE)
