@@ -21,10 +21,12 @@ import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import org.jdbi.v3.sqlobject.statement.SqlUpdate;
 import org.oscwii.repositorymanager.model.security.Role;
 import org.oscwii.repositorymanager.model.security.User;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
+@Service
 @JdbiRepository
 @RegisterConstructorMapper(User.class)
 public interface UserDAO

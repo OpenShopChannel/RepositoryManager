@@ -22,9 +22,11 @@ import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import org.jdbi.v3.sqlobject.statement.SqlUpdate;
 import org.oscwii.repositorymanager.model.app.InstalledApp;
 import org.oscwii.repositorymanager.model.app.ShopTitle;
+import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+@Service
 @JdbiRepository
 @RegisterConstructorMapper(ShopTitle.class)
 public interface AppDAO
