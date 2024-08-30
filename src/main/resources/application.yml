@@ -49,6 +49,7 @@ repository-manager:
     generate-banner: false
     banner-generator-path: "BannerGenerator"
     banner-output-path: "data/titles/"
+    access-token: "ChangeMe"
 
 management:
   endpoint:
@@ -70,3 +71,4 @@ logging:
     # org.springframework.beans: TRACE
     # org.oscwii.repositorymanager.security: TRACE
     # org.springframework.security: TRACE
+    # org.oscwii.repositorymanager.services.DownloadService: DEBUG

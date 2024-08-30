@@ -18,11 +18,15 @@ package org.oscwii.repositorymanager.config;
 import freemarker.template.TemplateException;
 import jakarta.servlet.Filter;
 import no.api.freemarker.java8.Java8ObjectWrapper;
+import org.oscwii.repositorymanager.config.repoman.ShopConfig;
+import org.oscwii.repositorymanager.controllers.shop.ShopControllerAuth;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.filter.ShallowEtagHeaderFilter;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
@@ -36,6 +40,14 @@ import static freemarker.template.Configuration.VERSION_2_3_32;
 @EnableWebMvc
 public class WebConfig implements WebMvcConfigurer
 {
+    private final ShopConfig shopConfig;
+
+    @Autowired
+    public WebConfig(ShopConfig shopConfig)
+    {
+        this.shopConfig = shopConfig;
+    }
+
     @Bean
     public FreeMarkerConfigurer freemarkerConfig() throws TemplateException, IOException
     {
@@ -66,6 +78,12 @@ public class WebConfig implements WebMvcConfigurer
     {
         registry.addResourceHandler("/static/**")
                 .addResourceLocations("classpath:/static/");
+    }
+
+    @Override
+    public void addInterceptors(InterceptorRegistry registry)
+    {
+        registry.addInterceptor(new ShopControllerAuth(shopConfig)).addPathPatterns("/shop/**");
     }
 
     @Bean

@@ -65,7 +65,9 @@ public class WebSecurityConfig
                         .tokenValiditySeconds(365 * 24 * 60 * 60)
                 )
                 // Enable CSRF
-                .csrf(Customizer.withDefaults())
+                .csrf(csrf -> csrf.
+                        ignoringRequestMatchers("/shop/**")
+                )
                 // Enable CORS
                 .cors(Customizer.withDefaults());
 
@@ -82,6 +84,7 @@ public class WebSecurityConfig
         config.addAllowedMethod("*");
         source.registerCorsConfiguration("/hbb/**", config);
         source.registerCorsConfiguration("/api/**", config);
+        source.registerCorsConfiguration("/shop/**", config);
         return new CorsFilter(source);
     }
 

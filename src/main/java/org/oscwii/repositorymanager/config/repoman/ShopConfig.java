@@ -22,6 +22,7 @@ import java.nio.file.Path;
 @ConfigurationProperties(prefix = "repository-manager.shop")
 public record ShopConfig(boolean generateBanner,
                          Path bannerGeneratorPath,
-                         Path bannerOutputPath)
+                         Path bannerOutputPath,
+                         String accessToken)
 {
 }

@@ -21,6 +21,8 @@ import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.oscwii.repositorymanager.database.dao.AppDAO;
 import org.oscwii.repositorymanager.model.app.InstalledApp;
 import org.oscwii.repositorymanager.utils.FileUtil;
@@ -37,6 +39,7 @@ public class DownloadService
 {
     private final AppDAO appDao;
     private final Cache<String, Boolean> dlAnAb;
+    private final Logger logger;
 
     @Autowired
     public DownloadService(AppDAO appDao)
@@ -45,21 +48,36 @@ public class DownloadService
         this.dlAnAb = CacheBuilder.newBuilder()
                 .expireAfterAccess(3, TimeUnit.MINUTES)
                 .build();
+        this.logger = LogManager.getLogger(DownloadService.class);
+    }
+
+    public void reportShopDownload(InstalledApp app, String data)
+    {
+        if(storeDownload(app, data))
+            logger.debug("Recorded download from SHOP channel for app {}", app);
     }
 
     public ResponseEntity<Resource> provideDownload(InstalledApp app, HttpServletRequest req)
     {
         // Increment download counter
-        String downloadKey = getDownloadKey(req, app.getSlug());
+        if(storeDownload(app, getDownloadKey(req, app.getSlug())))
+            logger.debug("Recorded download from DIRECT channel for app {}", app);
+
+        Path zip = app.getDataPath().getParent().resolve(app.getSlug() + ".zip");
+        return FileUtil.getContent(zip);
+    }
+
+    private boolean storeDownload(InstalledApp app, String downloadKey)
+    {
         if(dlAnAb.getIfPresent(downloadKey) == null)
         {
             app.incrementDownloads();
             appDao.setDownloads(app);
             dlAnAb.put(downloadKey, false);
+            return true;
         }
 
-        Path zip = app.getDataPath().getParent().resolve(app.getSlug() + ".zip");
-        return FileUtil.getContent(zip);
+        return false;
     }
 
     private String getDownloadKey(HttpServletRequest req, String slug)
