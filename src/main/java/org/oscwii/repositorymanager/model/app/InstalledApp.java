@@ -140,12 +140,12 @@ public class InstalledApp
     {
         if(other == null)
             return UpdateLevel.FIRST_RUN;
+        if(!other.metaXml.version.equals(this.metaXml.version))
+            return UpdateLevel.NEW_VERSION;
+        if(!other.computedInfo.binaryHash.equals(this.computedInfo.binaryHash))
+            return UpdateLevel.NEW_BINARY;
         if(other.computedInfo.rawSize != this.computedInfo.rawSize)
             return UpdateLevel.MODIFIED;
-        else if(!other.computedInfo.binaryHash.equals(this.computedInfo.binaryHash))
-            return UpdateLevel.NEW_BINARY;
-        else if(!other.metaXml.version.equals(this.metaXml.version))
-            return UpdateLevel.NEW_VERSION;
         return UpdateLevel.SAME;
     }
 
