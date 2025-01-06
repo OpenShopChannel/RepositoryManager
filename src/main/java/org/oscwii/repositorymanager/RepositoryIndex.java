@@ -726,20 +726,18 @@ public class RepositoryIndex
         app.getMetaXml().longDesc = requireNonNullElse(root.elementText("long_description"), "");
 
         // Determine release date
+        boolean hasReleaseDate = false;
         String dateText = root.elementText("release_date");
         if(dateText != null)
-        {
             for(SimpleDateFormat format : DATE_FORMATS)
-            {
                 try
                 {
                     // we want this in seconds
                     app.getComputedInfo().releaseDate = (int) format.parse(dateText).toInstant().getEpochSecond();
+                    hasReleaseDate = true;
                     break;
                 }
                 catch(ParseException ignored) {}
-            }
-        }
 
         Path binary = appFiles.resolve("boot." + app.getComputedInfo().packageType);
 
@@ -757,6 +755,8 @@ public class RepositoryIndex
         ShopTitle shopTitle = appDao.getShopTitle(app.getSlug());
         if(appDao.appExists(app.getSlug()).isEmpty())
         {
+            if(!hasReleaseDate)
+                app.getComputedInfo().releaseDate = (int) (System.currentTimeMillis() / 1000);
             appDao.insertApp(app);
             if(shopTitle == null)
                 shopTitle = appDao.insertShopTitle(app.getSlug());
@@ -764,6 +764,8 @@ public class RepositoryIndex
         }
         else
         {
+            if(!hasReleaseDate)
+                app.getComputedInfo().releaseDate = (int) appDao.getReleaseDate(app.getSlug()).toInstant().getEpochSecond();
             appDao.updateApp(app);
             app.setDownloads(appDao.getDownloads(app.getSlug()));
         }
@@ -900,6 +902,11 @@ public class RepositoryIndex
         // Bump version in database if app was updated
         if(level.isUpdated())
         {
+            int lastUpdate = (int) appDao.getReleaseDate(newApp.getSlug()).toInstant().getEpochSecond();
+            if(newApp.getComputedInfo().releaseDate == lastUpdate)
+                newApp.getComputedInfo().releaseDate = lastUpdate = (int) (System.currentTimeMillis() / 1000);
+            appDao.setReleaseDate(newApp.getSlug(), lastUpdate);
+
             ShopTitle titleInfo = newApp.getTitleInfo();
             int version = titleInfo.getVersion() + 1;
             appDao.setTitleVersion(newApp.getSlug(), version);

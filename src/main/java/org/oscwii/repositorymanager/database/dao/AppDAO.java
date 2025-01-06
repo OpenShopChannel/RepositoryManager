@@ -24,6 +24,8 @@ import org.oscwii.repositorymanager.model.app.InstalledApp;
 import org.oscwii.repositorymanager.model.app.ShopTitle;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.Optional;
 
 @Service
@@ -47,25 +49,37 @@ public interface AppDAO
 
     default void insertApp(InstalledApp app)
     {
-        insertApp(app.getSlug(), app.getMetaXml().coder, app.getMetaXml().version);
+        Timestamp releaseDate = Timestamp.from(Instant.ofEpochSecond(app.getComputedInfo().releaseDate));
+        insertApp(app.getSlug(), app.getMeta().author(), app.getMetaXml().version, releaseDate);
     }
 
-    @SqlUpdate("INSERT INTO app_information (slug, author, version) VALUES (:slug, :author, :version)")
-    void insertApp(String slug, String author, String version);
+    @SqlUpdate("""
+            INSERT INTO app_information (slug, author, version, last_update)
+            VALUES (:slug, :author, :version, :releaseDate)
+            """)
+    void insertApp(String slug, String author, String version, Timestamp releaseDate);
 
     default void updateApp(InstalledApp app)
     {
-        updateApp(app.getSlug(), app.getMetaXml().coder, app.getMetaXml().version, app.getDownloads());
+        Timestamp releaseDate = Timestamp.from(Instant.ofEpochSecond(app.getComputedInfo().releaseDate));
+        updateApp(app.getSlug(), app.getMeta().author(), app.getMetaXml().version, releaseDate);
     }
 
     @SqlUpdate("""
             UPDATE app_information
             SET author = :author,
                 version = :version,
-                last_index = CURRENT_TIMESTAMP
+                last_index = CURRENT_TIMESTAMP,
+                last_update = :releaseDate
             WHERE slug = :slug
             """)
-    void updateApp(String slug, String author, String version, int downloads);
+    void updateApp(String slug, String author, String version, Timestamp releaseDate);
+
+    @SqlQuery("SELECT last_update FROM app_information WHERE slug = :slug")
+    Timestamp getReleaseDate(String slug);
+
+    @SqlUpdate("UPDATE app_information SET last_update = :lastUpdate WHERE slug = :slug")
+    void setReleaseDate(String slug, int lastUpdate);
 
     @SqlQuery("SELECT 1 FROM shop_title_information WHERE title_id = :titleId")
     Optional<Boolean> isTIDInUse(String titleId);
