@@ -32,6 +32,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.nio.file.Path;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -84,7 +85,7 @@ public class DownloadService
     {
         ByteArrayDataOutput encode = ByteStreams.newDataOutput();
         encode.writeUTF(req.getRemoteAddr());
-        encode.writeUTF(req.getHeader("User-Agent"));
+        encode.writeUTF(Optional.ofNullable(req.getHeader("User-Agent")).orElse(""));
         encode.writeUTF(slug);
         return Base64.encodeBase64String(encode.toByteArray());
     }
