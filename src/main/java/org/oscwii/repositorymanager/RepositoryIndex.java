@@ -904,7 +904,8 @@ public class RepositoryIndex
         {
             int lastUpdate = (int) appDao.getReleaseDate(newApp.getSlug()).toInstant().getEpochSecond();
             if(newApp.getComputedInfo().releaseDate == lastUpdate)
-                newApp.getComputedInfo().releaseDate = lastUpdate = (int) (System.currentTimeMillis() / 1000);
+                lastUpdate = (int) (System.currentTimeMillis() / 1000);
+            newApp.getComputedInfo().releaseDate = lastUpdate;
             appDao.setReleaseDate(newApp.getSlug(), lastUpdate);
 
             ShopTitle titleInfo = newApp.getTitleInfo();
