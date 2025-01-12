@@ -78,8 +78,13 @@ public interface AppDAO
     @SqlQuery("SELECT last_update FROM app_information WHERE slug = :slug")
     Timestamp getReleaseDate(String slug);
 
+    default void setReleaseDate(String slug, int lastUpdate)
+    {
+        setReleaseDate(slug, Timestamp.from(Instant.ofEpochSecond(lastUpdate)));
+    }
+
     @SqlUpdate("UPDATE app_information SET last_update = :lastUpdate WHERE slug = :slug")
-    void setReleaseDate(String slug, int lastUpdate);
+    void setReleaseDate(String slug, Timestamp lastUpdate);
 
     @SqlQuery("SELECT 1 FROM shop_title_information WHERE title_id = :titleId")
     Optional<Boolean> isTIDInUse(String titleId);
