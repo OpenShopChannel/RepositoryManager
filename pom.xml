@@ -309,6 +309,29 @@
                     <generateGitPropertiesFile>true</generateGitPropertiesFile>
                 </configuration>
             </plugin>
+
+            <plugin>
+                <groupId>org.primefaces.extensions</groupId>
+                <artifactId>resources-optimizer-maven-plugin</artifactId>
+                <version>2.6.5</version>
+
+                <executions>
+                    <execution>
+                        <id>optimize</id>
+                        <goals>
+                            <goal>optimize</goal>
+                        </goals>
+                    </execution>
+                </executions>
+
+                <configuration>
+                    <inputDir>${project.build.directory}/classes/static</inputDir>
+                    <languageIn>ECMASCRIPT_2015</languageIn>
+                    <excludes>
+                        <exclude>**/*.min.*</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
 		</plugins>
 	</build>
 </project>
