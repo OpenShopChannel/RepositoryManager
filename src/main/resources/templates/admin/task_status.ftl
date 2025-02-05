@@ -18,7 +18,7 @@
     </div>
 
     <link rel="stylesheet" href="/static/xterm/css/xterm.css" />
-    <script src="/static/xterm/lib/xterm.js"></script>
+    <script src="/static/xterm/lib/xterm.min.js"></script>
     <script src="/static/stompjs/stomp.umd.min.js"></script>
     <script src="/static/stompjs/socket.js"></script>
     <script type="text/javascript" charset="utf-8">

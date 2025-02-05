@@ -5,7 +5,6 @@
     <title>Welcome to Repository Manager!</title>
     <meta name="robots" content="noindex">
     <link rel="stylesheet" href="/static/bulma/css/bulma.min.css">
-    <link rel="stylesheet" href="/static/bulma-divider/dist/bulma-divider.min.css">
 </head>
 <body>
 <section class="section">
