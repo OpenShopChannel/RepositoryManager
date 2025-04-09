@@ -888,7 +888,7 @@ public class RepositoryIndex
                     //noinspection DataFlowIssue - cannot be null here
                     notifyCatalog("New Version!", newApp.getMetaXml().name +
                             " has been updated from " + oldApp.getMetaXml().version +
-                            "to " +  newApp.getMetaXml().version, webhook);
+                            " to " +  newApp.getMetaXml().version, webhook);
                 }
                 case NEW_APP ->
                 {
