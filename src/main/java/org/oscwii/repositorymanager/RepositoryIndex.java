@@ -305,7 +305,7 @@ public class RepositoryIndex
     {
         int index = 0, errors = 0, indexed = 0;
         List<File> manifests;
-        List<InstalledApp> contents = new ArrayList<>();
+        List<InstalledApp> indexedApps = new ArrayList<>();
         Path folder = config.getRepoDir().resolve("contents");
 
         try(Stream<Path> walk = Files.walk(folder, 1))
@@ -368,7 +368,7 @@ public class RepositoryIndex
 
                 if(app != null && app.getMetaXml().isPresent())
                 {
-                    contents.add(app);
+                    indexedApps.add(app);
                     indexed++;
 
                     // Notify if necessary
@@ -377,7 +377,7 @@ public class RepositoryIndex
             }
         }
 
-        this.contents = contents;
+        this.contents = indexedApps;
         logger.info("Finished indexing application manifests");
         return new int[]{index, indexed, errors};
     }
@@ -446,7 +446,7 @@ public class RepositoryIndex
     private InstalledApp processMeta(File meta, boolean updateApp) throws IOException
     {
         if(!meta.getName().matches("^[a-zA-Z0-9_-]*.oscmeta"))
-            throw new QuietException("Application slug contains illegal charcters!");
+            throw new QuietException("Application slug contains illegal characters!");
         
         OSCMeta oscMeta = FileUtil.loadJson(meta, OSCMeta.class, gson,
                 e -> handleFatalException(e, "Failed to process meta \"" + meta.getName() + "\":"));
@@ -856,14 +856,7 @@ public class RepositoryIndex
             }
         }
 
-        boolean exists = oldApp != null;
-        if(!exists)
-        {
-            // Check in the database
-            exists = appDao.appExists(newApp.getSlug()).isPresent();
-        }
-
-        UpdateLevel level = !exists ? UpdateLevel.NEW_APP : newApp.compare(oldApp);
+        UpdateLevel level = oldApp == null ? UpdateLevel.NEW_APP : newApp.compare(oldApp);
         try(WebhookClient webhook = discordWebhook.catalogWebhook())
         {
             switch(level)
@@ -873,28 +866,23 @@ public class RepositoryIndex
                 case MODIFIED ->
                 {
                     logger.info("  - Modified Archive");
-                    notifyCatalog("New Update!", newApp.getMetaXml().name +
-                            " has been updated.", webhook);
+                    notifyCatalog("New Update!", MSG_UPDATED_GENERIC.formatted(newApp.getMetaXml().name), newApp.getSlug(), webhook);
                 }
                 case NEW_BINARY ->
                 {
                     logger.info("  - New Binary");
-                    notifyCatalog("New Update!", newApp.getMetaXml().name +
-                            " has been updated.", webhook);
+                    notifyCatalog("New Update!", MSG_UPDATED_GENERIC.formatted(newApp.getMetaXml().name), newApp.getSlug(), webhook);
                 }
                 case NEW_VERSION ->
                 {
                     logger.info("  - New Version");
-                    //noinspection DataFlowIssue - cannot be null here
-                    notifyCatalog("New Version!", newApp.getMetaXml().name +
-                            " has been updated from " + oldApp.getMetaXml().version +
-                            " to " +  newApp.getMetaXml().version, webhook);
+                    notifyCatalog("New Version!", MSG_UPDATED_VERSION.formatted(newApp.getMetaXml().name,
+                            oldApp.getMetaXml().version, newApp.getMetaXml().version), newApp.getSlug(), webhook);
                 }
                 case NEW_APP ->
                 {
                     logger.info("  - New Application");
-                    notifyCatalog("New Application!", newApp.getMetaXml().name +
-                            " has been added to the repository.", webhook);
+                    notifyCatalog("New Application!", MSG_NEW_APPLICATION.formatted(newApp.getMetaXml().name), newApp.getSlug(), webhook);
                 }
             }
         }
@@ -916,14 +904,15 @@ public class RepositoryIndex
         }
     }
 
-    private void notifyCatalog(String title, String description, WebhookClient webhook)
+    private void notifyCatalog(String title, String description, String slug, WebhookClient webhook)
     {
         if(webhook == null)
             return;
 
+        String url = config.getBaseUrl() + "/library/app/" + slug;
         WebhookEmbed embed = new WebhookEmbedBuilder()
-                .setTitle(new EmbedTitle(title, null))
-                .setDescription(description)
+                .setTitle(new EmbedTitle(title, url))
+                .setDescription(description + "\n\n" + url)
                 .build();
         WebhookMessage message = new WebhookMessageBuilder()
                 .addEmbeds(embed)
@@ -934,8 +923,7 @@ public class RepositoryIndex
 
     private String buildSubdirectoryPath(Path appFiles, Path path)
     {
-        return "/" + appFiles.getParent().getParent().relativize(path).toString()
-                .replace(File.separatorChar, '/');
+        return "/" + appFiles.getParent().getParent().relativize(path).toString().replace(File.separatorChar, '/');
     }
 
     private void handleApplicationUpdateFailure(File meta, Exception ex)
@@ -969,4 +957,7 @@ public class RepositoryIndex
             new SimpleDateFormat("yyyyMMddHHmm"),
             new SimpleDateFormat("yyyyMMdd")};
     private static final String PLACEHOLDER_ICON = "/static/assets/images/missing.png";
+    private static final String MSG_UPDATED_GENERIC = "%s has been updated.";
+    private static final String MSG_UPDATED_VERSION = "%s has been updated from %s to %s";
+    private static final String MSG_NEW_APPLICATION = "%s has been added to the repository!";
 }
