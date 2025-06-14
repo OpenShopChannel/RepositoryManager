@@ -78,6 +78,12 @@ public interface AppDAO
     @SqlQuery("SELECT last_update FROM app_information WHERE slug = :slug")
     Timestamp getReleaseDate(String slug);
 
+    @SqlQuery("SELECT first_index FROM app_information WHERE slug = :slug")
+    Timestamp getFirstIndex(String slug);
+
+    @SqlQuery("SELECT last_index FROM app_information WHERE slug = :slug")
+    Timestamp getLastIndex(String slug);
+
     default void setReleaseDate(String slug, int lastUpdate)
     {
         setReleaseDate(slug, Timestamp.from(Instant.ofEpochSecond(lastUpdate)));

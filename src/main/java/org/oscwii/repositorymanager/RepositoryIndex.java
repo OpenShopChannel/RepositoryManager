@@ -856,7 +856,8 @@ public class RepositoryIndex
             }
         }
 
-        UpdateLevel level = oldApp == null ? UpdateLevel.NEW_APP : newApp.compare(oldApp);
+        boolean isNewApp = appDao.getFirstIndex(newApp.getSlug()).equals(appDao.getLastIndex(newApp.getSlug()));
+        UpdateLevel level = isNewApp ? UpdateLevel.NEW_APP : newApp.compare(oldApp);
         try(WebhookClient webhook = discordWebhook.catalogWebhook())
         {
             switch(level)
@@ -876,6 +877,7 @@ public class RepositoryIndex
                 case NEW_VERSION ->
                 {
                     logger.info("  - New Version");
+                    //noinspection DataFlowIssue - cannot be null here
                     notifyCatalog("New Version!", MSG_UPDATED_VERSION.formatted(newApp.getMetaXml().name,
                             oldApp.getMetaXml().version, newApp.getMetaXml().version), newApp.getSlug(), webhook);
                 }
