@@ -911,7 +911,7 @@ public class RepositoryIndex
         if(webhook == null)
             return;
 
-        String url = config.getBaseUrl() + "/library/app/" + slug;
+        String url = "https://oscwii.org/library/app/" + slug;
         WebhookEmbed embed = new WebhookEmbedBuilder()
                 .setTitle(new EmbedTitle(title, url))
                 .setDescription(description + "\n\n" + url)
