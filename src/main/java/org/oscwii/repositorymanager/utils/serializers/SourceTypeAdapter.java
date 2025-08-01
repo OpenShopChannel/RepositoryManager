@@ -61,6 +61,7 @@ public class SourceTypeAdapter implements JsonDeserializer<OSCMeta.Source>
                 context.deserialize(additionalFilesArr, new TypeToken<>(){}.getType());
 
         return new OSCMeta.Source(type,
+                obj.has("host") ? obj.get("host").getAsString() : null,
                 context.deserialize(obj.get("format"), OSCMeta.Source.Format.class),
                 url,
                 file,

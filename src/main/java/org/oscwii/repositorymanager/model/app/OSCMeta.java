@@ -28,7 +28,7 @@ public record OSCMeta(String name, String author, String[] authors, String categ
                       List<String> peripherals, String version, EnumSet<Flag> flags,
                       Source source, List<Treatment> treatments)
 {
-    public record Source(String type, Format format, String url, String file,
+    public record Source(String type, String host, Format format, String url, String file,
                          String userAgent, Set<String> additionalFiles)
     {
         public enum Format
