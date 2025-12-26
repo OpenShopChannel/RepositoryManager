@@ -71,7 +71,7 @@ public record PublishedAppV4(String slug, String name, String author, String[] a
 
     private static Map<String, Asset> getAssets(InstalledApp app)
     {
-        return Map.of("archive", new Asset(FormatUtil.zipUrl(app.getSlug()), app.getComputedInfo().archiveHash,
+        return Map.of("archive", new Asset(FormatUtil.zipUrl(app.getSlug(), true), app.getComputedInfo().archiveHash,
                         app.getComputedInfo().archiveSize),
                 "binary", new Asset(FormatUtil.binaryUrl(app.getSlug(), app.getComputedInfo().packageType),
                         app.getComputedInfo().binaryHash, app.getComputedInfo().binarySize),

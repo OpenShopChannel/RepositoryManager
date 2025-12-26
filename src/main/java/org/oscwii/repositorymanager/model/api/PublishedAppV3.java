@@ -74,7 +74,7 @@ public record PublishedAppV3(String slug, String name, String author, String cat
     {
         public Resources(InstalledApp app)
         {
-            this(FormatUtil.iconUrl(app.getSlug()), FormatUtil.zipUrl(app.getSlug()));
+            this(FormatUtil.iconUrl(app.getSlug()), FormatUtil.zipUrl(app.getSlug(), true));
         }
     }
 

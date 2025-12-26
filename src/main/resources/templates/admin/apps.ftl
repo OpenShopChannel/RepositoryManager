@@ -31,7 +31,7 @@
                             <ul><br>${app.describe()}</ul>
                         </details>
                     </td>
-                    <td><a href="${FormatUtil.zipUrl(app.getSlug())}" class="btn" type="button">Download</a></td>
+                    <td><a href="${FormatUtil.zipUrl(app.getSlug(), false)}" class="btn" type="button">Download</a></td>
                 </tr>
             </#list>
             </tbody>
