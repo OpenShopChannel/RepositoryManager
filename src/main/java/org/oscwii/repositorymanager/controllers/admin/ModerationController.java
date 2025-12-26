@@ -75,7 +75,7 @@ public class ModerationController extends BaseAdminController
                 attributes.addFlashAttribute("message", "danger:Rejected " + entry.app() + "-" + checksum);
                 break;
             case "download":
-                return FileUtil.getContent(Path.of("data", "moderation", checksum + ".zip"));
+                return FileUtil.getContent(Path.of("data", "moderation", checksum + ".zip"), false);
         }
 
         return "redirect:/admin/moderation";

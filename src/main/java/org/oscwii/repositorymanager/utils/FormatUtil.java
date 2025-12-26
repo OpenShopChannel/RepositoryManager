@@ -100,7 +100,7 @@ public class FormatUtil
 
     public static String urlFor(String path)
     {
-        return baseUrl + path;
+        return path;
     }
 
     public static String formatDate(Date date)
