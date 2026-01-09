@@ -31,10 +31,12 @@ import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.commons.compress.compressors.xz.XZCompressorInputStream;
 import org.apache.commons.io.IOUtils;
+import org.oscwii.repositorymanager.config.repoman.CacheTTLConfig;
 import org.oscwii.repositorymanager.exceptions.QuietException;
 import org.oscwii.repositorymanager.model.app.OSCMeta.Source.Format;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -129,13 +131,21 @@ public class FileUtil
 
     public static ResponseEntity<Resource> getContent(Path path)
     {
+        return getContent(path, true);
+    }
+
+    public static ResponseEntity<Resource> getContent(Path path, boolean cache)
+    {
         if(Files.notExists(path))
             return ResponseEntity.notFound().build();
 
         FileSystemResource res = new FileSystemResource(path);
+        CacheControl cacheControl = cache ? CacheControl.maxAge(CacheTTLConfig.getPackageDuration()).mustRevalidate() :
+                CacheControl.noStore();
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + path.toFile().getName() + "\"")
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .cacheControl(cacheControl)
                 .body(res);
     }
 

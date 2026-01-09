@@ -16,9 +16,11 @@
 package org.oscwii.repositorymanager.utils;
 
 import org.apache.logging.log4j.Logger;
+import org.oscwii.repositorymanager.config.repoman.CacheTTLConfig;
 import org.oscwii.repositorymanager.exceptions.QuietException;
 import org.oscwii.repositorymanager.model.app.InstalledApp;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.CacheControl;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
@@ -56,6 +58,7 @@ public class AppUtil
         return ResponseEntity.ok()
                 .contentLength(image.length)
                 .contentType(MediaType.IMAGE_PNG)
+                .cacheControl(CacheControl.maxAge(CacheTTLConfig.getIconDuration()).mustRevalidate())
                 .body(new ByteArrayResource(image));
     }
 

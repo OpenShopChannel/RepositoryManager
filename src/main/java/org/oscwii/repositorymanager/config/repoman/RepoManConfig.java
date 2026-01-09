@@ -32,6 +32,8 @@ public class RepoManConfig
     private Path repoDir;
 
     @NestedConfigurationProperty
+    public CacheTTLConfig cacheTTLConfig;
+    @NestedConfigurationProperty
     public DiscordConfig discordConfig;
     @NestedConfigurationProperty
     public FetchConfig fetchConfig;
@@ -43,9 +45,10 @@ public class RepoManConfig
     public ShopConfig shopConfig;
 
     @Autowired
-    public RepoManConfig(DiscordConfig discordConfig, FetchConfig fetchConfig, MailConfig mailConfig,
+    public RepoManConfig(CacheTTLConfig cacheTTLConfig, DiscordConfig discordConfig, FetchConfig fetchConfig, MailConfig mailConfig,
                          SecurityConfig securityConfig, ShopConfig shopConfig)
     {
+        this.cacheTTLConfig = cacheTTLConfig;
         this.discordConfig = discordConfig;
         this.fetchConfig = fetchConfig;
         this.mailConfig = mailConfig;

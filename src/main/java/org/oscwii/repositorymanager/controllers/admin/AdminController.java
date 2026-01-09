@@ -175,7 +175,7 @@ public class AdminController extends BaseAdminController
     @GetMapping("/log/{log}")
     public ResponseEntity<Resource> getLog(@PathVariable String log)
     {
-        return FileUtil.getContent(Path.of("logs", log));
+        return FileUtil.getContent(Path.of("logs", log), false);
     }
 
     private boolean isLog(Path path)

@@ -75,30 +75,33 @@ public class FormatUtil
 
     public static String binaryUrl(String slug, String type)
     {
-        return urlFor(BINARY_PATH.formatted(slug, slug, type));
+        return publicUrl(BINARY_PATH.formatted(slug, slug, type));
     }
 
     public static String iconUrl(String slug)
     {
-        return urlFor(ICON_PATH.formatted(slug));
+        return publicUrl(ICON_PATH.formatted(slug));
     }
 
     public static String logUrl(String log)
     {
-        return urlFor(LOG_PATH.formatted(log));
+        return LOG_PATH.formatted(log);
     }
 
     public static String metaXmlUrl(String slug)
     {
-        return urlFor(META_XML.formatted(slug, slug));
+        return publicUrl(META_XML.formatted(slug, slug));
     }
 
-    public static String zipUrl(String slug)
+    public static String zipUrl(String slug, boolean publicUrl)
     {
-        return urlFor(ZIP_PATH.formatted(slug, slug));
+        String s = ZIP_PATH.formatted(slug, slug);
+        if(publicUrl)
+            s = baseUrl + s;
+        return s;
     }
 
-    public static String urlFor(String path)
+    public static String publicUrl(String path)
     {
         return baseUrl + path;
     }

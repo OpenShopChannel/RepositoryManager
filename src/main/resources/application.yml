@@ -27,6 +27,9 @@ repository-manager:
   base-url: "http://localhost:8080"
   default-platform: "wii"
   repo-dir: "repository"
+  cache-ttl:
+    icon: 86400
+    package: 14400
   discord:
     enable-logging: false
     catalog-webhook-url: ""
