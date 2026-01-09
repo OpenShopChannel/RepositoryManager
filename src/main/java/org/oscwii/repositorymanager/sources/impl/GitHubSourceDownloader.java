@@ -50,15 +50,20 @@ public class GitHubSourceDownloader extends BaseSourceDownloader
         OSCMeta.Source source = app.getMeta().source();
         Request.Builder request = new Request.Builder();
 
-        if(!config.getGithubToken().isEmpty())
-        {
-            logger.info("  - Authenticating with GitHub");
-            request.addHeader("Authorization", "token " + config.getGithubToken());
-        }
-        else
-            logger.info("  - No valid GitHub token found, using unauthenticated requests.");
+        String apiHost = source.host() + "/api/v1";
+        if (source.host() == null) {
+            apiHost = "https://api.github.com";
 
-        return request.url(LATEST_RELEASE.formatted(source.url()))
+            if(!config.getGithubToken().isEmpty())
+            {
+                logger.info("  - Authenticating with GitHub");
+                request.addHeader("Authorization", "token " + config.getGithubToken());
+            }
+            else
+                logger.info("  - No valid GitHub token found, using unauthenticated requests.");
+        }
+
+        return request.url(LATEST_RELEASE.formatted(apiHost, source.url()))
                 .addHeader("User-Agent", config.getUserAgent())
                 .build();
     }
@@ -106,5 +111,5 @@ public class GitHubSourceDownloader extends BaseSourceDownloader
         }
     }
 
-    private static final String LATEST_RELEASE = "https://api.github.com/repos/%s/releases/latest";
+    private static final String LATEST_RELEASE = "%s/repos/%s/releases/latest";
 }
