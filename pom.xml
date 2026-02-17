@@ -252,9 +252,9 @@
 
         <!-- Mail -->
         <dependency>
-            <groupId>com.sendgrid</groupId>
-            <artifactId>sendgrid-java</artifactId>
-            <version>4.10.2</version>
+            <groupId>com.postmarkapp</groupId>
+            <artifactId>postmark</artifactId>
+            <version>1.13.0</version>
         </dependency>
 
         <!-- Git for Java -->

@@ -43,7 +43,7 @@ repository-manager:
     itchio-token: ""
   mail:
     sender-address: "no-reply@example.com"
-    sendgrid-api-key: ""
+    postmark-api-key: ""
   security:
     allow-registration: false
     protected-users: [1]

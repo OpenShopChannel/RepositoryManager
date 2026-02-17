@@ -15,19 +15,15 @@
 
 package org.oscwii.repositorymanager.services;
 
-import com.sendgrid.Method;
-import com.sendgrid.Request;
-import com.sendgrid.Response;
-import com.sendgrid.SendGrid;
-import com.sendgrid.helpers.mail.Mail;
-import com.sendgrid.helpers.mail.objects.Content;
-import com.sendgrid.helpers.mail.objects.Email;
+import com.postmarkapp.postmark.Postmark;
+import com.postmarkapp.postmark.client.ApiClient;
+import com.postmarkapp.postmark.client.data.model.message.Message;
+import com.postmarkapp.postmark.client.data.model.message.MessageResponse;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.oscwii.repositorymanager.config.repoman.RepoManConfig;
 import org.oscwii.repositorymanager.model.security.PasswordToken;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -43,36 +39,25 @@ public class MailService
         this.config = config;
     }
 
-    public void sendPasswordReset(String email, PasswordToken token)
+    public void sendPasswordReset(String recipient, PasswordToken token)
     {
-        Email from = new Email(config.mailConfig.senderAddress(), "Repository Manager");
-        Email to = new Email(email);
-
         String subject = "Repository Manager Password Reset";
-        Content content = new Content(MediaType.TEXT_HTML_VALUE,
-                MAIL_CONTENT.formatted(config.getBaseUrl(), token.getToken()));
-        Mail mail = new Mail(from, subject, to, content);
+        String content = MAIL_CONTENT.formatted(config.getBaseUrl(), token.getToken());
+        Message mail = new Message("\"Repository Manager\" " + config.mailConfig.senderAddress(),
+                recipient, subject, content);
+        mail.setMessageStream("outbound");
         send(mail);
     }
 
-    private void send(Mail mail)
-    {
-        Request request = new Request();
-        request.setMethod(Method.POST);
-        request.setEndpoint("mail/send");
-        send0(mail, request);
-    }
-
-    private void send0(Mail mail, Request request)
+    private void send(Message mail)
     {
         try
         {
-            SendGrid client = new SendGrid(config.mailConfig.sendGridApiKey());
-            request.setBody(mail.build());
-            Response res = client.api(request);
+            ApiClient client = Postmark.getApiClient(config.mailConfig.postmarkApiKey());
+            MessageResponse res = client.deliverMessage(mail);
 
-            if(res.getStatusCode() != 202)
-                logger.error("Failed to send email: {}", res.getBody());
+            if(res.getErrorCode() != 0)
+                logger.error("Failed to send email: {}", res.getMessage());
         }
         catch(Exception e)
         {
