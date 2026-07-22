@@ -65,6 +65,7 @@ public class SourceTypeAdapter implements JsonDeserializer<OSCMeta.Source>
                 url,
                 file,
                 obj.has("user-agent") ? obj.get("user-agent").getAsString() : null,
-                additionalFiles);
+                additionalFiles,
+                !obj.has("update") || obj.get("update").getAsBoolean());
     }
 }

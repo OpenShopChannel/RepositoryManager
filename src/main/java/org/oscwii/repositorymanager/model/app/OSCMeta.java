@@ -29,7 +29,7 @@ public record OSCMeta(String name, String author, String[] authors, String categ
                       Source source, List<Treatment> treatments)
 {
     public record Source(String type, Format format, String url, String file,
-                         String userAgent, Set<String> additionalFiles)
+                         String userAgent, Set<String> additionalFiles, boolean update)
     {
         public enum Format
         {

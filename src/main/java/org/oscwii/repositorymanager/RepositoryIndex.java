@@ -373,6 +373,12 @@ public class RepositoryIndex
 
                     // Notify if necessary
                     determineUpdateLevel(app);
+
+                    logger.info("App {} is ready to be distributed.", app);
+                }
+                else
+                {
+                    logger.warn("App {} will not be distributed because a fatal error occurred while indexing it.", meta);
                 }
             }
         }
@@ -506,13 +512,29 @@ public class RepositoryIndex
 
             checkRequiredContents(app, app.getDataPath());
             checkModerationStatus(app, app.getDataPath());
-            loadAppInformation(app, Path.of("data", "contents", app.getSlug() + ".zip"));
         }
         else
-            updateApp(app);
+        {
+            boolean forceUpdate = Files.notExists(app.getAppFilesPath());
+
+            if(!forceUpdate && !app.getMeta().source().update())
+            {
+                logger.info("App {} will not be updated.", app);
+                checkRequiredContents(app, app.getDataPath());
+                checkModerationStatus(app, app.getDataPath());
+            }
+            else
+            {
+                if(!app.getMeta().source().update())
+                    logger.info("App {} is marked as non-updatable, but the app files are missing. Forcing update.", app);
+                updateApp(app);
+            }
+        }
+
+        // Load app information from database
+        loadAppInformation(app, Path.of("data", "contents", app.getSlug() + ".zip"));
 
         // Hurrah! we finished!
-        logger.info("{} has been updated.", app.getMeta().name());
         return app;
     }
 
@@ -550,8 +572,7 @@ public class RepositoryIndex
             Path appArchive = appDir.getParent().resolve(app + ".zip");
             FileUtil.zipDirectory(appDir, appArchive);
 
-            // Load app information from database
-            loadAppInformation(app, appArchive);
+            logger.info("{} has been updated.", app.getMeta().name());
         }
         catch(IOException e)
         {
