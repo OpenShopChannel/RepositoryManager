@@ -749,7 +749,7 @@ public class RepositoryIndex
         app.getComputedInfo().peripherals = Peripheral.buildHBBList(app.getPeripherals());
 
         // Create subdirectories list
-        createSubdirectoriesList(app, appFiles);
+        createSubdirectoriesList(app, app.getDataPath());
 
         // Update app information in the database and register if it doesn't exist
         ShopTitle shopTitle = appDao.getShopTitle(app.getSlug());
@@ -805,6 +805,7 @@ public class RepositoryIndex
         {
             stream.filter(Files::isDirectory)
                     .filter(path -> !path.equals(appFiles))
+                    .filter(path -> !path.equals(appFiles.resolve("apps")))
                     .forEach(path -> subdirectories.add(buildSubdirectoryPath(appFiles, path)));
         }
 
@@ -924,7 +925,7 @@ public class RepositoryIndex
 
     private String buildSubdirectoryPath(Path appFiles, Path path)
     {
-        return "/" + appFiles.getParent().getParent().relativize(path).toString().replace(File.separatorChar, '/');
+        return "/" + appFiles.relativize(path).toString().replace(File.separatorChar, '/');
     }
 
     private void handleApplicationUpdateFailure(File meta, Exception ex)
