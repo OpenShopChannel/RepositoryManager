@@ -46,6 +46,7 @@ public class URLSourceDownloader extends BaseSourceDownloader
     @Override
     protected void processFiles(InstalledApp app, Path archivePath, Path tmpDir, Request request) throws IOException
     {
+        logger.info("- Downloading {} to {}", request.url(), archivePath.getFileName());
         HttpUtil.downloadFile(httpClient, request, archivePath);
     }
 

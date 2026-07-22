@@ -69,6 +69,7 @@ public abstract class BaseSourceDownloader implements SourceDownloader
 
     protected void downloadFileFromUrl(String url, Path destination) throws IOException
     {
+        logger.info("- Downloading {} to {}", url, destination.getFileName());
         Request request = new Request.Builder()
                 .url(url)
                 .addHeader("User-Agent", config.getUserAgent())
