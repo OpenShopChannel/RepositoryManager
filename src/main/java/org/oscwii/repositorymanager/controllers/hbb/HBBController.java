@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 /*
@@ -44,16 +44,19 @@ public class HBBController extends RepoManController
     @GetMapping(value = {"/homebrew_browser/listv036.txt", "/listv036.txt"})
     public ResponseEntity<String> appsList()
     {
-        List<InstalledApp> apps = new ArrayList<>(index.getContents().size());
-        for(Category category : index.getCategories())
-            for(InstalledApp app : index.getContents())
-                if(app.getCategory().equals(category))
-                    apps.add(app);
+        // Sort by downloads and limit to the first 250 apps
+        List<InstalledApp> apps = index.getContents().stream()
+                /*.sorted(Comparator.comparingInt(InstalledApp::getDownloads).reversed())
+                .limit(250)*/
+                // Then sort by category
+                .sorted(Comparator.comparing(app -> app.getCategory().name()))
+                .toList();
 
         Category currentCategory = apps.stream().findFirst()
                 .map(InstalledApp::getCategory).orElse(null);
         HBBResponse response = new HBBResponse();
         response.appendLine(HBBResponse.START_LINE);
+        response.appendLine("=" + currentCategory + "=");
 
         for(InstalledApp app : apps)
         {
@@ -68,6 +71,7 @@ public class HBBController extends RepoManController
             {
                 response.appendLine("=" + currentCategory + "=");
                 currentCategory = app.getCategory();
+                response.appendLine("=" + app.getCategory() + "=");
             }
 
             String longDescPrefix = "";
@@ -88,14 +92,20 @@ public class HBBController extends RepoManController
                     // Archive size
                     .append(compInfo.archiveSize)
                     // Download and Rating count
-                    .append(0).append(0)
+                    .append(app.getDownloads()).append(0)
                     // Peripherals
                     .append(compInfo.peripherals);
 
             // Folders to create
             StringBuilder subdirectories = new StringBuilder();
             for(String folder : compInfo.subdirectories)
+            {
+                // HBB has a theoretical hardcoded limit of 300 characters for the subdirectory list
+                // Based on my own testing, 290 is a safe limit
+                if((subdirectories.length() + folder.length()) >= 290)
+                    break;
                 subdirectories.append(folder).append(";");
+            }
             response.append(subdirectories.toString());
 
             // Folders to not delete and files to not extract
