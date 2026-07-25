@@ -788,7 +788,7 @@ public class RepositoryIndex
             if(!hasReleaseDate)
                 app.getComputedInfo().releaseDate = (int) appDao.getReleaseDate(app.getSlug()).toInstant().getEpochSecond();
             appDao.updateApp(app);
-            app.setDownloads(appDao.getDownloads(app.getSlug()));
+            app.setDownloadCount(appDao.getDownloads(app.getSlug()));
         }
 
         // Check the app has a TID assigned

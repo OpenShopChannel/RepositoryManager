@@ -92,7 +92,7 @@ public class HBBController extends RepoManController
                     // Archive size
                     .append(compInfo.archiveSize)
                     // Download and Rating count
-                    .append(app.getDownloads()).append(0)
+                    .append(app.getDownloadCount()).append(0)
                     // Peripherals
                     .append(compInfo.peripherals);
 

@@ -42,7 +42,7 @@ public record PublishedAppV4(String slug, String name, String author, String[] a
     public PublishedAppV4(InstalledApp app)
     {
         this(app.getSlug(), app.getMeta().name(), app.getMeta().author(), app.getMeta().authors(),
-                app.getMeta().category(), app.getMeta().contributors(), new Description(app),  app.getDownloads(),
+                app.getMeta().category(), app.getMeta().contributors(), new Description(app),  app.getDownloadCount(),
                 getAssets(app), app.getMeta().flags(), app.getComputedInfo().packageType, getPeripherals(app),
                 app.getComputedInfo().releaseDate, new ShopInfo(app), app.getComputedInfo().subdirectories,
                 getPlatforms(app), app.getComputedInfo().rawSize, app.getEffectiveVersion());

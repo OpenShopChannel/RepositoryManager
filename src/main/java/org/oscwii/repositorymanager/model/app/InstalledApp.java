@@ -34,7 +34,7 @@ public class InstalledApp
     private final List<Platform> supportedPlatforms;
     private final Map<Peripheral, Integer> peripherals;
 
-    private int downloads;
+    private int downloadCount;
     private ShopTitle titleInfo;
 
     public InstalledApp(String slug, OSCMeta meta, Category category,
@@ -101,19 +101,19 @@ public class InstalledApp
         return metaXml;
     }
 
-    public int getDownloads()
+    public int getDownloadCount()
     {
-        return downloads;
+        return downloadCount;
     }
 
     public void incrementDownloads()
     {
-        this.downloads++;
+        this.downloadCount++;
     }
 
-    public void setDownloads(int downloads)
+    public void setDownloadCount(int downloadCount)
     {
-        this.downloads = downloads;
+        this.downloadCount = downloadCount;
     }
 
     public ShopTitle getTitleInfo()
@@ -159,7 +159,7 @@ public class InstalledApp
                 ", category=" + category +
                 ", supportedPlatforms=" + supportedPlatforms +
                 ", peripherals=" + peripherals +
-                ", downloads=" + downloads +
+                ", downloadCount=" + downloadCount +
                 ", titleInfo=" + titleInfo +
                 '}';
     }

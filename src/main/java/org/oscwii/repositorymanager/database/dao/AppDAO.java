@@ -41,7 +41,7 @@ public interface AppDAO
 
     default void setDownloads(InstalledApp app)
     {
-        setDownloads(app.getSlug(), app.getDownloads());
+        setDownloads(app.getSlug(), app.getDownloadCount());
     }
 
     @SqlUpdate("UPDATE app_information SET downloads = :downloads WHERE slug = :slug")
