@@ -50,7 +50,9 @@ public class AppConfig
         return new OkHttpClient.Builder()
                 .addInterceptor(new SentryOkHttpInterceptor())
                 .eventListener(new SentryOkHttpEventListener())
-                .callTimeout(config.getTimeout(), TimeUnit.SECONDS)
+                .connectTimeout(config.getTimeout(), TimeUnit.SECONDS)
+                .writeTimeout(config.getTimeout(), TimeUnit.SECONDS)
+                .readTimeout(config.getTimeout(), TimeUnit.SECONDS)
                 .build();
     }
 
