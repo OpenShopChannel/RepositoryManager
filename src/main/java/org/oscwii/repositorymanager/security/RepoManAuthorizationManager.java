@@ -25,6 +25,7 @@ import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.authorization.AuthorizationManager;
+import org.springframework.security.authorization.AuthorizationResult;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;
@@ -39,7 +40,7 @@ import static org.springframework.core.annotation.MergedAnnotations.SearchStrate
 public class RepoManAuthorizationManager implements AuthorizationManager<MethodInvocation>
 {
     @Override
-    public AuthorizationDecision check(Supplier<Authentication> authentication, MethodInvocation mi)
+    public AuthorizationResult authorize(Supplier<? extends Authentication> authentication, MethodInvocation mi)
     {
         boolean denied = false;
         Method method = mi.getMethod();

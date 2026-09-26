@@ -17,7 +17,7 @@ package org.oscwii.repositorymanager;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jdbi.v3.spring5.EnableJdbiRepositories;
+import org.jdbi.v3.spring.EnableJdbiRepositories;
 import org.oscwii.repositorymanager.config.repoman.RepoManConfig;
 import org.oscwii.repositorymanager.database.dao.SettingsDAO;
 import org.oscwii.repositorymanager.services.FeaturedAppService;

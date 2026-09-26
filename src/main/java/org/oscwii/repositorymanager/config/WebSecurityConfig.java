@@ -91,8 +91,7 @@ public class WebSecurityConfig
     @Bean
     public AuthenticationProvider authProvider(AuthService authService, PasswordEncoder encoder)
     {
-        RepoManAuthenticationProvider authProvider = new RepoManAuthenticationProvider();
-        authProvider.setUserDetailsService(authService);
+        RepoManAuthenticationProvider authProvider = new RepoManAuthenticationProvider(authService);
         authProvider.setPasswordEncoder(encoder);
         return authProvider;
     }
