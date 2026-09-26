@@ -17,12 +17,12 @@ package org.oscwii.repositorymanager.model.api;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies;
-import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import org.oscwii.repositorymanager.model.app.InstalledApp;
 import org.oscwii.repositorymanager.model.app.OSCMeta;
 import org.oscwii.repositorymanager.model.app.Peripheral;
 import org.oscwii.repositorymanager.utils.FormatUtil;
+import tools.jackson.databind.PropertyNamingStrategies;
+import tools.jackson.databind.annotation.JsonNaming;
 
 import java.util.EnumSet;
 import java.util.List;

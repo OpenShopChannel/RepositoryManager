@@ -34,7 +34,6 @@
         <java.version>21</java.version>
         <log4j2.version>2.26.1</log4j2.version>
         <sentry.version>8.57.0</sentry.version>
-        <flyway.version>10.11.0</flyway.version>
         <freemarker.version>2.3.35</freemarker.version>
         <freemarker-java8.version>3.0.3</freemarker-java8.version>
 
@@ -77,11 +76,6 @@
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-log4j2</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-freemarker</artifactId>
 
             <exclusions>
@@ -120,6 +114,11 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-gson</artifactId>
         </dependency>
 
         <!-- FreeMarker -->
@@ -220,6 +219,10 @@
         </dependency>
 
         <!-- Logging -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-log4j2</artifactId>
+        </dependency>
         <!--<dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
@@ -264,6 +267,11 @@
             <groupId>com.postmarkapp</groupId>
             <artifactId>postmark</artifactId>
             <version>1.13.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
         </dependency>
 
         <!-- Git for Java -->

@@ -15,9 +15,9 @@
 
 package org.oscwii.repositorymanager.model.app;
 
-import com.fasterxml.jackson.databind.PropertyNamingStrategies;
-import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.google.gson.annotations.SerializedName;
+import tools.jackson.databind.PropertyNamingStrategies;
+import tools.jackson.databind.annotation.JsonNaming;
 
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public record Platform(String name, @SerializedName("display_name") String displayName)
